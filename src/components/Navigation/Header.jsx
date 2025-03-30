@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getUser, logout } from "../../utils/helpers";
+import { getUser } from "../../utils/helpers";  
 
 import SearchModal from "../Extras/ModalSearch";
 import Notifications from "../Extras/DropdownNotifications";
@@ -17,18 +17,20 @@ const Header = () => {
       setUser(getUser());
     }
   }, []);
-  const handleLogout = () => {
-    logout(() => {
-      navigation("/login");
-      window.location.reload();
-    });
-  };
+  // const handleLogout = () => {
+  //   logout(() => {
+  //     navigation("/login");
+  //     window.location.reload();
+  //   });
+  // };
   const [searchModalOpen, setSearchModalOpen] = useState(false);
 
   return (
     <header className="bg-[#255F38] p-6 shadow-lg">
       <div className="container mx-auto flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-white"> NoWaste </h1>
+        <h1 className="text-3xl font-bold text-white">
+          <a href="/" className="hover:text-gray-200">NoWaste</a>
+        </h1>
         <nav>
           <ul className="flex space-x-4">
             <li>
@@ -47,17 +49,8 @@ const Header = () => {
               </a>
             </li>
 
-            {/* {user && user.role === "admin" && (
-                            <li><a href="/admin" className="text-white hover:text-gray-200">Admin</a></li>
-                        )} */}
-
             {user && user !== false ? (
               <>
-                <li>
-                  <a href="/profile" className="text-white hover:text-gray-200">
-                    Profile
-                  </a>
-                </li>
                 {user.role === "seller" || user.role === "admin" ? (
                   <li>
                     <a
@@ -68,14 +61,6 @@ const Header = () => {
                     </a>
                   </li>
                 ) : null}
-                <li>
-                  <button
-                    onClick={handleLogout}
-                    className="text-white hover:text-gray-200 bg-transparent border-none cursor-pointer"
-                  >
-                    Logout
-                  </button>
-                </li>
               </>
             ) : (
               <>

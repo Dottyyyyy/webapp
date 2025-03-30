@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import HomeNav from "./components/Navigation/HomeNav";
+import Home from "./components/Pages/Home";
 import Login from "./components/Pages/Login";
 import Header from "./components/Navigation/Header";
 import Register from "./components/Pages/Register";
@@ -17,7 +17,7 @@ const App = () => {
       <Header />
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/" element={<HomeNav />} />
+        <Route path="/" element={<Home />} />
 
         <Route path="/register" element={<Register />} />
         <Route path="/forgotpassword" element={<ForgotPassword />} />
