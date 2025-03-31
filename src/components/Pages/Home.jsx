@@ -13,6 +13,8 @@ const Home = () => {
         {/* Admin View */}
         {user && user.role === "admin" && (
           <>
+            <Sidebar user={user} />
+
             <div className="mb-8">
               <h1 className="text-3xl font-extrabold text-green-900">Welcome, Admin {user.name}</h1>
               <p className="text-md text-gray-700 mt-2">

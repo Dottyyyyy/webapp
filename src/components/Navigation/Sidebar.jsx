@@ -46,7 +46,19 @@ const Sidebar = () => {
       { name: "Manage Users", icon: "👥" },
       { name: "System Settings", icon: "⚙️" },
     ],
-    bottom: [{ name: "Profile", icon: "📜" }],
+    bottom: [
+      {
+        name: "Profile",
+        icon: "👤",
+        action: () => navigation("/profile"),
+      },
+      {
+        name: "Logout",
+        icon: "🔓",
+        action: handleLogout,
+        onClick: handleLogout,
+      },
+    ],
   };
 
   const vendorMenuItems = {
@@ -71,7 +83,11 @@ const Sidebar = () => {
 
   const farmerMenuItems = {
     top: [
-      { name: "View Market", icon: "🥬" },
+      { 
+        name: "View Stalls", 
+        icon: "🏪",
+        action: () => navigation("/viewstalls"),
+      },
       { name: "Manage Sacks", icon: "🎒" },
       { name: "Notifications", icon: "🔔" },
     ],
@@ -80,6 +96,11 @@ const Sidebar = () => {
         name: "Profile",
         icon: "👤",
         action: () => navigation("/profile"),
+      },
+      { 
+        name: "Dashboard", 
+        icon: "📊",
+        action: () => navigation("/dashboard"),
       },
       {
         name: "Logout",
@@ -102,6 +123,7 @@ const Sidebar = () => {
           <li
             key={`top-${index}`}
             className="flex items-center p-4 hover:bg-gray-700 cursor-pointer"
+            onClick={item.action || null}
           >
             <span className="text-2xl mr-4">{item.icon}</span>
             <span className="text-lg">{item.name}</span>

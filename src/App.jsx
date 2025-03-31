@@ -8,6 +8,8 @@ import About from "./components/Pages/About";
 import Contact from "./components/Pages/Contact";
 import Profile from "./components/Pages/Profile";
 import Dashboard from "./components/Pages/Dashboard";
+import ViewStalls from "./components/User/viewStalls";
+import StallDetails from "./components/User/Stalldetail";
 
 import "./css/style.css";
 
@@ -27,6 +29,12 @@ const App = () => {
         <Route path="/profile" element={<Profile />} />
 
         <Route path="/dashboard" element={<Dashboard />} />
+
+        {/* Farmer Sidebar */}
+        <Route path="/viewstalls" element={<ViewStalls />} />
+        <Route path="/stalls/:id" element={<StallDetails />} />
+
+        {/* Vendor Sidebar */}
       </Routes>
     </Router>
   );
