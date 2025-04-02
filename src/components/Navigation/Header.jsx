@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getUser } from "../../utils/helpers";  
+import { getUser } from "../../utils/helpers";
 
 import SearchModal from "../Extras/ModalSearch";
 import Notifications from "../Extras/DropdownNotifications";
@@ -17,12 +17,7 @@ const Header = () => {
       setUser(getUser());
     }
   }, []);
-  // const handleLogout = () => {
-  //   logout(() => {
-  //     navigation("/login");
-  //     window.location.reload();
-  //   });
-  // };
+
   const [searchModalOpen, setSearchModalOpen] = useState(false);
 
   return (
@@ -31,7 +26,7 @@ const Header = () => {
         <h1 className="text-3xl font-bold text-white">
           <a href="/" className="hover:text-gray-200">NoWaste</a>
         </h1>
-        <nav>
+        <nav className="ml-16">
           <ul className="flex space-x-4">
             <li>
               <a href="/" className="text-white hover:text-gray-200">
@@ -51,13 +46,34 @@ const Header = () => {
 
             {user && user !== false ? (
               <>
-                {user.role === "seller" || user.role === "admin" ? (
-                  <li>
+                {user && (user.role === "farmer" || user.role === "composter") ? (
+                  <li className="relative mr-12">
                     <a
-                      href="/dashboard"
-                      className="text-white hover:text-gray-200"
+                      href="/MySack"
+                      className="text-white hover:text-gray-200 flex items-center"
                     >
-                      Dashboard
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={2}
+                        stroke="currentColor"
+                        className="w-6 h-6"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M12 2C8.134 2 5 5.134 5 9c0 3.866 3.134 7 7 7s7-3.134 7-7c0-3.866-3.134-7-7-7zM5 9c0 3.866 3.134 7 7 7s7-3.134 7-7"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M5 9c0 3.866 3.134 7 7 7s7-3.134 7-7"
+                        />
+                      </svg>
+                      <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full px-1">
+                        {user.sackItems || 0}
+                      </span>
                     </a>
                   </li>
                 ) : null}

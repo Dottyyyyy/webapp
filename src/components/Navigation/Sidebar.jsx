@@ -56,7 +56,6 @@ const Sidebar = () => {
         name: "Logout",
         icon: "🔓",
         action: handleLogout,
-        onClick: handleLogout,
       },
     ],
   };
@@ -67,28 +66,30 @@ const Sidebar = () => {
       { name: "Manage Sacks", icon: "🎒" },
     ],
     bottom: [
-        {
-          name: "Profile",
-          icon: "👤",
-          action: () => navigation("/profile"),
-        },
-        {
-          name: "Logout",
-          icon: "🔓",
-          action: handleLogout,
-          onClick: handleLogout,
-        },
-      ],
+      {
+        name: "Profile",
+        icon: "👤",
+        action: () => navigation("/profile"),
+      },
+      {
+        name: "Logout",
+        icon: "🔓",
+        action: handleLogout,
+      },
+    ],
   };
 
   const farmerMenuItems = {
     top: [
-      { 
-        name: "View Stalls", 
+      {
+        name: "View Stalls",
         icon: "🏪",
         action: () => navigation("/viewstalls"),
       },
-      { name: "Manage Sacks", icon: "🎒" },
+      { name: "Pick Up", 
+        icon: "📦",
+        action: () => navigation("/pickup"),
+      },
       { name: "Notifications", icon: "🔔" },
     ],
     bottom: [
@@ -97,8 +98,8 @@ const Sidebar = () => {
         icon: "👤",
         action: () => navigation("/profile"),
       },
-      { 
-        name: "Dashboard", 
+      {
+        name: "Dashboard",
         icon: "📊",
         action: () => navigation("/dashboard"),
       },
@@ -106,14 +107,24 @@ const Sidebar = () => {
         name: "Logout",
         icon: "🔓",
         action: handleLogout,
-        onClick: handleLogout,
       },
     ],
   };
 
   const composterMenuItems = {
     top: [{ name: "View Market", icon: "♻️" }],
-    bottom: [{ name: "Composting Guide", icon: "📘" }],
+    bottom: [
+      {
+        name: "Profile",
+        icon: "👤",
+        action: () => navigation("/profile"),
+      },
+      {
+        name: "Logout",
+        icon: "🔓",
+        action: handleLogout,
+      },
+    ],
   };
 
   const renderMenuItems = (menuItems) => (
@@ -148,20 +159,20 @@ const Sidebar = () => {
   return (
     <div>
       {/* Toggle Button */}
-      <button
-        className={`p-4 bg-gray-800 text-white fixed top-4 z-50 rounded-full shadow-lg transition-all duration-300 ${
-          isSidebarOpen ? "left-48" : "left-4"
-        }`}
-        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-      >
-        {isSidebarOpen ? <FaTimes size={20} /> : <FaBars size={20} />}
-      </button>
+      {!isSidebarOpen && ( // Render the button only when the sidebar is closed
+        <button
+          className="p-4 bg-gray-800 text-white fixed top-4 z-50 rounded-full shadow-lg transition-all duration-300 right-4"
+          onClick={() => setIsSidebarOpen(true)}
+        >
+          <FaBars size={20} />
+        </button>
+      )}
 
       {/* Sidebar */}
       <div
         ref={sidebarRef}
-        className={`fixed top-0 left-0 h-screen bg-gray-800 text-white flex flex-col z-40 transform ${
-          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        className={`fixed top-0 right-0 h-screen bg-gray-800 text-white flex flex-col z-40 transform ${
+          isSidebarOpen ? "translate-x-0" : "translate-x-full"
         } transition-transform duration-300 ease-in-out w-64`}
       >
         <h2 className="text-xl font-bold p-4 border-b border-gray-700">Menu</h2>

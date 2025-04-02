@@ -13,7 +13,7 @@ const Home = () => {
         {/* Admin View */}
         {user && user.role === "admin" && (
           <>
-            <Sidebar user={user} />
+            <Sidebar />
 
             <div className="mb-8">
               <h1 className="text-3xl font-extrabold text-green-900">Welcome, Admin {user.name}</h1>
@@ -27,7 +27,7 @@ const Home = () => {
         {/* Vendor View */}
         {user && user.role === "vendor" && (
           <>
-            <Sidebar user={user} />
+            <Sidebar />
 
             <div className="mb-8">
               <h1 className="text-3xl font-extrabold text-green-900">Welcome, Vendor {user.name}</h1>
@@ -41,7 +41,7 @@ const Home = () => {
         {/* Farmer View */}
         {user && user.role === "farmer" && (
           <>
-            <Sidebar user={user} /> {/* Pass the user object as a prop */}
+            <Sidebar /> {/* Pass the user object as a prop */}
 
             <div className="mb-8">
               <h1 className="text-3xl font-extrabold text-green-900">Welcome, Farmer {user.name}</h1>

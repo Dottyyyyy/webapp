@@ -32,7 +32,7 @@ function ViewStalls() {
         <div className="flex w-full h-full bg-gray-50">
             {user && user.role === "farmer" && (
                 <>
-                    <Sidebar user={user} />
+                    <Sidebar />
 
                     <div className="flex-grow p-6">
                         <h1 className="text-4xl font-bold text-gray-800 mb-8">

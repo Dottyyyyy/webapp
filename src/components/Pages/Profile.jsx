@@ -43,8 +43,7 @@ const Profile = () => {
 
   return (
     <div className="flex w-full h-full">
-      {/* Sidebar */}
-      <Sidebar user={getUser()} /> {/* Pass the user object as a prop */}
+      <Sidebar />
 
       {/* Main Content */}
       <div className="flex-grow flex items-center justify-center min-h-screen bg-gradient-to-r from-[#1F7D53] via-[#3A7D44] to-[#4CAF50]">

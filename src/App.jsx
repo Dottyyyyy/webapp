@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import React, { useState } from "react";
 import Home from "./components/Pages/Home";
 import Login from "./components/Pages/Login";
 import Header from "./components/Navigation/Header";
@@ -10,10 +11,14 @@ import Profile from "./components/Pages/Profile";
 import Dashboard from "./components/Pages/Dashboard";
 import ViewStalls from "./components/User/viewStalls";
 import StallDetails from "./components/User/Stalldetail";
+import MySack from "./components/User/Mysack";
+import Pickup from "./components/User/Pickup";
 
 import "./css/style.css";
 
 const App = () => {
+  const [mySacks, setMySacks] = useState([]); // Lifted state for sacks
+
   return (
     <Router>
       <Header />
@@ -32,7 +37,15 @@ const App = () => {
 
         {/* Farmer Sidebar */}
         <Route path="/viewstalls" element={<ViewStalls />} />
-        <Route path="/stalls/:id" element={<StallDetails />} />
+        <Route
+          path="/stalls/:id"
+          element={<StallDetails mySacks={mySacks} setMySacks={setMySacks} />}
+        />
+        <Route
+          path="/mysack"
+          element={<MySack mySacks={mySacks} setMySacks={setMySacks} />}
+        />
+        <Route path="/pickup" element={<Pickup mySacks={mySacks} setMySacks={setMySacks} />} />
 
         {/* Vendor Sidebar */}
       </Routes>
