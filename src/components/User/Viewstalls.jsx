@@ -72,7 +72,7 @@ function ViewStalls() {
                                 </div>
                             ))}
                         </div>
-                    </div>
+                    </div>      
                 </>
             )}
         </div>
