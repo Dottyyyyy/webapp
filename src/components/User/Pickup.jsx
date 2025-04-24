@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Sidebar from "../Navigation/Sidebar"; // Ensure Sidebar is correctly imported
 import { getUser } from "../../utils/helpers";
 import axios from "axios";
+import Mysack from "./Mysack";
 
 const Pickup = () => {
     const navigate = useNavigate();
@@ -75,11 +76,14 @@ const Pickup = () => {
             fetchSackSellers();
         }
     }, [mySack]);
-
+    console.log(mySack,'My sack')
     return (
         <div className="flex-grow p-6 overflow-y-auto">
-            <h1 className="text-3xl font-bold text-white mb-6">Pickup Waste</h1>
-
+            <div className="flex items-center justify-center">
+                <h1 className="text-3xl font-bold text-black text-center bg-blue-500 p-4 rounded-xl inline-block">
+                    Pickup Waste
+                </h1>
+            </div>
             <div className="bg-gray-100 rounded-lg p-4">
                 {mySack.map((item, index) => (
                     <div
@@ -122,7 +126,7 @@ const Pickup = () => {
                             {item.status !== "completed" && (
                                 <div className="text-xs mt-1">
                                     <i className="mdi mdi-clock-remove"></i> {
-                                        new Date(new Date(item.pickupTimestamp).getTime() - 24 * 60 * 60 * 1000)
+                                        new Date(new Date(item.pickupTimestamp).getTime())
                                             .toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
                                     }<br />
                                     {
