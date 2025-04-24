@@ -38,7 +38,7 @@ const MyStall = () => {
         const interval = setInterval(() => {
             fetchStore();
             fetchStoreSacks();
-        }, 5000);
+        }, 1000);
         return () => clearInterval(interval);
     }, []);
     // console.log(sacks)
