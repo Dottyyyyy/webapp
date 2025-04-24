@@ -34,7 +34,11 @@ const Header = () => {
   };
 
   useEffect(() => {
-    fetchMySacks()
+    fetchMySacks();
+    const interval = setInterval(() => {
+      fetchMySacks();
+    }, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   const [searchModalOpen, setSearchModalOpen] = useState(false);
