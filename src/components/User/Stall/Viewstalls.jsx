@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getUser } from "../../utils/helpers";
-import Sidebar from "../Navigation/Sidebar";
+import { getUser } from "../../../utils/helpers";
+import Sidebar from "../../Navigation/Sidebar";
 import axios from "axios";
 
 function ViewStalls() {

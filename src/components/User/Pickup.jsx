@@ -1,79 +1,140 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../Navigation/Sidebar"; // Ensure Sidebar is correctly imported
+import { getUser } from "../../utils/helpers";
+import axios from "axios";
 
-const Pickup = ({ mySacks, setMySacks, stallDetails }) => {
+const Pickup = () => {
     const navigate = useNavigate();
+    const user = getUser();
+    const userId = user._id;
+    const [mySack, setMySacks] = useState([]);
+    const [sellers, setSellers] = useState({});
 
-    // Calculate total sacks and total weight
-    const totalSacks = mySacks.reduce((total, sack) => total + sack.quantity, 0);
-    const totalWeight = mySacks.reduce(
-        (total, sack) => total + sack.weight * sack.quantity,
-        0
-    );
+    // console.log(mySack,'My sack')
+    // console.log(sellers,'Seller')
 
-    const handleConfirmPickup = () => {
-        console.log("Sacks picked up:", mySacks);
-        // Add logic to notify the system that the sacks have been picked up
-        setMySacks([]); // Clear the sacks after confirmation
-        navigate("/"); // Redirect to the home page or another page
+    const fetchMySacks = async () => {
+        try {
+            const response = await axios.get(`${import.meta.env.VITE_API}/sack/get-pickup-sacks/${userId}`);
+            const pickUpSacks = response.data.pickUpSacks;
+            if (!Array.isArray(pickUpSacks)) {
+                console.error("pickUpSacks is not an array:", pickUpSacks);
+                return;
+            }
+            // console.log(pickUpSacks,'sack')
+            const now = new Date();
+            const nowUTC8 = new Date(now.getTime() + 8 * 60 * 60 * 1000);
+
+            for (const sack of pickUpSacks) {
+                const pickupTimestamp = new Date(sack.pickupTimestamp);
+
+                const sackIds = sack.sacks.map(s => s.sackId);
+                if (pickupTimestamp.getTime() <= nowUTC8.getTime()) {
+                    await axios.delete(`${import.meta.env.VITE_API}/sack/delete-pickuped-sack/${sack._id}`, {
+                        data: { sackIds }
+                    });
+                    toast.warning('You did not pick up the sack, it will return there')
+                }
+            }
+            setMySacks(pickUpSacks);
+        } catch (error) {
+            console.error("Error fetching sacks:", error.response?.data || error.message);
+        }
     };
 
+    const fetchSackSellers = async () => {
+        try {
+            const sellerIds = [...new Set(mySack.flatMap(item => item.sacks.map(sack => sack.seller)))];
+            const sellerData = {};
+            await Promise.all(
+                sellerIds.map(async (sellerId) => {
+                    if (!sellers[sellerId]) {
+                        const { data } = await axios.get(`${import.meta.env.VITE_API}/get-user/${sellerId}`);
+                        sellerData[sellerId] = data.user;
+                    }
+                })
+            );
+            setSellers((prevSellers) => ({ ...prevSellers, ...sellerData }));
+        } catch (error) {
+            console.error("Error fetching sellers:", error);
+        }
+    };
+    useEffect(() => {
+        if (userId) {
+            fetchMySacks();
+            const interval = setInterval(() => {
+                fetchMySacks();
+            }, 3000);
+            return () => clearInterval(interval);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (mySack.length > 0) {
+            fetchSackSellers();
+        }
+    }, [mySack]);
+
     return (
-        <div className="flex w-full h-full">
-            {/* Sidebar */}
-            <Sidebar />
+        <div className="flex-grow p-6 overflow-y-auto">
+            <h1 className="text-3xl font-bold text-white mb-6">Pickup Waste</h1>
 
-            {/* Main Content */}
-            <div className="flex-grow p-6">
-                <h1 className="text-3xl font-bold text-gray-800 mb-4">Pick Up</h1>
+            <div className="bg-gray-100 rounded-lg p-4">
+                {mySack.map((item, index) => (
+                    <div
+                        key={item._id}
+                        onClick={() => navigate(`/pickup/see/${item._id}`, { state: { pickupData: item } })}
+                        className="cursor-pointer bg-gray-800 text-white rounded-xl shadow-md p-4 mb-4 flex items-center justify-between transition-transform hover:scale-[1.01]"
+                    >
+                        {/* Left section */}
+                        <div className="flex-1 text-center">
+                            {item.status !== "completed" && (
+                                <div className="bg-green-500 px-3 py-1 rounded-full font-semibold text-sm mb-2 inline-block">
+                                    Pickup No: {index + 1}
+                                </div>
+                            )}
+                            <div className="text-6xl mb-2">
+                                <i className="mdi mdi-car-lifted-pickup"></i>
+                            </div>
+                            <div className="text-md font-medium">Total Kilo: {item.totalKilo}</div>
+                        </div>
 
-                {/* Sacks Summary */}
-                <div className="bg-gray-100 p-4 rounded-lg shadow-md mb-6">
-                    <h2 className="text-2xl font-bold text-gray-700 mb-2">
-                        All Sacks Added
-                    </h2>
-                    <p className="text-lg text-gray-600">
-                        Total Sacks: <span className="font-bold">{totalSacks}</span>
-                    </p>
-                    <p className="text-lg text-gray-600">
-                        Total Weight: <span className="font-bold">{totalWeight}kg</span>
-                    </p>
-                </div>
+                        {/* Middle section */}
+                        <div className="flex-1 text-center">
+                            <div className="text-4xl mb-2">
+                                <i className="fas fa-route"></i>
+                            </div>
+                            <div className="text-sm">Taytay Rizal,<br />New Market</div>
+                        </div>
 
-                {/* Stall Details */}
-                <div className="bg-gray-100 p-4 rounded-lg shadow-md mb-6">
-                    <h2 className="text-2xl font-bold text-gray-700 mb-2">
-                        Stall Details
-                    </h2>
-                    <p className="text-lg text-gray-600">
-                        Stall Name: <span className="font-bold">{stallDetails?.name || "N/A"}</span>
-                    </p>
-                    <p className="text-lg text-gray-600">
-                        Stall Address: <span className="font-bold">{stallDetails?.address || "N/A"}</span>
-                    </p>
-                </div>
-
-                {/* Mapping Section */}
-                <div className="bg-gray-100 p-4 rounded-lg shadow-md mb-6">
-                    <h2 className="text-2xl font-bold text-gray-700 mb-2">Mapping</h2>
-                    <p className="text-lg text-gray-600">
-                        The sacks are located at:{" "}
-                        <span className="font-bold">{stallDetails?.address || "N/A"}</span>
-                    </p>
-                    {/* Add a map component or placeholder */}
-                    <div className="mt-4 bg-gray-300 h-64 flex items-center justify-center rounded-lg">
-                        <p className="text-gray-700">Map Placeholder</p>
+                        {/* Right section */}
+                        <div className="flex-1 text-center">
+                            <img
+                                src='/src/images/newtaytay.jpg'
+                                alt="Taytay"
+                                className="w-24 h-24 rounded-lg mx-auto mb-2 object-cover"
+                            />
+                            <div className="text-sm">
+                                <i className="mdi mdi-sack"></i> {item.sacks.length}
+                            </div>
+                            <div className="text-yellow-400 font-semibold text-sm mt-1">Status: {item.status}</div>
+                            {item.status !== "completed" && (
+                                <div className="text-xs mt-1">
+                                    <i className="mdi mdi-clock-remove"></i> {
+                                        new Date(new Date(item.pickupTimestamp).getTime() - 24 * 60 * 60 * 1000)
+                                            .toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
+                                    }<br />
+                                    {
+                                        new Date(item.pickupTimestamp).toLocaleTimeString("en-US", {
+                                            timeZone: "UTC", hour: "2-digit", minute: "2-digit", hour12: true
+                                        })
+                                    }
+                                </div>
+                            )}
+                        </div>
                     </div>
-                </div>
-
-                {/* Confirm Pickup Button */}
-                <button
-                    onClick={handleConfirmPickup}
-                    className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors duration-300"
-                >
-                    Confirm Pickup
-                </button>
+                ))}
             </div>
         </div>
     );

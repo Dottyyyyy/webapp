@@ -1,38 +1,50 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Sidebar from "../Navigation/Sidebar"; // Ensure Sidebar is correctly imported
+import Sidebar from "../Navigation/Sidebar";
+import { getUser } from "../../utils/helpers";
+import axios from "axios";
 
-const Mysack = ({ mySacks, setMySacks }) => {
-    const navigate = useNavigate();
+const Mysack = () => {
+    const user = getUser();
+    const userId = user._id
+    const navigation = useNavigate()
+    const [mySack, setMySacks] = useState([]);
+    const addToSackId = mySack.length > 0 ? mySack[0]._id : undefined;
+    const status = mySack.length > 0 ? mySack[0].status : undefined;
+    console.log(addToSackId)
 
-    const totalWeight = mySacks.reduce(
-        (total, sack) => total + sack.weight * sack.quantity,
-        0
-    );
+    const fetchMySacks = async () => {
+        try {
+            const { data } = await axios.get(`${import.meta.env.VITE_API}/sack/get-my-sacks/${userId}`);
+            const pendingSacks = data.mySack.filter(sack => sack.status === "pending");
 
-    const handleIncrease = (id) => {
-        setMySacks((prev) =>
-            prev.map((sack) =>
-                sack.id === id ? { ...sack, quantity: sack.quantity + 1 } : sack
-            )
-        );
+            setMySacks(pendingSacks);
+        } catch (error) {
+            console.error("Error fetching:", error);
+        }
     };
 
-    const handleDecrease = (id) => {
-        setMySacks((prev) =>
-            prev.map((sack) =>
-                sack.id === id && sack.quantity > 1
-                    ? { ...sack, quantity: sack.quantity - 1 }
-                    : sack
-            )
-        );
-    };
+    useEffect(() => {
+        fetchMySacks();
+    }, [userId]);
 
-    const handlePickUp = () => {
-        console.log("Pick up request sent for:", mySacks);
-        // Add logic to notify the stall
-        setMySacks([]); // Clear the sack after pickup
-    };
+    // console.log("My Sack Data:", mySack);
+    const totalKilos = mySack.reduce((sum, item) => {
+        return sum + item.sacks.reduce((sackSum, sack) => sackSum + Number(sack.kilo || 0), 0);
+    }, 0);
+
+    const handlePickUpSacks = async () => {
+        // console.log(totalKilos, 'Kilos');
+        // console.log(mySack, 'My sacks');
+        // const status = 'pending';
+        try {
+            const { data } = await axios.post(`${import.meta.env.VITE_API}/sack/pick-up-sacks/${addToSackId}`, { mySack, totalKilos });
+            navigation(-1);
+        } catch (error) {
+            console.error("Error fetching:", error);
+        }
+    }
+
 
     return (
         <div className="flex w-full h-full">
@@ -43,55 +55,64 @@ const Mysack = ({ mySacks, setMySacks }) => {
             <div className="flex-grow p-6">
                 <h1 className="text-3xl font-bold text-gray-800 mb-4">My Sack</h1>
                 <div className="text-2xl font-bold text-green-600 mb-6">
-                    Total Weight: {totalWeight}kg
+                    Total Weight: {totalKilos} kg
                 </div>
-                <div className="grid grid-cols-1 gap-4">
-                    {mySacks.map((sack) => (
-                        <div
-                            key={sack.id}
-                            className="p-4 bg-gray-100 rounded-lg shadow-md flex justify-between items-center"
-                        >
-                            <div>
-                                <p className="text-lg font-semibold text-gray-700">
-                                    {sack.name}
-                                </p>
-                                <p className="text-sm text-gray-600">
-                                    From: {sack.stallName}
-                                </p>
-                                <p className="text-sm text-gray-600">
-                                    Added: {new Date(sack.timestamp).toLocaleString()}
-                                </p>
-                                <p className="text-sm text-gray-600">
-                                    Weight: {sack.weight}kg
-                                </p>
-                                <p className="text-sm text-gray-600">
-                                    Quantity: {sack.quantity}
-                                </p>
+
+                {mySack.length === 0 ? (
+                    <div className="text-gray-500">No pending sacks found.</div>
+                ) : (
+                    <div className="space-y-4">
+                        {mySack.map((entry, index) => (
+                            <div key={entry._id} className="border p-4 rounded-lg shadow-md bg-white">
+                                <div className="text-lg font-semibold text-gray-700 mb-2">
+                                    Sack Entry #{index + 1}
+                                </div>
+                                <div className="text-sm text-gray-600 mb-1">
+                                    Status: <span className="font-medium text-blue-600">{entry.status}</span>
+                                </div>
+                                <div className="text-sm text-gray-600 mb-1">
+                                    Created At:{" "}
+                                    <span className="font-medium">
+                                        {new Date(entry.createdAt).toLocaleString()}
+                                    </span>
+                                </div>
+                                <div className="mt-2">
+                                    <div className="text-sm font-semibold mb-1 text-gray-700">Sacks:</div>
+                                    <div className="flex overflow-x-auto space-x-4 p-2">
+                                        {entry.sacks.map((sack, i) => (
+                                            <div
+                                                key={i}
+                                                className="min-w-[250px] p-2 border border-gray-200 rounded-md bg-white shadow-sm"
+                                            >
+                                                <img
+                                                    src={sack.images[0]?.url}
+                                                    alt="Stall"
+                                                    className="w-full h-48 object-cover rounded"
+                                                />
+                                                <div className="mt-2 text-sm">
+                                                    <div><strong>Seller:</strong> {sack.seller || "N/A"}</div>
+                                                    <div><strong>Stall #:</strong> {sack.stallNumber || "N/A"}</div>
+                                                    <div><strong>Weight:</strong> {sack.kilo || 0} kg</div>
+                                                    <div><strong>Description:</strong> {sack.description || "N/A"}</div>
+                                                    <div><strong>Location:</strong> {sack.location || "N/A"}</div>
+                                                    <div><strong>Spoilage Date:</strong> {sack.dbSpoil ? new Date(sack.dbSpoil).toLocaleDateString() : "N/A"}</div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="mt-4">
+                                    <button
+                                        onClick={handlePickUpSacks}
+                                        className="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition duration-200"
+                                    >
+                                        Pick Up These Sacks
+                                    </button>
+                                </div>
+
                             </div>
-                            <div className="flex items-center space-x-2">
-                                <button
-                                    onClick={() => handleIncrease(sack.id)}
-                                    className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-300"
-                                >
-                                    +
-                                </button>
-                                <button
-                                    onClick={() => handleDecrease(sack.id)}
-                                    className="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-300"
-                                >
-                                    -
-                                </button>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-                {mySacks.length > 0 && (
-                    <button
-                        onClick={handlePickUp}
-                        className="mt-6 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors duration-300"
-                    >
-                        Pick Up
-                    </button>
+                        ))}
+                    </div>
                 )}
             </div>
         </div>

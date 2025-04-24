@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getUser } from "../../utils/helpers";
 
@@ -7,9 +7,13 @@ import Notifications from "../Extras/DropdownNotifications";
 import Help from "../Extras/DropdownHelp";
 import UserMenu from "../Extras/DropdownProfile";
 import ThemeToggle from "../Extras/ThemeToggle";
+import axios from "axios";
 
 const Header = () => {
   const navigation = useNavigate();
+  const userData = getUser();
+  const userId = userData._id;
+  const [mySack, setMySacks] = useState([]);
 
   const [user, setUser] = React.useState(false);
   React.useEffect(() => {
@@ -18,15 +22,30 @@ const Header = () => {
     }
   }, []);
 
+  const fetchMySacks = async () => {
+    try {
+      const { data } = await axios.get(`${import.meta.env.VITE_API}/sack/get-my-sacks/${userId}`);
+      const pendingSacks = data.mySack.filter(sack => sack.status === "pending");
+
+      setMySacks(pendingSacks);
+    } catch (error) {
+      console.error("Error fetching:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchMySacks()
+  }, []);
+
   const [searchModalOpen, setSearchModalOpen] = useState(false);
 
   return (
     <header className="bg-[#255F38] p-6 shadow-lg">
-      <div className="container mx-auto flex justify-between items-center">
+      <div className="container mx-auto flex justify-between items-center mr-20">
         <h1 className="text-3xl font-bold text-white">
           <a href="/" className="hover:text-gray-200">NoWaste</a>
         </h1>
-        <nav className="ml-16">
+        <nav className="mr-13">
           <ul className="flex space-x-4">
             <li>
               <a href="/" className="text-white hover:text-gray-200">
@@ -47,7 +66,7 @@ const Header = () => {
             {user && user !== false ? (
               <>
                 {user && (user.role === "farmer" || user.role === "composter") ? (
-                  <li className="relative mr-12">
+                  <li className="relative ">
                     <a
                       href="/MySack"
                       className="text-white hover:text-gray-200 flex items-center"
@@ -72,7 +91,7 @@ const Header = () => {
                         />
                       </svg>
                       <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full px-1">
-                        {user.sackItems || 0}
+                        {mySack.length || 0}
                       </span>
                     </a>
                   </li>

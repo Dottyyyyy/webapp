@@ -1,11 +1,13 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import Sidebar from "../Navigation/Sidebar";
-import { getUser } from "../../utils/helpers";
+import Sidebar from "../../Navigation/Sidebar";
+import { getUser } from "../../../utils/helpers";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function StallDetails() {
-    const { id } = useParams(); // Get the stall ID from the route
+    const { id } = useParams();
     const [stall, setStall] = useState({});
     const [sacks, setSacks] = useState([]);
     const [seller, setUser] = useState([]);
@@ -13,7 +15,6 @@ function StallDetails() {
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const user = getUser()
-    // console.log(user.role, 'User role')
 
     const fetchStallData = async () => {
         try {
@@ -41,40 +42,29 @@ function StallDetails() {
 
     const fetchStallWasteData = async () => {
         try {
-            const response = await axios.get(
+            const { data } = await axios.get(
                 `${import.meta.env.VITE_API}/sack/get-store-sacks/${id}`
             );
-            let filteredSacks = response.data.sacks;
-            if (user.role === 'farmer') {
-                // Farmers should not see "spoiled" or "completed" sacks
-                filteredSacks = filteredSacks.filter(
-                    sack => sack.status !== "spoiled" && sack.status !== "completed"
-                );
-            } else if (user.role === 'composter') {
-                // Composters should only see "spoiled" sacks
-                filteredSacks = filteredSacks.filter(sack => sack.status === "spoiled");
-            }
+            // console.log(data,'hello')
+            const filteredSacks = data.sacks.filter(sack => sack.status === "posted");
+            // console.log(filteredSacks,'Hello')
             setSacks(filteredSacks);
         } catch (error) {
             console.error("Error fetching sacks data:", error);
         }
     };
 
-    const handleAddToSack = (sack) => {
-        const existingSack = mySacks.find((item) => item.id === sack.id);
-        if (existingSack) {
-            // If the sack already exists, increase its quantity
-            setMySacks((prev) =>
-                prev.map((item) =>
-                    item.id === sack.id ? { ...item, quantity: item.quantity + 1 } : item
-                )
-            );
-        } else {
-            // Add the sack to "My Sack"
-            setMySacks((prev) => [
-                ...prev,
-                { ...sack, quantity: 1, timestamp: new Date().toISOString() },
-            ]);
+    // console.log(mySacks, 'Mysacks')
+
+    const handleAddToSack = async (sack) => {
+        try {
+            const { data } = await axios.post(`${import.meta.env.VITE_API}/sack/add-to-sack/${user._id}`, sack);
+
+            if (data.message) {
+                toast.success('Added to Sack Successfully.');
+            }
+        } catch (error) {
+            toast.warning('Error in Adding to Cart');
         }
     };
 
@@ -92,13 +82,10 @@ function StallDetails() {
         );
     }
 
-    // console.log(sacks)
-
     return (
         <div className="flex w-full h-full bg-gray-50 relative">
             <Sidebar />
-
-            {/* Main Content */}
+            <ToastContainer />
             <div className={`flex-grow p-6 ${isModalOpen ? "blur-sm" : ""}`}>
                 <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
                     {/* Stall Details */}
@@ -141,7 +128,10 @@ function StallDetails() {
                                             {sack.description}
                                         </p>
                                         <p className="text-sm text-gray-600">
-                                            Weight: {sack.weight}kg
+                                            Weight: {sack.kilo} kg
+                                        </p>
+                                        <p className="text-sm text-gray-600">
+                                            Spoilage Date: {new Date(sack.dbSpoil).toLocaleDateString()}
                                         </p>
                                     </div>
                                     <button

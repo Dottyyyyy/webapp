@@ -9,27 +9,56 @@ const Register = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const navigate = useNavigate();
+  const [avatar, setAvatar] = useState(null);
+  const [role, setRole] = useState("farmer");
+  const [avatarPreview, setAvatarPreview] = useState(null);
+
+  const handleAvatarChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => setAvatarPreview(reader.result);
+      reader.readAsDataURL(file);
+      setAvatar(file);
+    }
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault(); // prevent form from refreshing the page
+
     if (password !== confirmPassword) {
-      alert("Passwords do not match");
+      alert("Passwords do not match.");
       return;
     }
+
     try {
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("email", email);
+      formData.append("password", password);
+      formData.append("address", address);
+      formData.append("role", role);
+      if (avatar) {
+        formData.append("avatar", avatar);
+      }
+
       const response = await axios.post(
         `${import.meta.env.VITE_API}/register`,
-        { name, email, password, address }
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
       );
-      // Handle successful registration (e.g., redirect to login page)
-      console.log("Register Successful:", response.data);
-      authenticate(response.data, () => {
-        navigate("/");
-        window.location.reload();
-      });
-      // navigate('/login');
+
+      if (response.data.success) {
+        alert("Registration successful!");
+        navigate("/login");
+      } else {
+        alert(response.data.message || "Registration failed.");
+      }
     } catch (error) {
-      console.error("Registration failed:", error);
+      console.error("Error creating user", error);
+      alert("An error occurred during registration.");
     }
   };
 
@@ -40,6 +69,20 @@ const Register = () => {
           Create an Account
         </h2>
         <form className="space-y-6" onSubmit={handleSubmit}>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleAvatarChange}
+            className="w-full mb-3"
+          />
+
+          {avatarPreview && (
+            <img
+              src={avatarPreview}
+              alt="Avatar Preview"
+              className="w-24 h-24 object-cover rounded-full mb-4"
+            />)}
+
           <div className="space-y-1">
             <label
               htmlFor="name"
@@ -124,6 +167,25 @@ const Register = () => {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
             />
+          </div>
+          <div className="space-y-1">
+            <label
+              htmlFor="role"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Role:
+            </label>
+            <select
+              id="role"
+              name="role"
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+            >
+              <option value="farmer">Farmer</option>
+              <option value="composter">Composter</option>
+              <option value="vendor">Vendor</option>
+            </select>
           </div>
           <button
             type="submit"

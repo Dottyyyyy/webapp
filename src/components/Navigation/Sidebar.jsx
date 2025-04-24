@@ -7,7 +7,7 @@ const Sidebar = () => {
   const navigation = useNavigate();
   const [user, setUser] = React.useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
-
+  // console.log(user._id,'User Data')
   const sidebarRef = React.useRef(null);
 
   React.useEffect(() => {
@@ -62,7 +62,9 @@ const Sidebar = () => {
 
   const vendorMenuItems = {
     top: [
-      { name: "View Request", icon: "📨" },
+      {
+        name: "My Stall", icon: "📨", action: () => navigation(`/vendor/myStall/${user._id}`),
+      },
       { name: "Manage Sacks", icon: "🎒" },
     ],
     bottom: [
@@ -86,7 +88,8 @@ const Sidebar = () => {
         icon: "🏪",
         action: () => navigation("/viewstalls"),
       },
-      { name: "Pick Up", 
+      {
+        name: "Pick Up",
         icon: "📦",
         action: () => navigation("/pickup"),
       },
@@ -171,9 +174,8 @@ const Sidebar = () => {
       {/* Sidebar */}
       <div
         ref={sidebarRef}
-        className={`fixed top-0 right-0 h-screen bg-gray-800 text-white flex flex-col z-40 transform ${
-          isSidebarOpen ? "translate-x-0" : "translate-x-full"
-        } transition-transform duration-300 ease-in-out w-64`}
+        className={`fixed top-0 right-0 h-screen bg-gray-800 text-white flex flex-col z-40 transform ${isSidebarOpen ? "translate-x-0" : "translate-x-full"
+          } transition-transform duration-300 ease-in-out w-64`}
       >
         <h2 className="text-xl font-bold p-4 border-b border-gray-700">Menu</h2>
         <div className="flex-1 flex flex-col">

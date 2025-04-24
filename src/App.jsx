@@ -9,12 +9,20 @@ import About from "./components/Pages/About";
 import Contact from "./components/Pages/Contact";
 import Profile from "./components/Pages/Profile";
 import Dashboard from "./components/Pages/Dashboard";
-import ViewStalls from "./components/User/viewStalls";
-import StallDetails from "./components/User/Stalldetail";
 import MySack from "./components/User/Mysack";
 import Pickup from "./components/User/Pickup";
 
 import "./css/style.css";
+import Farmers from "./components/Admin/Users/Farmers";
+import CreateFarmer from "./components/Admin/Users/CreateFarmer";
+import Composters from "./components/Admin/Users/Composters";
+import CreateComposter from "./components/Admin/Users/CreateComposter";
+import Vendors from "./components/Admin/Users/Vendors";
+import CreateVendor from "./components/Admin/Users/CreateVendor";
+import MyStall from "./components/Vendor/MyStall";
+import CreateSack from "./components/Vendor/CreateSack";
+import StallDetails from "./components/User/Stall/Stalldetail";
+import ViewStalls from "./components/User/Stall/Viewstalls";
 
 const App = () => {
   const [mySacks, setMySacks] = useState([]); // Lifted state for sacks
@@ -34,6 +42,14 @@ const App = () => {
         <Route path="/profile" element={<Profile />} />
 
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/admin/farmers" element={<Farmers />} />
+        <Route path="/admin/create/farmer" element={<CreateFarmer />} />
+        <Route path="/admin/composters" element={<Composters />} />
+        <Route path="/admin/create/composter" element={<CreateComposter />} />
+        <Route path="/admin/vendors" element={<Vendors />} />
+        <Route path="/admin/create/vendor" element={<CreateVendor />} />
+        {/* <Route path="/admin/farmers" element={<Dashboard />} />
+        <Route path="/admin/farmers" element={<Dashboard />} /> */}
 
         {/* Farmer Sidebar */}
         <Route path="/viewstalls" element={<ViewStalls />} />
@@ -48,6 +64,8 @@ const App = () => {
         <Route path="/pickup" element={<Pickup mySacks={mySacks} setMySacks={setMySacks} />} />
 
         {/* Vendor Sidebar */}
+        <Route path="/vendor/myStall/:id" element={<MyStall />} />
+        <Route path="/vendor/create-sack" element={<CreateSack />} />
       </Routes>
     </Router>
   );
