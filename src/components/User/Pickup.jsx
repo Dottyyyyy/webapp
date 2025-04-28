@@ -100,7 +100,7 @@ const Pickup = () => {
                                 </div>
                             )}
                             <div className="text-6xl mb-2">
-                                <i className="mdi mdi-car-lifted-pickup"></i>
+                                <i className="fas fa-truck mr-2"></i> {/* Font Awesome truck icon */}
                             </div>
                             <div className="text-md font-medium">Total Kilo: {item.totalKilo}</div>
                         </div>

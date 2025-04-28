@@ -72,7 +72,7 @@ const VendorPickup = () => {
             <Sidebar />
             <div className="flex items-center justify-center">
                 <h1 className="text-3xl font-bold text-black text-center bg-blue-500 p-4 rounded-xl inline-block">
-                    Pickup Waste
+                    Pickup Request:
                 </h1>
             </div>
             <div className="bg-gray-100 rounded-lg p-4">
@@ -90,7 +90,7 @@ const VendorPickup = () => {
                                 </div>
                             )}
                             <div className="text-6xl mb-2">
-                                <i className="mdi mdi-car-lifted-pickup"></i>
+                                <i className="fas fa-truck mr-2"></i> {/* Font Awesome truck icon */}
                             </div>
                             <div className="text-md font-medium">Total Kilo: {item.totalKilo}</div>
                         </div>
