@@ -24,6 +24,7 @@ import CreateSack from "./components/Vendor/CreateSack";
 import StallDetails from "./components/User/Stall/Stalldetail";
 import ViewStalls from "./components/User/Stall/Viewstalls";
 import PickupDetails from "./components/User/MyPickup/PickupDetail";
+import VendorPickup from "./components/Vendor/Pickup/VendorPickup";
 
 const App = () => {
   const [mySacks, setMySacks] = useState([]); // Lifted state for sacks
@@ -68,6 +69,7 @@ const App = () => {
         {/* Vendor Sidebar */}
         <Route path="/vendor/myStall/:id" element={<MyStall />} />
         <Route path="/vendor/create-sack" element={<CreateSack />} />
+        <Route path="/vendor/pickup" element={<VendorPickup />} />
       </Routes>
     </Router>
   );

@@ -1,46 +1,36 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Sidebar from "../Navigation/Sidebar"; // Ensure Sidebar is correctly imported
-import { getUser } from "../../utils/helpers";
+import Sidebar from "../../Navigation/Sidebar"; // Ensure Sidebar is correctly imported
+import { getUser } from "../../../utils/helpers";
 import axios from "axios";
-import Mysack from "./Mysack";
 
-const Pickup = () => {
+const VendorPickup = () => {
     const navigate = useNavigate();
     const user = getUser();
     const userId = user._id;
+    const sellerId = user._id;
     const [mySack, setMySacks] = useState([]);
     const [sellers, setSellers] = useState({});
 
-    // console.log(mySack,'My sack')
-    // console.log(sellers,'Seller')
-
     const fetchMySacks = async () => {
         try {
-            const response = await axios.get(`${import.meta.env.VITE_API}/sack/get-pickup-sacks/${userId}`);
-            const pickUpSacks = response.data.pickUpSacks;
-            if (!Array.isArray(pickUpSacks)) {
-                console.error("pickUpSacks is not an array:", pickUpSacks);
-                return;
-            }
-            // console.log(pickUpSacks,'sack')
-            const now = new Date();
-            const nowUTC8 = new Date(now.getTime() + 8 * 60 * 60 * 1000);
+            const response = await axios.get(`${import.meta.env.VITE_API}/sack/stall-pickup-sacks/${sellerId}`);
+            const pickUpSacks = response.data;
 
-            for (const sack of pickUpSacks) {
-                const pickupTimestamp = new Date(sack.pickupTimestamp);
+            const filteredSacks = pickUpSacks.map((pickup) => {
+                const sellerSacks = pickup.sacks.filter((sack) => sack.seller === sellerId);
 
-                const sackIds = sack.sacks.map(s => s.sackId);
-                if (pickupTimestamp.getTime() <= nowUTC8.getTime()) {
-                    await axios.delete(`${import.meta.env.VITE_API}/sack/delete-pickuped-sack/${sack._id}`, {
-                        data: { sackIds }
-                    });
-                    toast.warning('You did not pick up the sack, it will return there')
-                }
-            }
-            setMySacks(pickUpSacks);
+                const totalKilo = sellerSacks.reduce((sum, sack) => sum + parseFloat(sack.kilo || 0), 0);
+
+                return {
+                    ...pickup,
+                    sacks: sellerSacks,
+                    totalKilo: totalKilo.toString(),
+                };
+            }).filter((pickup) => pickup.sacks.length > 0);
+
+            setMySacks(filteredSacks);
         } catch (error) {
-            console.error("Error fetching sacks:", error.response?.data || error.message);
         }
     };
 
@@ -89,7 +79,7 @@ const Pickup = () => {
                 {mySack.map((item, index) => (
                     <div
                         key={item._id}
-                        onClick={() => navigate(`/pickup/see/${item._id}`, { state: { pickupData: item } })}
+                        onClick={() => navigate(`/vendor/pickup-detail/${item._id}`, { state: { pickupData: item } })}
                         className="cursor-pointer bg-gray-800 text-white rounded-xl shadow-md p-4 mb-4 flex items-center justify-between transition-transform hover:scale-[1.01]"
                     >
                         {/* Left section */}
@@ -145,4 +135,4 @@ const Pickup = () => {
     );
 };
 
-export default Pickup;
+export default VendorPickup;
