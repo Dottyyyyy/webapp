@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { getUser } from "../../utils/helpers";
 import Sidebar from "../Navigation/Sidebar"; // Import Sidebar component
+import '../../index.css'
 
 const Profile = () => {
   const [user, setUser] = useState({ name: "", address: "" });
@@ -42,7 +43,7 @@ const Profile = () => {
   }
 
   return (
-    <div className="flex w-full h-full">
+    <div className="flex w-full h-full fade-in">
       <Sidebar />
 
       {/* Main Content */}

@@ -4,6 +4,7 @@ import axios from "axios";
 import { getUser } from "../../utils/helpers";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import '../../index.css'
 
 const CreateSack = () => {
     const [description, setDescription] = useState("");
@@ -57,12 +58,14 @@ const CreateSack = () => {
                 }
             );
 
-            if (response.data.success) {
-                toast.success("Registration successful!");
-                navigate(-1);
-            } else {
-                alert(response.data.message || "Registration failed.");
-            }
+            toast.success("Create Sack Successful!");
+            setTimeout(() => {
+                if (response.data.success) {
+                    navigate(-1);
+                } else {
+                    toast.error(response.data.message || "Registration failed.");
+                }
+            }, 1500);
         } catch (error) {
             console.error("Error creating user", error);
             alert("An error occurred during registration.");
@@ -83,12 +86,12 @@ const CreateSack = () => {
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-[#1F7D53] via-[#3A7D44] to-[#4CAF50]">
+        <div className="flex items-center fade-in justify-center min-h-screen bg-gradient-to-r from-[#1F7D53] via-[#3A7D44] to-[#4CAF50]">
+            <ToastContainer />
             <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
                 <h2 className="text-2xl font-bold text-center text-gray-900">
                     Create Sack
                 </h2>
-                <ToastContainer />
                 <form className="space-y-6" onSubmit={handleSubmit}>
                     <input
                         type="file"
@@ -152,7 +155,7 @@ const CreateSack = () => {
 
                     <input
                         type="number"
-                        placeholder="How Many Days before spoiling?"
+                        placeholder="How Many Days before spoilage?"
                         value={dbSpoil}
                         onChange={(e) => setDbSpoil(e.target.value)}
                         style={{
@@ -162,7 +165,7 @@ const CreateSack = () => {
                             padding: '0 16px',
                             marginBottom: '8px',
                             backgroundColor: '#fff',
-                            width: '63%',
+                            width: '80%',
                         }}
                     />
 

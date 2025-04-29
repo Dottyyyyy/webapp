@@ -2,12 +2,15 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../Navigation/Sidebar";
 import { getUser } from "../../utils/helpers";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import axios from "axios";
+import '../../index.css'
 
 const Mysack = () => {
     const user = getUser();
     const userId = user._id
-    const navigation = useNavigate()
+    const navigate = useNavigate()
     const [mySack, setMySacks] = useState([]);
     const addToSackId = mySack.length > 0 ? mySack[0]._id : undefined;
     const status = mySack.length > 0 ? mySack[0].status : undefined;
@@ -39,7 +42,10 @@ const Mysack = () => {
         // const status = 'pending';
         try {
             const { data } = await axios.post(`${import.meta.env.VITE_API}/sack/pick-up-sacks/${addToSackId}`, { mySack, totalKilos });
-            navigation(-1);
+            toast.success("Pick up sack Successfully.");
+            setTimeout(() => {
+                navigate(-1);
+            }, 1500);
         } catch (error) {
             console.error("Error fetching:", error);
         }
@@ -47,8 +53,9 @@ const Mysack = () => {
 
 
     return (
-        <div className="flex w-full h-full">
+        <div className="flex w-full h-full fade-in">
             {/* Sidebar */}
+            <ToastContainer />
             <Sidebar />
 
             {/* Main Content */}

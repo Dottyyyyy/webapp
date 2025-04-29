@@ -5,6 +5,8 @@ import axios from 'axios';
 import { FaCarSide } from 'react-icons/fa'; // You can import specific icons from FontAwesome
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import '../../../index.css'
+
 const PickupDetails = () => {
     const location = useLocation();
     const { pickupData } = location.state || {};
@@ -41,10 +43,11 @@ const PickupDetails = () => {
         try {
             const { data } = await axios.put(`${import.meta.env.VITE_API}/sack/pickup-sack-now/${pickup._id}`);
             setPickupStatus(data.status);
-            toast.success(
-                'You should now Pick-up the Sack'
-            );
-            navigation(-1)
+            toast.success('You should now Pick-up the Sack');
+
+            setTimeout(() => {
+                navigation(-1)
+            }, 1000);
         } catch (e) {
             console.log(e)
         }
@@ -89,12 +92,12 @@ const PickupDetails = () => {
     }
 
     return (
-        <div className="flex flex-col p-5 bg-gray-900 text-white">
+        <div className="flex flex-col fade-in p-5 bg-gray-900 text-white">
             <h1 className="text-3xl font-bold text-center mb-6">See Pick Up</h1>
 
             <div className="bg-gray-700 rounded-xl p-6 mb-6">
                 <div className="flex justify-between">
-                    {pickupStatus !== "completed" && (
+                    {pickupStatus !== "pickup" && pickupStatus !== "completed" && (
                         <button className="bg-green-500 text-white p-2 rounded-lg flex flex-col items-center" onClick={handlePickupStatus}>
                             <FaCarSide size={35} color="black" />
                             <span>Pickup</span>

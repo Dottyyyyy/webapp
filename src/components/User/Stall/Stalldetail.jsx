@@ -1,10 +1,11 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Sidebar from "../../Navigation/Sidebar";
 import { getUser } from "../../../utils/helpers";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import '../../../index.css'
 
 function StallDetails() {
     const { id } = useParams();
@@ -13,6 +14,7 @@ function StallDetails() {
     const [seller, setUser] = useState([]);
     const [mySacks, setMySacks] = useState([]);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const user = getUser()
 
@@ -60,9 +62,10 @@ function StallDetails() {
         try {
             const { data } = await axios.post(`${import.meta.env.VITE_API}/sack/add-to-sack/${user._id}`, sack);
 
-            if (data.message) {
-                toast.success('Added to Sack Successfully.');
-            }
+            toast.success('Added to Sack Successfully.');
+            setTimeout(() => {
+                navigate(-1);
+            }, 1500);
         } catch (error) {
             toast.warning('Error in Adding to Cart');
         }
@@ -83,7 +86,7 @@ function StallDetails() {
     }
 
     return (
-        <div className="flex w-full h-full bg-gray-50 relative">
+        <div className="flex w-full fade-in h-full bg-gray-50 relative">
             <Sidebar />
             <ToastContainer />
             <div className={`flex-grow p-6 ${isModalOpen ? "blur-sm" : ""}`}>

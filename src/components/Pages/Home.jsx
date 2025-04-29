@@ -2,6 +2,7 @@ import React from "react";
 import { getUser } from "../../utils/helpers";
 import Sidebar from "../Navigation/Sidebar";
 import AdminDashboard from "../Admin/Screen/AdminDashboard";
+import '../../index.css'
 
 const Home = () => {
   const user = getUser();
@@ -9,7 +10,7 @@ const Home = () => {
   if (!user) {
     // Show landing page for unauthenticated users
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100">
+      <div className="min-h-screen fade-in bg-gradient-to-br from-green-50 to-green-100">
         {/* Hero Section */}
         <section className="flex flex-col lg:flex-row items-center justify-between px-10 py-20">
           <div className="max-w-xl mb-10 lg:mb-0">
@@ -72,7 +73,7 @@ const Home = () => {
 
   // Logged-in user experience
   return (
-    <div className="flex w-full h-full">
+    <div className="flex w-full h-full fade-in">
       <div className="flex-grow p-8 bg-gradient-to-br from-green-50 to-green-100 w-full h-full">
         {/* Admin View */}
         {user.role === "admin" && (

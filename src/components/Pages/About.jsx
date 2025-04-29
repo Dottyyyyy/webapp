@@ -1,12 +1,13 @@
 import React from "react";
 import Sidebar from "../Navigation/Sidebar"; // Import Sidebar component
 import { getUser } from "../../utils/helpers"; // Import getUser to fetch user data
+import '../../index.css'
 
 const About = () => {
   const user = getUser(); // Fetch the user object
 
   return (
-    <div className="flex w-full h-full">
+    <div className="flex w-full h-full fade-in">
       {/* Sidebar */}
       {/* <Sidebar /> */}
       {/* Main Content */}

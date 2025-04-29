@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { getUser } from "../../../utils/helpers";
 import Sidebar from "../../Navigation/Sidebar";
 import axios from "axios";
+import '../../../index.css'
 
 function ViewStalls() {
     const navigate = useNavigate();
@@ -29,7 +30,7 @@ function ViewStalls() {
     }, []);
 
     return (
-        <div className="flex w-full h-full bg-white text-black">
+        <div className="flex w-full fade-in h-full bg-white text-black">
             {user && user.role === "farmer" && (
                 <>
                     <Sidebar user={user} />

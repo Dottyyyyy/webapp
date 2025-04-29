@@ -66,9 +66,8 @@ const Sidebar = () => {
         name: "My Stall", icon: "📨", action: () => navigation(`/vendor/myStall/${user._id}`),
       },
       {
-         name: "Pickup", icon: "📨", action: () => navigation(`/vendor/pickup`),
+        name: "Pickup", icon: "🎒", action: () => navigation(`/vendor/pickup`),
       },
-      { name: "Manage Sacks", icon: "🎒" },
     ],
     bottom: [
       {

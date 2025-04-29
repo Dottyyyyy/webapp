@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Sidebar from "../../Navigation/Sidebar"; // Ensure Sidebar is correctly imported
 import { getUser } from "../../../utils/helpers";
 import axios from "axios";
+import '../../../index.css'
 
 const VendorPickup = () => {
     const navigate = useNavigate();
@@ -68,7 +69,7 @@ const VendorPickup = () => {
     }, [mySack]);
     console.log(mySack, 'My sack')
     return (
-        <div className="flex-grow p-6 overflow-y-auto">
+        <div className="flex-grow fade-in p-6 overflow-y-auto">
             <Sidebar />
             <div className="flex items-center justify-center">
                 <h1 className="text-3xl font-bold text-black text-center bg-blue-500 p-4 rounded-xl inline-block">

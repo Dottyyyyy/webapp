@@ -3,3 +3,17 @@
 * {
   font-family: "Nunito", sans-serif;
 }
+/* Define the fade-in effect */
+.fade-in {
+  animation: fadeIn 0.6s ease-out forwards;
+}
+
+/* Define the keyframes for fade-in */
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
