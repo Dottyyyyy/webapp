@@ -3,6 +3,7 @@ import { getUser } from "../../utils/helpers";
 import Sidebar from "../Navigation/Sidebar";
 import AdminDashboard from "../Admin/Screen/AdminDashboard";
 import '../../index.css'
+import ComposterIndex from "../Composter/ComposterIndex";
 
 const Home = () => {
   const user = getUser();
@@ -196,7 +197,8 @@ const Home = () => {
 
         {user.role === "composter" && (
           <>
-           <h1>Hello</h1>
+            <Sidebar />
+            <ComposterIndex />
           </>
         )}
       </div>

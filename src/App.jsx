@@ -26,6 +26,7 @@ import ViewStalls from "./components/User/Stall/Viewstalls";
 import PickupDetails from "./components/User/MyPickup/PickupDetail";
 import VendorPickup from "./components/Vendor/Pickup/VendorPickup";
 import SeePickUp from "./components/Vendor/Pickup/SeePickup";
+import ComposterIndex from "./components/Composter/ComposterIndex";
 
 const App = () => {
   const [mySacks, setMySacks] = useState([]); // Lifted state for sacks
@@ -66,6 +67,9 @@ const App = () => {
         />
         <Route path="/pickup" element={<Pickup mySacks={mySacks} setMySacks={setMySacks} />} />
         <Route path="/pickup/see/:id" element={<PickupDetails mySacks={mySacks} setMySacks={setMySacks} />} />
+        
+        {/* Composter Side */}
+        <Route path="/composter/dashboard/" element={<ComposterIndex />} />
 
         {/* Vendor Sidebar */}
         <Route path="/vendor/myStall/:id" element={<MyStall />} />
