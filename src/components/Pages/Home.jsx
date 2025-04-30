@@ -193,6 +193,12 @@ const Home = () => {
             </>
           );
         })()}
+
+        {user.role === "composter" && (
+          <>
+           <h1>Hello</h1>
+          </>
+        )}
       </div>
     </div>
   );
