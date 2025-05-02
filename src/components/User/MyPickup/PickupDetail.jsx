@@ -10,22 +10,26 @@ import '../../../index.css'
 const PickupDetails = () => {
     const location = useLocation();
     const { pickupData } = location.state || {};
-    const pickup = pickupData;
-    const [pickupStatus, setPickupStatus] = useState(pickup.status);
+    const [newPickup, setNewPickup] = useState({});
+    const pickup = pickupData || newPickup;
+    const [pickupStatus, setPickupStatus] = useState(pickup?.status || newPickup?.status);
     const [sackStatuses, setSackStatuses] = useState({});
+    const [review, setReview] = useState('');
+    const [rating, setRating] = useState(0);
     const [sellers, setSellers] = useState({});
-    const navigation = useNavigate();
+    const navigate = useNavigate();
     const user = getUser();
     const userId = user._id;
-
-    console.log(pickupData)
+    console.log(pickup)
 
     useEffect(() => {
         const fetchSackSellers = async () => {
             try {
+                if (!pickup?.sacks || !Array.isArray(pickup.sacks)) return; // ⛔ Prevent running if sacks not loaded
+
                 const sellerData = {};
                 await Promise.all(
-                    pickup.sacks.map(async (item) => {
+                    pickup?.sacks?.map(async (item) => {
                         const { data } = await axios.get(`${import.meta.env.VITE_API}/get-user/${item.seller}`);
                         sellerData[item.seller] = data.user;
                     })
@@ -46,7 +50,7 @@ const PickupDetails = () => {
             toast.success('You should now Pick-up the Sack');
 
             setTimeout(() => {
-                navigation(-1)
+                navigate(-1)
             }, 1000);
         } catch (e) {
             console.log(e)
@@ -55,9 +59,11 @@ const PickupDetails = () => {
 
     const fetchAllSackStatuses = async () => {
         try {
+            if (!pickup?.sacks || !Array.isArray(pickup.sacks)) return; // ⛔ Prevent running if sacks not loaded
+
             const statuses = {};
             await Promise.all(
-                pickup.sacks.map(async (item) => {
+                pickup?.sacks?.map(async (item) => {
                     const response = await axios.get(`${import.meta.env.VITE_API}/sack/see-sacks`, {
                         params: { sackIds: item.sackId }
                     });
@@ -77,15 +83,41 @@ const PickupDetails = () => {
         fetchAllSackStatuses();
     }, [userId]);
 
+    //Handle Review
+    const handleReviewChange = (e) => setReview(e.target.value);
+
+    // Handle rating selection
+    const handleRatingClick = (ratingValue) => setRating(ratingValue);
+
+    // Handle form submission
+    const handleFormSubmit = async (e) => {
+        e.preventDefault(); // prevent default form behavior
+        try {
+            const { data } = await axios.put(`${import.meta.env.VITE_API}/sack/rate-transaction/${pickup._id}`,
+                { review, rating }
+            )
+
+            if (data?.pickup) {
+                setNewPickup(data.pickup); // update local state with returned pickup
+            }
+
+            toast.success("Your Review Was Sent!!");
+            navigate(-1);
+            // window.location.reload();
+        } catch (error) {
+            console.log('Error in completing pickup status', error.message)
+        }
+    };
+
     const handleCompletePickUpStatus = async () => {
         try {
             const data = await axios.put(`${import.meta.env.VITE_API}/sack/complete-pickup/${pickup._id}`)
             toast.success(
                 <div>
-                    <p>Status updated. You should now be going to pickup.</p>
+                    <p>All orders are all claimed. Thankyou for your service.</p>
                 </div>
             );
-            navigation(-1)
+            navigate(-1)
         } catch (error) {
             console.log('Error in completing pickup status', error.message)
         }
@@ -139,7 +171,7 @@ const PickupDetails = () => {
             <h2 className="text-xl font-bold mb-4">Stall/s Info</h2>
 
             <div className="space-y-4">
-                {pickup.sacks.map((item) => (
+                {pickup?.sacks?.map((item) => (
                     <div key={item._id} className="bg-gray-600 rounded-xl p-4 flex items-center">
                         <img
                             src={sellers[item.seller]?.stall?.stallImage?.url || "https://via.placeholder.com/150"}
@@ -155,18 +187,52 @@ const PickupDetails = () => {
                     </div>
                 ))}
             </div>
+            {pickupStatus === "completed" && (
+                <form onSubmit={handleFormSubmit} className="p-6 bg-white rounded-lg shadow-lg mt-6">
+                    <h3 className="text-xl font-semibold mb-4">Write a Review</h3>
+
+                    <textarea
+                        value={review}
+                        onChange={handleReviewChange}
+                        placeholder="Write your review here..."
+                        className="w-full p-2 border text-black rounded-md mb-4"
+                        rows="4"
+                    />
+
+                    <div className="flex items-center mb-4">
+                        <span className="mr-2 text-black">Rate:</span>
+                        {[1, 2, 3, 4, 5].map((star) => (
+                            <button
+                                key={star}
+                                onClick={() => handleRatingClick(star)}
+                                type="button"
+                                className={`text-xl ${rating >= star ? 'text-yellow-500' : 'text-gray-400'}`}
+                            >
+                                ★
+                            </button>
+                        ))}
+                    </div>
+
+                    <button type="submit" className="bg-blue-500 text-white p-2 rounded-md w-full">
+                        Submit Review
+                    </button>
+                </form>
+            )}
 
             {pickupStatus !== "completed" && Object.values(sackStatuses).length > 0 && Object.values(sackStatuses).every(status => status === "claimed") && (
-                <button
-                    className="bg-green-300 p-3 rounded-full mt-6 text-black w-full"
-                    onClick={handleCompletePickUpStatus}
-                >
-                    All Claimed
-                </button>
+                <div>
+                    <button
+                        className="bg-green-300 p-3 rounded-full mt-6 text-black w-full"
+                        onClick={handleCompletePickUpStatus}
+                    >
+                        All Claimed
+                    </button>
+                </div>
+
             )}
 
             <div className="flex overflow-x-scroll mt-6 space-x-4">
-                {pickup.sacks.map((item) => {
+                {pickup?.sacks?.map((item) => {
                     const sackStatus = sackStatuses[item.sackId] || "Loading...";
                     const backgroundColor = sackStatus === "claimed" ? "#AFE1AF" : "gray";
                     return (
