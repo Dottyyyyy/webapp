@@ -19,25 +19,28 @@ const Pickup = () => {
         try {
             const response = await axios.get(`${import.meta.env.VITE_API}/sack/get-pickup-sacks/${userId}`);
             const pickUpSacks = response.data.pickUpSacks;
+
             if (!Array.isArray(pickUpSacks)) {
                 console.error("pickUpSacks is not an array:", pickUpSacks);
                 return;
             }
-            // console.log(pickUpSacks,'sack')
+
             const now = new Date();
             const nowUTC8 = new Date(now.getTime() + 8 * 60 * 60 * 1000);
 
             for (const sack of pickUpSacks) {
                 const pickupTimestamp = new Date(sack.pickupTimestamp);
 
-                const sackIds = sack.sacks.map(s => s.sackId);
-                if (pickupTimestamp.getTime() <= nowUTC8.getTime()) {
+                // ✅ Only delete if past the pickup time AND status is NOT "completed"
+                if (pickupTimestamp.getTime() <= nowUTC8.getTime() && sack.status !== "completed") {
+                    const sackIds = sack.sacks.map(s => s.sackId);
                     await axios.delete(`${import.meta.env.VITE_API}/sack/delete-pickuped-sack/${sack._id}`, {
                         data: { sackIds }
                     });
-                    toast.warning('You did not pick up the sack, it will return there')
+                    toast.warning('You did not pick up the sack, it will return there');
                 }
             }
+
             setMySacks(pickUpSacks);
         } catch (error) {
             console.error("Error fetching sacks:", error.response?.data || error.message);
@@ -76,7 +79,7 @@ const Pickup = () => {
             fetchSackSellers();
         }
     }, [mySack]);
-    console.log(mySack, 'My sack')
+    // console.log(mySack, 'My sack')
     return (
         <div className="flex-grow p-6 fade-in overflow-y-auto">
             <Sidebar />

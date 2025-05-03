@@ -44,76 +44,86 @@ const Header = () => {
   const [searchModalOpen, setSearchModalOpen] = useState(false);
 
   return (
-    <header className="bg-[#255F38] p-6 shadow-lg">
-      <div className="container mx-auto flex justify-between items-center mr-20">
-        <h1 className="text-3xl font-bold text-white">
-          <a href="/" className="hover:text-gray-200">NoWaste</a>
-        </h1>
-        <nav className="mr-13">
-          <ul className="flex space-x-4">
-            <li>
-              <a href="/" className="text-white hover:text-gray-200">
-                Home
-              </a>
-            </li>
-            <li>
-              <a href="/about" className="text-white hover:text-gray-200">
-                About
-              </a>
-            </li>
-            <li>
-              <a href="/contact" className="text-white hover:text-gray-200">
-                Contact
-              </a>
-            </li>
+    <>
+      <header className="bg-[#fffff] p-6 shadow-lg">
+        <div className="container mx-auto flex justify-between items-center mr-20">
+          <h1 className="text-3xl font-bold text-black">
+            <a href="/" className="hover:text-gray-200">NoWaste</a>
+          </h1>
+          <nav className="mr-13">
+            <ul className="flex items-center space-x-6">
+              <li>
+                <a href="/" className="text-black hover:text-gray-200 mt-10">
+                  Home
+                </a>
+              </li>
+              <li>
+                <a href="/about" className="text-black hover:text-gray-200 mt-10">
+                  About
+                </a>
+              </li>
 
-            {user && user !== false ? (
-              <>
-                {user && (user.role === "farmer" || user.role === "composter") ? (
-                  <li className="relative ">
-                    <a
-                      href="/MySack"
-                      className="text-white hover:text-gray-200 flex items-center"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={2}
-                        stroke="currentColor"
-                        className="w-6 h-6"
+              {user && user !== false ? (
+                <>
+                  {user && (user.role === "farmer" || user.role === "composter") ? (
+                    <li className="relative ">
+                      <a
+                        href="/MySack"
+                        className="text-black hover:text-gray-200 flex items-center"
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M12 2C8.134 2 5 5.134 5 9c0 3.866 3.134 7 7 7s7-3.134 7-7c0-3.866-3.134-7-7-7zM5 9c0 3.866 3.134 7 7 7s7-3.134 7-7"
-                        />
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M5 9c0 3.866 3.134 7 7 7s7-3.134 7-7"
-                        />
-                      </svg>
-                      <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full px-1">
-                        {mySack.length || 0}
-                      </span>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={2}
+                          stroke="currentColor"
+                          className="w-6 h-6"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M12 2C8.134 2 5 5.134 5 9c0 3.866 3.134 7 7 7s7-3.134 7-7c0-3.866-3.134-7-7-7zM5 9c0 3.866 3.134 7 7 7s7-3.134 7-7"
+                          />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M5 9c0 3.866 3.134 7 7 7s7-3.134 7-7"
+                          />
+                        </svg>
+                        <span className="absolute top-0 right-0 bg-red-500 text-black text-xs rounded-full px-1">
+                          {mySack.length || 0}
+                        </span>
+                      </a>
+                    </li>
+                  ) : null}
+                </>
+              ) : (
+                <>
+                  <li>
+                    <a
+                      href="/register"
+                      className="relative inline-block px-6 py-2 font-bold text-black bg-white border-2 border-green-600 rounded-md hover:text-white hover:bg-green-600 transition"
+                    >
+                      Register
                     </a>
                   </li>
-                ) : null}
-              </>
-            ) : (
-              <>
-                <li>
-                  <a href="/login" className="text-white hover:text-gray-200">
-                    Login
-                  </a>
-                </li>
-              </>
-            )}
-          </ul>
-        </nav>
+                  <li>
+                    <a
+                      href="/login"
+                      className="relative inline-block px-6 py-2 font-bold text-black bg-white border-2 border-green-600 rounded-md hover:text-white hover:bg-green-600 transition"
+                    >
+                      Login
+                    </a>
+                  </li>
+                </>
+              )}
+            </ul>
+          </nav>
+        </div>
+      </header>
+      <div className="bg-green-500 h-2 w-full">
       </div>
-    </header>
+    </>
   );
 };
 

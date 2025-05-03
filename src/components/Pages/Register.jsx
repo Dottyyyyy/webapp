@@ -12,15 +12,13 @@ const Register = () => {
   const navigate = useNavigate();
   const [avatar, setAvatar] = useState(null);
   const [role, setRole] = useState("farmer");
-  const [avatarPreview, setAvatarPreview] = useState(null);
+  const [preview, setPreview] = useState(null);
 
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = () => setAvatarPreview(reader.result);
-      reader.readAsDataURL(file);
       setAvatar(file);
+      setPreview(URL.createObjectURL(file));
     }
   };
 
@@ -64,148 +62,100 @@ const Register = () => {
   };
 
   return (
-    <div className="flex items-center fade-in justify-center min-h-screen bg-gradient-to-r from-[#1F7D53] via-[#3A7D44] to-[#4CAF50]">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold text-center text-gray-900">
-          Create an Account
-        </h2>
-        <form className="space-y-6" onSubmit={handleSubmit}>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleAvatarChange}
-            className="w-full mb-3"
-          />
+    <div className="flex min-h-screen">
+      {/* Left panel */}
+      <div className="hidden md:flex flex-col justify-center w-1/2 bg-[#4CAF50] text-white px-10 relative overflow-hidden">
+        <div className="z-10">
+          <h1 className="text-4xl font-bold mb-4">Join <span className="text-white">NoWaste</span> Community</h1>
+          <p className="text-md max-w-md">
+            Connect with local partners, reduce food waste, and make a positive
+            impact on our environment. Start your journey towards sustainable
+            waste management today.
+          </p>
+        </div>
+        <div className="absolute rounded-full bg-[#3A7D44] w-[300px] h-[300px] top-[-80px] left-[-80px]"></div>
+        <div className="absolute rounded-full bg-[#1F7D53] w-[200px] h-[200px] bottom-[-80px] left-[-80px]"></div>
+      </div>
 
-          {avatarPreview && (
-            <img
-              src={avatarPreview}
-              alt="Avatar Preview"
-              className="w-24 h-24 object-cover rounded-full mb-4"
-            />)}
+      {/* Right panel (form) */}
+      <div className="flex flex-col justify-center w-full md:w-1/2 px-8 py-10 bg-white">
+        <div className="max-w-md w-full mx-auto">
+          <h2 className="text-2xl font-bold text-center mb-6 text-gray-900">
+            Create an Account
+          </h2>
 
-          <div className="space-y-1">
-            <label
-              htmlFor="name"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Name:
+          {/* Profile Upload Circle */}
+          <div className="flex justify-center mb-6 relative">
+            <label htmlFor="avatar-upload" className="cursor-pointer group">
+              <div className="w-24 h-24 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden bg-gray-100 hover:border-green-600 transition">
+                {preview ? (
+                  <img
+                    src={preview}
+                    alt="Avatar Preview"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-3xl text-gray-400 group-hover:text-green-600">+</span>
+                )}
+              </div>
+              <input
+                id="avatar-upload"
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarChange}
+                className="hidden"
+              />
             </label>
+          </div>
+
+          {/* Form Fields */}
+          <form className="space-y-5">
             <input
               type="text"
-              id="name"
-              name="name"
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              placeholder="Full Name"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
             />
-          </div>
-          <div className="space-y-1">
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Email:
-            </label>
             <input
               type="email"
-              id="email"
-              name="email"
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email Address"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
             />
-          </div>
-          <div className="space-y-1">
-            <label
-              htmlFor="address"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Address:
-            </label>
             <input
               type="text"
-              id="address"
-              name="address"
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
+              placeholder="Address"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
             />
-          </div>
-          <div className="space-y-1">
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Password:
-            </label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-          <div className="space-y-1">
-            <label
-              htmlFor="confirmPassword"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Confirm Password:
-            </label>
-            <input
-              type="password"
-              id="confirmPassword"
-              name="confirmPassword"
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-            />
-          </div>
-          <div className="space-y-1">
-            <label
-              htmlFor="role"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Role:
-            </label>
-            <select
-              id="role"
-              name="role"
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            >
+            <select className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+              <option value="">Choose your role</option>
               <option value="farmer">Farmer</option>
               <option value="composter">Composter</option>
               <option value="vendor">Vendor</option>
             </select>
-          </div>
-          <button
-            type="submit"
-            className="w-full px-4 py-2 text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            Register
-          </button>
-        </form>
-        <div className="text-sm text-center">
-          <span>
-            Already have an account?{" "}
-            <Link
-              to="/login"
-              className="font-medium text-indigo-600 hover:text-indigo-500"
+            <div className="flex gap-4">
+              <input
+                type="password"
+                placeholder="Password"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+              />
+              <input
+                type="password"
+                placeholder="Confirm Password"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full py-2 bg-[#4CAF50] text-white font-semibold rounded-md hover:bg-[#3A7D44]"
             >
-              {" "}
-              Login{" "}
-            </Link>
-          </span>
+              Create Account
+            </button>
+            <p className="text-sm text-center mt-4">
+              Already have an account?{" "}
+              <a href="/login" className="text-[#4CAF50] hover:underline">
+                Sign in
+              </a>
+            </p>
+          </form>
         </div>
       </div>
     </div>
