@@ -117,7 +117,9 @@ const Sidebar = () => {
   };
 
   const composterMenuItems = {
-    top: [{ name: "View Market", icon: "♻️" }],
+    top: [{ name: "View Market", icon: "♻️", action: () => navigation("/composter/market") },
+      { name: "Pickup", icon: "📦", action: () => navigation("/composter/pickup") }
+    ],
     bottom: [
       {
         name: "Profile",

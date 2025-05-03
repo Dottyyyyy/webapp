@@ -37,9 +37,6 @@ const Mysack = () => {
     }, 0);
 
     const handlePickUpSacks = async () => {
-        // console.log(totalKilos, 'Kilos');
-        // console.log(mySack, 'My sacks');
-        // const status = 'pending';
         try {
             const { data } = await axios.post(`${import.meta.env.VITE_API}/sack/pick-up-sacks/${addToSackId}`, { mySack, totalKilos });
             toast.success("Pick up sack Successfully.");
@@ -108,15 +105,16 @@ const Mysack = () => {
                                         ))}
                                     </div>
                                 </div>
-                                <div className="mt-4">
-                                    <button
-                                        onClick={handlePickUpSacks}
-                                        className="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition duration-200"
-                                    >
-                                        Pick Up These Sacks
-                                    </button>
-                                </div>
-
+                                {user && (user.role === "farmer" || user.role === "composter") && (
+                                    <div className="mt-4">
+                                        <button
+                                            onClick={handlePickUpSacks}
+                                            className="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition duration-200"
+                                        >
+                                            {user.role === "farmer" ? "Pick Up These Sacks" : "Pick Up Spoiled Sacks"}
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         ))}
                     </div>

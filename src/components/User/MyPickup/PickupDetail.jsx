@@ -6,6 +6,7 @@ import { FaCarSide } from 'react-icons/fa'; // You can import specific icons fro
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import '../../../index.css'
+import Sidebar from '../../Navigation/Sidebar';
 
 const PickupDetails = () => {
     const location = useLocation();
@@ -101,8 +102,8 @@ const PickupDetails = () => {
                 setNewPickup(data.pickup); // update local state with returned pickup
             }
 
-            toast.success("Your Review Was Sent!!");
             navigate(-1);
+            toast.success("Your Review Was Sent!!");
             // window.location.reload();
         } catch (error) {
             console.log('Error in completing pickup status', error.message)
@@ -125,6 +126,7 @@ const PickupDetails = () => {
 
     return (
         <div className="flex flex-col fade-in p-5 bg-gray-900 text-white">
+            <Sidebar />
             <h1 className="text-3xl font-bold text-center mb-6">See Pick Up</h1>
 
             <div className="bg-gray-700 rounded-xl p-6 mb-6">
