@@ -9,7 +9,6 @@ const About = () => {
   return (
     <div className="min-h-screen bg-white text-gray-800">
       {/* Hero Section */}
-      <Sidebar />
       <div className="max-w-6xl mx-auto px-6 py-16 flex flex-col md:flex-row items-center">
         <div className="w-full md:w-1/2 mb-10 md:mb-0">
           <div className="w-full h-48 bg-gray-200 rounded-lg"></div>

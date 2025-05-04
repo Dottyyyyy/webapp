@@ -82,7 +82,6 @@ const Pickup = () => {
     // console.log(mySack, 'My sack')
     return (
         <div className="flex-grow p-6 fade-in overflow-y-auto">
-            <Sidebar />
             <div className="flex items-center justify-center">
                 <h1 className="text-3xl font-bold text-black text-center bg-blue-500 p-4 rounded-xl inline-block">
                     Pickup Waste

@@ -124,7 +124,6 @@ const Home = () => {
           {/* Admin View */}
           {user.role === "admin" && (
             <>
-              <Sidebar />
               <AdminDashboard />
               <Footer />
             </>
@@ -175,7 +174,6 @@ const Home = () => {
           {user.role === "farmer" && (
             <>
               <UserIndex />
-              <Footer />
             </>
           )}
 

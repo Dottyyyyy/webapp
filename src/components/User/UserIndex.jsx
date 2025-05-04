@@ -74,10 +74,6 @@ function UserIndex() {
     return (
         <>
             <div className="min-h-screen bg-gray-50">
-                {/* Sidebar */}
-                <Sidebar />
-
-                {/* Main Content */}
                 <main className="p-8 md:ml-64">
                     {/* Welcome */}
                     <div className="mb-6">
@@ -136,6 +132,7 @@ function UserIndex() {
                         </div>
                     </div>
                 </main>
+                <Footer />
             </div>
         </>
     );

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getUser } from "../../utils/helpers";
+import { getUser, logout } from "../../utils/helpers";
 
 import SearchModal from "../Extras/ModalSearch";
 import Notifications from "../Extras/DropdownNotifications";
@@ -33,6 +33,13 @@ const Header = () => {
     }
   };
 
+  const handleLogout = () => {
+    logout(() => {
+      navigation("/login");
+      window.location.reload();
+    });
+  };
+
   useEffect(() => {
     fetchMySacks();
     const interval = setInterval(() => {
@@ -46,19 +53,23 @@ const Header = () => {
   return (
     <>
       <header className="bg-[#fffff] p-6 shadow-lg">
-        <div className="container mx-auto flex justify-between items-center mr-20">
+        <div className="container mx-auto flex justify-between items-center">
           <h1 className="text-3xl font-bold text-black">
             <a href="/" className="hover:text-gray-200">NoWaste</a>
           </h1>
-          <nav className="mr-13">
-            <ul className="flex items-center space-x-6">
+          <nav>
+            <ul className="flex items-center space-x-4">
               <li>
-                <a href="/" className="text-black hover:text-gray-200 mt-10">
-                  Home
+                <a href="/"
+                  className="relative flex items-center gap-2 px-4 py-2 text-black font-semibold rounded-full bg-green border-2 border-green-600 rounded-md hover:text-green hover:bg-green-600 transition"
+                >
+                  {user ? "Dashboard" : "Home"}
                 </a>
               </li>
               <li>
-                <a href="/about" className="text-black hover:text-gray-200 mt-10">
+                <a href="/about"
+                  className="relative flex items-center gap-2 px-4 py-2 text-black font-semibold rounded-full bg-green border-2 border-green-600 rounded-md hover:text-green hover:bg-green-600 transition"
+                >
                   About
                 </a>
               </li>
@@ -66,35 +77,52 @@ const Header = () => {
               {user && user !== false ? (
                 <>
                   {user && (user.role === "farmer" || user.role === "composter") ? (
-                    <li className="relative ">
+                    <li className="flex items-center gap-4">
+                      {/* View Sacks Button */}
                       <a
-                        href="/MySack"
-                        className="text-black hover:text-gray-200 flex items-center"
+                        href='/viewStalls'
+                        className="relative flex items-center gap-2 px-5 py-2 text-black font-semibold rounded-full bg-green border-2 border-green-600 rounded-md hover:text-green hover:bg-green-600 transition"
                       >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          strokeWidth={2}
-                          stroke="currentColor"
-                          className="w-6 h-6"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M12 2C8.134 2 5 5.134 5 9c0 3.866 3.134 7 7 7s7-3.134 7-7c0-3.866-3.134-7-7-7zM5 9c0 3.866 3.134 7 7 7s7-3.134 7-7"
-                          />
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M5 9c0 3.866 3.134 7 7 7s7-3.134 7-7"
-                          />
-                        </svg>
-                        <span className="absolute top-0 right-0 bg-red-500 text-black text-xs rounded-full px-1">
+                        Stalls
+                      </a>
+                      <a
+                        href='/pickup'
+                        className="relative flex items-center gap-2 px-5 py-2 text-black font-semibold rounded-full bg-green border-2 border-green-600 rounded-md hover:text-green hover:bg-green-600 transition"
+                      >
+                        Pickup
+                      </a>
+                      <a
+                        href="/mySack"
+                        className="relative flex items-center gap-2 px-5 py-2 text-black font-semibold rounded-full bg-green border-2 border-green-600 rounded-md hover:text-green hover:bg-green-600 transition"
+                      >
+                        🗑️
+                        <span className="ml-1 flex items-center justify-center w-3 mb-3 h-3 text-xs bg-green-500 text-white font-bold rounded-full">
                           {mySack.length || 0}
                         </span>
                       </a>
+
+                      {/* Logout Button */}
+                      <button
+                        onClick={handleLogout}
+                        className="relative flex items-center gap-2 px-5 py-2 text-black font-semibold rounded-full bg-green border-2 border-green-600 rounded-md hover:text-green hover:bg-green-600 transition"
+                      >
+                        Logout
+                      </button>
                     </li>
+
+                  ) : null}
+                  {user && (user.role === "admin") ? (
+                    <li className="flex items-center gap-4">
+
+                      {/* Logout Button */}
+                      <button
+                        onClick={handleLogout}
+                        className="relative flex items-center gap-2 px-5 py-2 text-black font-semibold rounded-full bg-green border-2 border-green-600 rounded-md hover:text-green hover:bg-green-600 transition"
+                      >
+                        Logout
+                      </button>
+                    </li>
+
                   ) : null}
                 </>
               ) : (
@@ -120,7 +148,7 @@ const Header = () => {
             </ul>
           </nav>
         </div>
-      </header>
+      </header >
       <div className="bg-green-500 h-2 w-full">
       </div>
     </>

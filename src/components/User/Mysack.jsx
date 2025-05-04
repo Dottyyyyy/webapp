@@ -53,8 +53,6 @@ const Mysack = () => {
         <div className="flex w-full h-full fade-in">
             {/* Sidebar */}
             <ToastContainer />
-            <Sidebar />
-
             {/* Main Content */}
             <div className="flex-grow p-6">
                 <h1 className="text-3xl font-bold text-gray-800 mb-4">My Sack</h1>

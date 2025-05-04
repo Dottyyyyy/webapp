@@ -386,7 +386,7 @@ const AdminDashboard = () => {
     const totalWaste = wasteData.reduce((sum, item) => sum + item.value, 0);
     const totalCO2 = co2Data.reduce((sum, item) => sum + item.value, 0);
 
-
+    console.log(pieData, 'pieData')
     return (
         <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 p-8">
             <header className="mb-10">
@@ -440,7 +440,7 @@ const AdminDashboard = () => {
 
                 {/* Bar Chart */}
                 <div className="bg-white p-6 rounded-xl shadow-md">
-                    <h2 className="text-lg font-semibold mb-2 text-green-800 text-center">Sack Status (Bar)</h2>
+                    <h2 className="text-lg font-semibold mb-2 text-green-800 text-center">Sack Status This Month</h2>
                     <canvas ref={barChartRef} className="mx-auto" />
                 </div>
 

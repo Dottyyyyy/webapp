@@ -126,7 +126,6 @@ const PickupDetails = () => {
 
     return (
         <div className="flex flex-col fade-in p-5 bg-gray-900 text-white">
-            <Sidebar />
             <h1 className="text-3xl font-bold text-center mb-6">See Pick Up</h1>
 
             <div className="bg-gray-700 rounded-xl p-6 mb-6">
