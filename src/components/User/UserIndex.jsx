@@ -53,12 +53,16 @@ function UserIndex() {
     const fetchNotifications = async () => {
         try {
             const { data } = await axios.get(`${import.meta.env.VITE_API}/notifications/users-get-notif/${userId}`);
-            console.log(data.notifications)
-            setNotifications(data.notifications);
+
+            const newSackNotifications = data.notifications.filter(notification => notification.type === 'new_sack');
+
+            console.log(newSackNotifications);
+            setNotifications(newSackNotifications);
         } catch (error) {
             console.error("Error fetching notifications:", error);
         }
     };
+
 
     useEffect(() => {
         fetchPickupSacks();
@@ -119,15 +123,17 @@ function UserIndex() {
                         <div className="grid gap-4">
 
                             {/* Notifications */}
-                            {notifications.map((notif, i) =>
-                                !notif.isRead && (
+                            {notifications.filter((notif) => !notif.isRead).length > 0 ? (
+                                notifications.filter((notif) => !notif.isRead).map((notif, i) => (
                                     <div
                                         key={notif._id || i}
                                         className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded"
                                     >
                                         <p className="text-sm font-medium">{notif.message}</p>
                                     </div>
-                                )
+                                ))
+                            ) : (
+                                <h1>No New Spoiled Sacks</h1>
                             )}
                         </div>
                     </div>

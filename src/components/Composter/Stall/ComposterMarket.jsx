@@ -31,7 +31,6 @@ function ComposterMarket() {
 
     return (
         <div className="flex w-full fade-in h-full bg-white text-black">
-            <Sidebar user={user} />
             <div className="flex-grow p-6">
                 <h1 className="text-4xl font-bold text-black mb-8">
                     Vendor Stalls

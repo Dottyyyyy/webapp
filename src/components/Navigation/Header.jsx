@@ -76,7 +76,7 @@ const Header = () => {
 
               {user && user !== false ? (
                 <>
-                  {user && (user.role === "farmer" || user.role === "composter") ? (
+                  {user && (user.role === "farmer" ) ? (
                     <li className="flex items-center gap-4">
                       {/* View Sacks Button */}
                       <a
@@ -87,6 +87,41 @@ const Header = () => {
                       </a>
                       <a
                         href='/pickup'
+                        className="relative flex items-center gap-2 px-5 py-2 text-black font-semibold rounded-full bg-green border-2 border-green-600 rounded-md hover:text-green hover:bg-green-600 transition"
+                      >
+                        Pickup
+                      </a>
+                      <a
+                        href="/mySack"
+                        className="relative flex items-center gap-2 px-5 py-2 text-black font-semibold rounded-full bg-green border-2 border-green-600 rounded-md hover:text-green hover:bg-green-600 transition"
+                      >
+                        🗑️
+                        <span className="ml-1 flex items-center justify-center w-3 mb-3 h-3 text-xs bg-green-500 text-white font-bold rounded-full">
+                          {mySack.length || 0}
+                        </span>
+                      </a>
+
+                      {/* Logout Button */}
+                      <button
+                        onClick={handleLogout}
+                        className="relative flex items-center gap-2 px-5 py-2 text-black font-semibold rounded-full bg-green border-2 border-green-600 rounded-md hover:text-green hover:bg-green-600 transition"
+                      >
+                        Logout
+                      </button>
+                    </li>
+
+                  ) : null}
+                  {user && (user.role === "composter") ? (
+                    <li className="flex items-center gap-4">
+                      {/* View Sacks Button */}
+                      <a
+                        href='/composter/market'
+                        className="relative flex items-center gap-2 px-5 py-2 text-black font-semibold rounded-full bg-green border-2 border-green-600 rounded-md hover:text-green hover:bg-green-600 transition"
+                      >
+                        Stalls
+                      </a>
+                      <a
+                        href='/composter/pickup'
                         className="relative flex items-center gap-2 px-5 py-2 text-black font-semibold rounded-full bg-green border-2 border-green-600 rounded-md hover:text-green hover:bg-green-600 transition"
                       >
                         Pickup

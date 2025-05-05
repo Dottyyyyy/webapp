@@ -101,6 +101,7 @@ function StallDetails() {
         if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} remaining`;
         return `${minutes} minute${minutes !== 1 ? 's' : ''} remaining`;
     }
+    console.log(stall,'Stall')
 
     return (
         <>
@@ -119,7 +120,7 @@ function StallDetails() {
                         {/* Header Image */}
                         <div className="w-full h-80 bg-gray-300 flex items-center justify-center text-gray-500 text-3xl">
                             <img
-                                src={stall.stallImage.url}
+                                src={stall.stallImage?.url}
                                 alt="Stall"
                                 className="w-full h-full object-cover border-4 border-green-500 rounded"
                             />

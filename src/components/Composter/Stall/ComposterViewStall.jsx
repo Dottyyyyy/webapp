@@ -93,7 +93,6 @@ function ComposterViewStall() {
     console.log(sacks,'Sacks')
     return (
         <div className="flex w-full fade-in h-full bg-gray-50 relative">
-            <Sidebar />
             <ToastContainer />
             <div className={`flex-grow p-6 ${isModalOpen ? "blur-sm" : ""}`}>
                 <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">

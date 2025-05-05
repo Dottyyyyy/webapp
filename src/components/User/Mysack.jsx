@@ -92,7 +92,6 @@ const Mysack = () => {
                                                     className="w-full h-48 object-cover rounded"
                                                 />
                                                 <div className="mt-2 text-sm">
-                                                    <div><strong>Seller:</strong> {sack.seller || "N/A"}</div>
                                                     <div><strong>Stall #:</strong> {sack.stallNumber || "N/A"}</div>
                                                     <div><strong>Weight:</strong> {sack.kilo || 0} kg</div>
                                                     <div><strong>Description:</strong> {sack.description || "N/A"}</div>
