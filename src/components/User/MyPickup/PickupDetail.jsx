@@ -7,6 +7,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import '../../../index.css'
 import Sidebar from '../../Navigation/Sidebar';
+import Footer from '../../Navigation/Footer';
 
 const PickupDetails = () => {
     const location = useLocation();
@@ -125,138 +126,129 @@ const PickupDetails = () => {
     }
 
     return (
-        <div className="flex flex-col fade-in p-5 bg-gray-900 text-white">
-            <h1 className="text-3xl font-bold text-center mb-6">See Pick Up</h1>
+        <>
+            <div className="p-6 bg-gray-100 min-h-screen text-gray-800">
+                {/* Header */}
+                <div className="flex justify-between items-center mb-6">
+                    <div>
+                        <h1 className="text-3xl font-bold">Pick up Detail</h1>
+                        <p className="text-sm text-gray-600">Pickup #: <span className="font-semibold">{pickup._id}</span></p>
+                    </div>
 
-            <div className="bg-gray-700 rounded-xl p-6 mb-6">
-                <div className="flex justify-between">
-                    {pickupStatus !== "pickup" && pickupStatus !== "completed" && (
-                        <button className="bg-green-500 text-white p-2 rounded-lg flex flex-col items-center" onClick={handlePickupStatus}>
-                            <FaCarSide size={35} color="black" />
-                            <span>Pickup</span>
-                        </button>
-                    )}
-                </div>
-
-                <div className="flex flex-col items-center bg-green-900 p-6 rounded-lg">
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="100"
-                        height="100"
-                        fill="white"
-                        className="mb-4"
-                        viewBox="0 0 24 24"
-                    >
-                        <path d="M12 2L15 6H9L12 2ZM18 8H6L3 20H21L18 8ZM12 19C10.34 19 9 17.66 9 16H15C15 17.66 13.66 19 12 19Z" />
-                    </svg>
-                    <div className="text-xl font-bold mb-2">{pickup.totalKilo} KG</div>
-                    <div>Status: {pickupStatus}</div>
-                    {pickupStatus !== "completed" && (
-                        <div className="mt-2">
-                            Pickup Time: {new Date(new Date(pickup.pickupTimestamp).getTime()).toLocaleDateString("en-US", {
-                                year: "numeric",
-                                month: "long",
-                                day: "numeric",
-                            })}{" "}
-                            {new Date(pickup.pickupTimestamp).toLocaleTimeString("en-US", {
-                                timeZone: "UTC",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                                hour12: true,
-                            })}
+                    <div className="flex items-center gap-4">
+                        <span
+                            className={`text-white px-3 py-1 rounded-full text-sm font-medium ${pickup.status === "pending"
+                                ? "bg-blue-400"
+                                : pickup.status === "pickup"
+                                    ? "bg-yellow-500"
+                                    : pickup.status === "completed"
+                                        ? "bg-green-500"
+                                        : "bg-gray-400"
+                                }`}
+                        >
+                            {pickup.status === "pending"
+                                ? "In Progress"
+                                : pickup.status === "pickup"
+                                    ? "Picking Up"
+                                    : pickup.status === "completed"
+                                        ? "Complete"
+                                        : pickup.status}
+                        </span>
+                        <div className="bg-white p-3 rounded-lg shadow text-center">
+                            <p className="text-sm">Total Weight</p>
+                            <p className="font-bold text-lg">{pickup.totalKilo} kg</p>
                         </div>
-                    )}
+                        <div className="bg-white p-3 rounded-lg shadow text-center">
+                            <p className="text-sm">Pending Items</p>
+                            <p className="font-bold text-lg">{pickup.sacks?.length}</p>
+                        </div>
+                        {pickup.status === 'pending' && (
+                            <button
+                                className="bg-green-500 hover:bg-green-600 text-white px-5 py-2 rounded-lg shadow"
+                                onClick={handlePickupStatus}
+                            >
+                                Start Pickup
+                            </button>
+                        )}
+                    </div>
                 </div>
-            </div>
 
-            <h2 className="text-xl font-bold mb-4">Stall/s Info</h2>
+                {pickupStatus === "completed" && (
+                    <form onSubmit={handleFormSubmit} className="p-6 bg-white rounded-lg shadow-lg mt-6">
+                        <h3 className="text-xl font-semibold mb-4">Write a Review</h3>
 
-            <div className="space-y-4">
-                {pickup?.sacks?.map((item) => (
-                    <div key={item._id} className="bg-gray-600 rounded-xl p-4 flex items-center">
-                        <img
-                            src={sellers[item.seller]?.stall?.stallImage?.url || "https://via.placeholder.com/150"}
-                            alt="Stall"
-                            className="w-16 h-16 rounded-lg mr-4"
+                        <textarea
+                            value={review}
+                            onChange={handleReviewChange}
+                            placeholder="Write your review here..."
+                            className="w-full p-2 border text-black rounded-md mb-4"
+                            rows="4"
                         />
-                        <div className="flex-1">
-                            <div className="text-sm text-white">Stall #: {item.stallNumber}</div>
-                            <div className="text-sm text-white">Seller: {sellers[item.seller]?.name || "Unknown"}</div>
-                            <div className="text-sm text-white">Stall Address: {sellers[item.seller]?.stall?.stallAddress || "Unknown"}</div>
-                            <div className="text-sm">{sellers[item.seller]?.stall?.status === "open" ? "Open: 🟢" : "Close: 🔴"}</div>
+
+                        <div className="flex items-center mb-4">
+                            <span className="mr-2 text-black">Rate:</span>
+                            {[1, 2, 3, 4, 5].map((star) => (
+                                <button
+                                    key={star}
+                                    onClick={() => handleRatingClick(star)}
+                                    type="button"
+                                    className={`text-xl ${rating >= star ? 'text-yellow-500' : 'text-gray-400'}`}
+                                >
+                                    ★
+                                </button>
+                            ))}
+                        </div>
+
+                        <button type="submit" className="bg-blue-500 text-white p-2 rounded-md w-full">
+                            Submit Review
+                        </button>
+                    </form>
+                )}
+
+                {/* Pickup Info Section */}
+                {pickup?.sacks?.map((item) => (
+                    <div key={item._id} className="bg-white rounded-xl p-6 mb-6 flex gap-6 shadow">
+                        {/* Left Column: Image + Stall Info */}
+                        <div className="w-1/3">
+                            <img
+                                src={sellers[item.seller]?.stall?.stallImage?.url || "https://via.placeholder.com/800x400"}
+                                alt="Stall"
+                                className="w-full h-56 object-cover rounded-xl mb-4"
+                            />
+                            <div className="bg-gray-100 p-4 rounded-xl">
+                                <h3 className="font-bold">Taytay Rizal Market</h3>
+                                <p className="text-sm mt-1">Stall #: {item.stallNumber}</p>
+                                <p className="text-sm">{sellers[item.seller]?.stall?.stallAddress || "Taytay Rizal New Market"}</p>
+                                <p className="text-sm">📅 {new Date(pickup.pickupTimestamp).toLocaleDateString()} {new Date(pickup.pickupTimestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                            </div>
+                        </div>
+
+                        {/* Right Column: Items */}
+                        <div className="w-2/3">
+                            <h3 className="text-lg font-semibold mb-4">Items to Pick Up</h3>
+                            <div className="space-y-4">
+                                <div className="flex items-start bg-gray-100 p-4 rounded-lg shadow">
+                                    <img
+                                        src={item.images[0]?.url || "https://via.placeholder.com/400x300"}
+                                        alt="Item"
+                                        className="w-24 h-20 object-cover rounded-lg mr-4"
+                                    />
+                                    <div className="flex-1">
+                                        <div className="flex justify-between items-center">
+                                            <h4 className="font-semibold">Item #{item.index || 1}</h4>
+                                            <p className="font-bold">{item.kilo} kg</p>
+                                        </div>
+                                        <p className="text-sm">Description: {item.description || 'Mixed Vegetables'}</p>
+                                        <p className="text-sm">Spoilage Date: {item.spoilageDate || '12/18/23'}</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 ))}
             </div>
-            {pickupStatus === "completed" && (
-                <form onSubmit={handleFormSubmit} className="p-6 bg-white rounded-lg shadow-lg mt-6">
-                    <h3 className="text-xl font-semibold mb-4">Write a Review</h3>
-
-                    <textarea
-                        value={review}
-                        onChange={handleReviewChange}
-                        placeholder="Write your review here..."
-                        className="w-full p-2 border text-black rounded-md mb-4"
-                        rows="4"
-                    />
-
-                    <div className="flex items-center mb-4">
-                        <span className="mr-2 text-black">Rate:</span>
-                        {[1, 2, 3, 4, 5].map((star) => (
-                            <button
-                                key={star}
-                                onClick={() => handleRatingClick(star)}
-                                type="button"
-                                className={`text-xl ${rating >= star ? 'text-yellow-500' : 'text-gray-400'}`}
-                            >
-                                ★
-                            </button>
-                        ))}
-                    </div>
-
-                    <button type="submit" className="bg-blue-500 text-white p-2 rounded-md w-full">
-                        Submit Review
-                    </button>
-                </form>
-            )}
-
-            {pickupStatus !== "completed" && Object.values(sackStatuses).length > 0 && Object.values(sackStatuses).every(status => status === "claimed") && (
-                <div>
-                    <button
-                        className="bg-green-300 p-3 rounded-full mt-6 text-black w-full"
-                        onClick={handleCompletePickUpStatus}
-                    >
-                        All Claimed
-                    </button>
-                </div>
-
-            )}
-
-            <div className="flex overflow-x-scroll mt-6 space-x-4">
-                {pickup?.sacks?.map((item) => {
-                    const sackStatus = sackStatuses[item.sackId] || "Loading...";
-                    const backgroundColor = sackStatus === "claimed" ? "#AFE1AF" : "gray";
-                    return (
-                        <div
-                            key={item._id}
-                            className="flex items-center p-4 rounded-xl"
-                            style={{ backgroundColor }}
-                        >
-                            <img
-                                src={item.images[0]?.url || "https://via.placeholder.com/150"}
-                                alt="Sack"
-                                className="w-16 h-16 rounded-lg mr-4"
-                            />
-                            <div className="bg-white p-4 rounded-lg">
-                                <div className="text-sm text-black">Stall# {item.stallNumber}</div>
-                                <div className="text-sm text-black">Weight: {item.kilo} KG</div>
-                                <div className="text-sm text-black">Status: {sackStatus}</div>
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
-        </div>
+            <Footer />
+        </>
     );
 };
 

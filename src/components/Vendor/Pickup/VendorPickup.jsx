@@ -57,7 +57,7 @@ const VendorPickup = () => {
             fetchMySacks();
             const interval = setInterval(() => {
                 fetchMySacks();
-            }, 3000);
+            }, 1000);
             return () => clearInterval(interval);
         }
     }, []);
@@ -70,7 +70,6 @@ const VendorPickup = () => {
     console.log(mySack, 'My sack')
     return (
         <div className="flex-grow fade-in p-6 overflow-y-auto">
-            <Sidebar />
             <div className="flex items-center justify-center">
                 <h1 className="text-3xl font-bold text-black text-center bg-blue-500 p-4 rounded-xl inline-block">
                     Pickup Request:
@@ -78,7 +77,7 @@ const VendorPickup = () => {
             </div>
             <div className="bg-gray-100 rounded-lg p-4">
                 {mySack.map((item, index) => (
-                    <div
+                    <div    
                         key={item._id}
                         onClick={() => navigate(`/vendor/pickup-detail/${item._id}`, { state: { pickupData: item } })}
                         className="cursor-pointer bg-gray-800 text-white rounded-xl shadow-md p-4 mb-4 flex items-center justify-between transition-transform hover:scale-[1.01]"

@@ -74,6 +74,7 @@ function CompPickup() {
             fetchSackSellers();
         }
     }, [mySack]);
+    console.log(mySack,'Sack')
     return (
         <div className="flex-grow p-6 fade-in overflow-y-auto">
             <ToastContainer />

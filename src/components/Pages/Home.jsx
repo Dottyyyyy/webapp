@@ -133,7 +133,6 @@ const Home = () => {
           {/* Vendor View */}
           {user.role === "vendor" && (
             <>
-              <Sidebar />
               <VendorIndex />
               <Footer />
             </>

@@ -44,81 +44,88 @@ const MyStall = () => {
     }, []);
     // console.log(sacks)
     return (
-        <>
-            <Sidebar />
-            <div className="flex-grow flex fade-in items-center justify-center min-h-screen bg-gradient-to-r from-[#1F7D53] via-[#3A7D44] to-[#4CAF50]">
-                <div className="w-full max-w-6xl p-6 space-y-6 bg-white rounded-lg shadow-md">
-                    <h2 className="text-2xl font-bold text-center text-gray-900">My Stall</h2>
+        <div className="min-h-screen bg-gray-100 p-6 fade-in">
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">My Stall</h2>
 
-                    {stall ? (
-                        <div className="flex items-start space-x-4">
-                            <img
-                                src={stall.stallImage?.url}
-                                alt="Stall"
-                                className="w-40 h-32 object-cover rounded-md shadow"
-                            />
-                            <div className="text-sm space-y-1">
-                                <p><strong>Stall No:</strong> {stall.stallNumber}</p>
-                                <p><strong>Address:</strong> {stall.stallAddress}</p>
-                                <p><strong>Description:</strong> {stall.stallDescription}</p>
-                                <p><strong>Status:</strong> {stall.status}</p>
-                            </div>
-                        </div>
-                    ) : (
-                        <p className="text-center text-gray-600">Loading stall details...</p>
-                    )}
-                    <div className="div">
-                        <a
-                            href='/vendor/create-sack'
-                            className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg shadow transition duration-300"
-                        >
-                            Go to Create Sack
-                        </a>
-                    </div>
+            {/* Stall Info Card */}
+            {stall ? (
+                <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8">
+                    <img
+                        src={stall.stallImage?.url || "https://via.placeholder.com/800x400"}
+                        alt="Stall"
+                        className="w-full h-64 object-cover"
+                    />
+                    <div className="p-6 relative">
+                        <h3 className="text-xl font-semibold text-gray-900 mb-1">{stall.stallName || "Fresh Foods Market"}</h3>
+                        <p className="text-sm text-gray-600 mb-1"><strong>Stall #:</strong> {stall.stallNumber}</p>
+                        <p className="text-sm text-gray-600 mb-1"><strong>Address:</strong> {stall.stallAddress}</p>
+                        <p className="text-sm text-gray-600"><strong>Description:</strong> {stall.stallDescription}</p>
 
-
-                    <div>
-                        <h3 className="text-xl font-semibold text-gray-800 mb-2">Sacks</h3>
-
-                        {sacks.length > 0 ? (
-                            <div className="flex overflow-x-auto space-x-4 pb-4">
-                                {sacks.map((sack) => {
-
-                                    const isSpoiled = sack.status.toLowerCase() === 'spoiled';
-                                    return (
-                                        <div
-                                            key={sack._id}
-                                            className={`min-w-[220px] max-w-[220px] p-4 rounded-md shadow flex-shrink-0 ${isSpoiled ? 'bg-red-200 border border-red-400' : 'bg-gray-100'
-                                                }`}
-                                        >
-                                            <p className="text-sm"><strong>Kilos:</strong> {sack.kilo} kg</p>
-                                            <p className="text-sm"><strong>Location:</strong> {sack.location}</p>
-                                            <p className="text-sm"><strong>Description:</strong> {sack.description}</p>
-                                            <p className="text-sm"><strong>Date:</strong> {new Date(sack.dbSpoil).toLocaleDateString()}</p>
-                                            <p className={`font-semibold ${isSpoiled ? 'text-red-700' : 'text-gray-800'}`}>
-                                                <strong>Status:</strong> {sack.status}
-                                            </p>
-                                            {sack.images?.length > 0 && (
-                                                <img
-                                                    src={sack.images[0]?.url}
-                                                    alt="Sack"
-                                                    className="w-full h-24 object-cover mt-2 rounded"
-                                                />
-                                            )}
-                                        </div>
-                                    )
-                                }
-                                )}
-                            </div>
-                        ) : (
-                            <p className="text-gray-600">No sacks found.</p>
-                        )}
+                        <span className={`absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-medium ${stall.status === 'Open'
+                            ? 'bg-green-100 text-green-700'
+                            : 'bg-red-100 text-red-700'
+                            }`}>
+                            {stall.status}
+                        </span>
                     </div>
                 </div>
-            </div>
-        </>
-    );
+            ) : (
+                <p className="text-center text-gray-600 mb-6">Loading stall details...</p>
+            )}
 
+            {/* Sack Header & Button */}
+            <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl font-semibold text-gray-800">Posted Waste Sacks</h3>
+                <a
+                    href="/vendor/create-sack"
+                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow transition"
+                >
+                    + Create New Sack
+                </a>
+            </div>
+
+            {/* Sacks Grid */}
+            {sacks.length > 0 ? (
+                <div className="flex overflow-x-auto space-x-4 pb-4 ">
+                    {sacks.map((sack, index) => {
+                        const isSpoiled = sack.status.toLowerCase() === 'spoiled';
+                        const isClaimed = sack.status.toLowerCase() === 'claimed';
+                        const isTrashed = sack.status.toLowerCase() === 'trashed';
+
+                        const statusColor = isClaimed
+                            ? 'bg-green-100 text-green-700'
+                            : isTrashed
+                                ? 'bg-red-100 text-red-700'
+                                : isSpoiled
+                                    ? 'bg-yellow-100 text-yellow-700'
+                                    : 'bg-gray-200 text-gray-800';
+
+                        return (
+                            <div key={sack._id} className="bg-white rounded-lg shadow p-4 min-w-[250px] flex-shrink-0">
+                                <img
+                                    src={sack.images?.[0]?.url || "https://via.placeholder.com/300x200"}
+                                    alt="Sack"
+                                    className="w-full h-40 object-cover rounded mb-4"
+                                />
+                                <div className="text-sm space-y-1">
+                                    <p className="font-semibold">Sack #{index + 1}</p>
+                                    <p><strong>Weight:</strong> {sack.kilo} kg</p>
+                                    <p><strong>Location:</strong> {sack.location}</p>
+                                    <p><strong>Description:</strong> {sack.description}</p>
+                                    <p><strong>Date:</strong> {new Date(sack.dbSpoil).toLocaleDateString()}</p>
+                                </div>
+                                <span className={`inline-block mt-3 px-3 py-1 rounded-full text-xs font-medium ${statusColor}`}>
+                                    {sack.status}
+                                </span>
+                            </div>
+                        );
+                    })}
+                </div>
+            ) : (
+                <p className="text-gray-600">No sacks found.</p>
+            )}
+        </div>
+    );
 };
 
 export default MyStall;

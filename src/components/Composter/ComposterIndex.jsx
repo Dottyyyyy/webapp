@@ -129,7 +129,6 @@ function ComposterIndex() {
             </div>
           </div>
         </main>
-        <Footer />
       </div>
     </>
   )

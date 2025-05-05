@@ -7,6 +7,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Sidebar from '../../Navigation/Sidebar';
 import '../../../index.css'
+import Footer from '../../Navigation/Footer';
 
 const SeePickUp = () => {
     const location = useLocation();
@@ -58,90 +59,108 @@ const SeePickUp = () => {
         try {
             const sackIds = mySacks.map(sack => sack.sackId);
             const response = await axios.put(`${import.meta.env.VITE_API}/sack/update-status`, { status: 'claimed', sackIds });
+            const data = await axios.put(`${import.meta.env.VITE_API}/sack/complete-pickup/${pickup._id}`)
+
+            // console.log(response.data);
             toast.success("Complete Process!! Job Well Done");
             navigation(-1)
         } catch (e) {
             console.error("Error updating sacks:", e);
         }
     };
-
     return (
-        <div className="min-h-screen bg-gray-900 text-white p-6 fade-in">
-            <Sidebar />
-            <h1 className="text-2xl font-bold text-center mb-6">See Pick Up</h1>
-            <div className="bg-gray-800 p-4 rounded-lg mb-6">
-                <div className="flex justify-between items-center mb-4">
-                    {status !== "Claimed" && (
-                        <button
-                            onClick={handleCompleteSackStatus}
-                            className="bg-green-600 text-white px-4 py-2 rounded-full"
-                        >
-                            Confirm
-                        </button>
-                    )}
-                </div>
+        <>
+            <div className="min-h-screen bg-gray-100 text-gray-800 p-6">
+                <div className="bg-white rounded-lg shadow-md p-6 relative">
+                    {/* Status Badge */}
+                    <span className="absolute top-4 right-4 bg-red-200 text-red-700 text-sm px-3 py-1 rounded-full">
+                        {status}
+                    </span>
 
-                <div className="bg-green-900 p-5 rounded-lg text-center">
-                    <p className="text-xl font-bold">{totalSellerKilo} KG</p>
-                    <p>Status: <span className="text-green-300">{status}</span></p>
-                    {status !== "Claimed" && (
-                        <p className="mt-2 text-sm">
-                            Pickup Time:{" "}
-                            {new Date(new Date(pickup.pickupTimestamp).getTime() - 24 * 60 * 60 * 1000).toLocaleDateString("en-US", {
-                                year: "numeric",
-                                month: "long",
-                                day: "numeric",
-                            })}{" "}
-                            {new Date(pickup.pickupTimestamp).toLocaleTimeString("en-US", {
-                                timeZone: "UTC",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                                hour12: true,
-                            })}
-                        </p>
+                    {/* Header */}
+                    <h1 className="text-2xl font-bold mb-1">Pickup Request Details</h1>
+                    <p className="text-sm text-gray-500 mb-6">Request #{pickup._id || 'REQ-2023-001'}</p>
+
+                    {/* Summary */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div className="bg-gray-50 p-4 rounded-lg">
+                            <p className="text-sm text-gray-500">Total Waste</p>
+                            <p className="text-3xl font-bold">{totalSellerKilo} kg</p>
+                        </div>
+                        <div className="bg-gray-50 p-4 rounded-lg">
+                            <p className="text-sm text-gray-500">Pickup Schedule up to:</p>
+                            <p className="text-lg font-semibold">
+                                {new Date(pickup.pickupTimestamp).toLocaleDateString("en-US", {
+                                    year: "numeric",
+                                    month: "long",
+                                    day: "numeric"
+                                })},{" "}
+                                {new Date(pickup.pickupTimestamp).toLocaleTimeString("en-US", {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                    hour12: true
+                                })}
+                            </p>
+
+                        </div>
+                    </div>
+
+                    {/* Collector Details */}
+                    {buyer && (
+                        <div className="mb-6">
+                            <h2 className="text-lg font-bold mb-2">Collector Details</h2>
+                            <img
+                                src={buyer.avatar?.url || "https://via.placeholder.com/100"}
+                                alt="buyer"
+                                className="w-20 h-20 rounded-full mx-auto mb-2"
+                            />
+                            <div className="grid grid-cols-1 md:grid-cols-3 bg-gray-50 p-4 rounded-lg text-sm">
+                                <div><span className="font-semibold">Name:</span> {buyer.name}</div>
+                                <div><span className="font-semibold">Email:</span> {buyer.email}</div>
+                                <div>
+                                    <span className="font-semibold">Address:</span> {buyer.address?.lotNum}, {buyer.address?.street}, {buyer.address?.baranggay}, {buyer.address?.city}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Sacks Details */}
+                    <h2 className="text-lg font-bold mb-3">Sacks Details</h2>
+                    <div className="border rounded-lg divide-y">
+                        {mySacks.map((item, idx) => (
+                            <div key={item._id} className="p-4 flex justify-between items-center">
+                                <div className="flex items-center">
+                                    <img
+                                        src={item.images[0]?.url || "https://via.placeholder.com/80"}
+                                        alt="sack"
+                                        className="w-16 h-16 object-cover rounded-lg mr-4"
+                                    />
+                                    <div>
+                                        <p className="font-semibold">Stall {item.stallNumber}</p>
+                                        <p className="text-sm text-gray-600">{item.kilo} kg</p>
+                                        <p className="text-sm text-gray-500">{item.description}</p>
+                                    </div>
+                                </div>
+                                <div className="text-sm text-gray-500 text-right">{item.location}</div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Confirm Button */}
+                    {pickup.status !== "completed" && (
+                        <div className="text-center mt-6">
+                            <button
+                                onClick={handleCompleteSackStatus}
+                                className="bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700 transition"
+                            >
+                                Confirm Pickup
+                            </button>
+                        </div>
                     )}
                 </div>
             </div>
-
-            {buyer && (
-                <div className="bg-gray-700 p-4 rounded-lg text-center mb-6">
-                    <h2 className="text-lg font-bold mb-3">Collector Details</h2>
-                    <img
-                        src={buyer.avatar?.url || "https://via.placeholder.com/100"}
-                        alt="buyer"
-                        className="w-20 h-20 rounded-full mx-auto mb-2"
-                    />
-                    <p>Name: {buyer.name}</p>
-                    <p>Email: {buyer.email}</p>
-                    <p>
-                        Address: {buyer.address?.lotNum}, {buyer.address?.street}, {buyer.address?.baranggay}, {buyer.address?.city}
-                    </p>
-                </div>
-            )}
-
-            <h2 className="text-lg font-bold mb-3">Your Sacks</h2>
-            {mySacks.length > 0 ? (
-                <div className="space-y-4">
-                    {mySacks.map(item => (
-                        <div key={item._id} className="bg-gray-600 p-3 rounded-lg flex items-center">
-                            <img
-                                src={item.images[0]?.url || "https://via.placeholder.com/150"}
-                                alt="sack"
-                                className="w-20 h-20 object-cover rounded-lg mr-4"
-                            />
-                            <div>
-                                <p>Stall #: {item.stallNumber}</p>
-                                <p>Weight: {item.kilo} KG</p>
-                                <p>Description: {item.description}</p>
-                                <p>Location: {item.location}</p>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            ) : (
-                <p>No sacks found for this seller.</p>
-            )}
-        </div>
+            <Footer />
+        </>
     );
 };
 

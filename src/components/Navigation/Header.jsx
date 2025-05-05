@@ -10,7 +10,7 @@ import ThemeToggle from "../Extras/ThemeToggle";
 import axios from "axios";
 
 const Header = () => {
-  const navigation = useNavigate();
+  const navigate = useNavigate();
   const userData = getUser();
   const userId = userData._id;
   const [mySack, setMySacks] = useState([]);
@@ -35,7 +35,7 @@ const Header = () => {
 
   const handleLogout = () => {
     logout(() => {
-      navigation("/login");
+      navigate("/login");
       window.location.reload();
     });
   };
@@ -76,7 +76,7 @@ const Header = () => {
 
               {user && user !== false ? (
                 <>
-                  {user && (user.role === "farmer" ) ? (
+                  {user && (user.role === "farmer") ? (
                     <li className="flex items-center gap-4">
                       {/* View Sacks Button */}
                       <a
@@ -104,7 +104,7 @@ const Header = () => {
                       {/* Logout Button */}
                       <button
                         onClick={handleLogout}
-                        className="relative flex items-center gap-2 px-5 py-2 text-black font-semibold rounded-full bg-green border-2 border-green-600 rounded-md hover:text-green hover:bg-green-600 transition"
+                        className="relative flex items-center gap-2 px-5 py-2 text-black font-semibold rounded-full bg-red border-2 border-red-600 rounded-md hover:text-red hover:bg-red-600 transition"
                       >
                         Logout
                       </button>
@@ -139,7 +139,31 @@ const Header = () => {
                       {/* Logout Button */}
                       <button
                         onClick={handleLogout}
+                        className="relative flex items-center gap-2 px-5 py-2 text-black font-semibold rounded-full bg-red border-2 border-red-600 rounded-md hover:text-red hover:bg-red-600 transition"
+                      >
+                        Logout
+                      </button>
+                    </li>
+
+                  ) : null}
+                  {user && (user.role === "vendor") ? (
+                    <li className="flex items-center gap-4">
+                      {/* Logout Button */}
+                      <button
+                        onClick={() => navigate(`/vendor/myStall/${user._id}`)}
                         className="relative flex items-center gap-2 px-5 py-2 text-black font-semibold rounded-full bg-green border-2 border-green-600 rounded-md hover:text-green hover:bg-green-600 transition"
+                      >
+                        My Stall
+                      </button>
+                      <a
+                        href='/vendor/pickup'
+                        className="relative flex items-center gap-2 px-5 py-2 text-black font-semibold rounded-full bg-green border-2 border-green-600 rounded-md hover:text-green hover:bg-green-600 transition"
+                      >
+                        Pickup
+                      </a>
+                      <button
+                        onClick={handleLogout}
+                        className="relative flex items-center gap-2 px-5 py-2 text-black font-semibold rounded-full bg-red border-2 border-red-600 rounded-md hover:text-red hover:bg-red-600 transition"
                       >
                         Logout
                       </button>
@@ -148,11 +172,10 @@ const Header = () => {
                   ) : null}
                   {user && (user.role === "admin") ? (
                     <li className="flex items-center gap-4">
-
                       {/* Logout Button */}
                       <button
                         onClick={handleLogout}
-                        className="relative flex items-center gap-2 px-5 py-2 text-black font-semibold rounded-full bg-green border-2 border-green-600 rounded-md hover:text-green hover:bg-green-600 transition"
+                        className="relative flex items-center gap-2 px-5 py-2 text-black font-semibold rounded-full bg-red border-2 border-red-600 rounded-md hover:text-red hover:bg-red-600 transition"
                       >
                         Logout
                       </button>
