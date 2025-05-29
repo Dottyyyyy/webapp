@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import '../../index.css'
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Register = () => {
   const [name, setName] = useState("");
@@ -26,7 +28,7 @@ const Register = () => {
     e.preventDefault(); // prevent form from refreshing the page
 
     if (password !== confirmPassword) {
-      alert("Passwords do not match.");
+      toast.error("Passwords do not match.");
       return;
     }
 
@@ -35,11 +37,12 @@ const Register = () => {
       formData.append("name", name);
       formData.append("email", email);
       formData.append("password", password);
-      formData.append("address", address);
       formData.append("role", role);
       if (avatar) {
         formData.append("avatar", avatar);
       }
+
+      console.log(formData, 'formData')
 
       const response = await axios.post(
         `${import.meta.env.VITE_API}/register`,
@@ -50,10 +53,12 @@ const Register = () => {
       );
 
       if (response.data.success) {
-        alert("Registration successful!");
-        navigate("/login");
+        toast.success("Registration successful!");
+        setTimeout(() => {
+          navigate("/login");
+        }, 2000);
       } else {
-        alert(response.data.message || "Registration failed.");
+        toast.error(response.data.message || "Registration failed.");
       }
     } catch (error) {
       console.error("Error creating user", error);
@@ -64,6 +69,7 @@ const Register = () => {
   return (
     <div className="flex min-h-screen">
       {/* Left panel */}
+      <ToastContainer autoClose={3000} hideProgressBar />
       <div className="hidden md:flex flex-col justify-center w-1/2 bg-[#4CAF50] text-white px-10 relative overflow-hidden">
         <div className="z-10">
           <h1 className="text-4xl font-bold mb-4">Join <span className="text-white">NoWaste</span> Community</h1>
@@ -109,23 +115,26 @@ const Register = () => {
           </div>
 
           {/* Form Fields */}
-          <form className="space-y-5">
+          <form className="space-y-5" onSubmit={handleSubmit}>
             <input
               type="text"
               placeholder="Full Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
             />
             <input
               type="email"
               placeholder="Email Address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
             />
-            <input
-              type="text"
-              placeholder="Address"
+            <select
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
-            />
-            <select className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+            >
               <option value="">Choose your role</option>
               <option value="farmer">Farmer</option>
               <option value="composter">Composter</option>
@@ -135,11 +144,15 @@ const Register = () => {
               <input
                 type="password"
                 placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
               />
               <input
                 type="password"
                 placeholder="Confirm Password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
               />
             </div>
@@ -149,13 +162,8 @@ const Register = () => {
             >
               Create Account
             </button>
-            <p className="text-sm text-center mt-4">
-              Already have an account?{" "}
-              <a href="/login" className="text-[#4CAF50] hover:underline">
-                Sign in
-              </a>
-            </p>
           </form>
+
         </div>
       </div>
     </div>

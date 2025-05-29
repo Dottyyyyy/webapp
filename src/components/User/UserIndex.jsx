@@ -133,7 +133,7 @@ function UserIndex() {
                                     </div>
                                 ))
                             ) : (
-                                <h1>No New Spoiled Sacks</h1>
+                                <h1>No New Waste Sacks</h1>
                             )}
                         </div>
                     </div>

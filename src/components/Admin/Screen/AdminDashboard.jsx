@@ -127,7 +127,7 @@ const AdminDashboard = () => {
                     labels: predictedWaste.map((item) => item.date),
                     datasets: [
                         {
-                            label: "Predicted Waste (kg)",
+                            label: "Predicted Waste for each Stall (kg)",
                             data: predictedWaste.map((item) => item.predicted_kilos),
                             borderColor: "rgba(75,192,192,1)",
                             fill: false,
