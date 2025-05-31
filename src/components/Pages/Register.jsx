@@ -27,7 +27,7 @@ const Register = () => {
     e.preventDefault(); // Prevent form from refreshing the page
 
     if (password !== confirmPassword) {
-      alert("Passwords do not match.");
+      toast.error("Passwords do not match.");
       return;
     }
 
@@ -40,6 +40,8 @@ const Register = () => {
       if (avatar) {
         formData.append("avatar", avatar);
       }
+
+      console.log(formData, 'formData')
 
       // Uncomment this part when the backend is ready
       const response = await axios.post(
@@ -63,7 +65,7 @@ const Register = () => {
           window.location.reload();
         });
       } else {
-        alert(response.data.message || "Registration failed.");
+        toast.error(response.data.message || "Registration failed.");
       }
     } catch (error) {
       console.error("Error creating user", error);
@@ -74,6 +76,7 @@ const Register = () => {
   return (
     <div className="flex min-h-screen">
       {/* Left panel */}
+      <ToastContainer autoClose={3000} hideProgressBar />
       <div className="hidden md:flex flex-col justify-center w-1/2 bg-[#4CAF50] text-white px-10 relative overflow-hidden">
         <div className="z-10">
           <h1 className="text-4xl font-bold mb-4">Join <span className="text-white">NoWaste</span> Community</h1>
@@ -165,13 +168,8 @@ const Register = () => {
             >
               Create Account
             </button>
-            <p className="text-sm text-center mt-4">
-              Already have an account?{" "}
-              <a href="/login" className="text-[#4CAF50] hover:underline">
-                Sign in
-              </a>
-            </p>
           </form>
+
         </div>
       </div>
     </div>

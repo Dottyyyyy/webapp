@@ -12,7 +12,7 @@ import axios from "axios";
 const Header = () => {
   const navigate = useNavigate();
   const userData = getUser();
-  const userId = userData._id;
+  const userId = userData?._id;
   const [mySack, setMySacks] = useState([]);
 
   const [user, setUser] = React.useState(false);
@@ -29,7 +29,7 @@ const Header = () => {
 
       setMySacks(pendingSacks);
     } catch (error) {
-      console.error("Error fetching:", error);
+      // console.error("Error fetching:", error);
     }
   };
 
@@ -41,12 +41,14 @@ const Header = () => {
   };
 
   useEffect(() => {
-    fetchMySacks();
-    const interval = setInterval(() => {
+    if (userId) {
       fetchMySacks();
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
+      const interval = setInterval(() => {
+        fetchMySacks();
+      }, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [userId]);
 
   const [searchModalOpen, setSearchModalOpen] = useState(false);
 
