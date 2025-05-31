@@ -30,6 +30,8 @@ import ComposterIndex from "./components/Composter/ComposterIndex";
 import ComposterMarket from "./components/Composter/Stall/ComposterMarket";
 import ComposterViewStall from "./components/Composter/Stall/ComposterViewStall";
 import CompPickup from "./components/Composter/Pickup/CompPickup";
+import AddAddress from "./components/Pages/AddAddress";
+import AddStall from "./components/Pages/addStall";
 
 const App = () => {
   const [mySacks, setMySacks] = useState([]); // Lifted state for sacks
@@ -39,6 +41,8 @@ const App = () => {
       <Header />
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/addAddress" element={<AddAddress />} />
+        <Route path="/addStall" element={<AddStall />} />
         <Route path="/" element={<Home />} />
 
         <Route path="/register" element={<Register />} />

@@ -1,19 +1,20 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import '../../index.css'
+import '../../index.css';
+import { authenticate } from "../../utils/helpers";
+import { toast } from "react-toastify";
 
 const Register = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [address, setAddress] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const navigate = useNavigate();
   const [avatar, setAvatar] = useState(null);
   const [role, setRole] = useState("farmer");
   const [preview, setPreview] = useState(null);
-
+  const navigate = useNavigate();
+  console.log(name, 'name')
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -23,7 +24,7 @@ const Register = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); // prevent form from refreshing the page
+    e.preventDefault(); // Prevent form from refreshing the page
 
     if (password !== confirmPassword) {
       alert("Passwords do not match.");
@@ -35,12 +36,12 @@ const Register = () => {
       formData.append("name", name);
       formData.append("email", email);
       formData.append("password", password);
-      formData.append("address", address);
       formData.append("role", role);
       if (avatar) {
         formData.append("avatar", avatar);
       }
 
+      // Uncomment this part when the backend is ready
       const response = await axios.post(
         `${import.meta.env.VITE_API}/register`,
         formData,
@@ -50,8 +51,17 @@ const Register = () => {
       );
 
       if (response.data.success) {
-        alert("Registration successful!");
-        navigate("/login");
+        const response = await axios.post(`${import.meta.env.VITE_API}/login`, {
+          email,
+          password,
+        });
+        // Handle successful login (e.g., save token, redirect to home page)
+        toast.success("Register successful:");
+        authenticate(response.data, () => {
+          // toast.success('Login Successfully.');
+          navigate("/addAddress");
+          window.location.reload();
+        });
       } else {
         alert(response.data.message || "Registration failed.");
       }
@@ -109,24 +119,26 @@ const Register = () => {
           </div>
 
           {/* Form Fields */}
-          <form className="space-y-5">
+          <form className="space-y-5" onSubmit={handleSubmit}>
             <input
               type="text"
               placeholder="Full Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
             />
             <input
               type="email"
               placeholder="Email Address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
             />
-            <input
-              type="text"
-              placeholder="Address"
+            <select
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
-            />
-            <select className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
-              <option value="">Choose your role</option>
+            >
               <option value="farmer">Farmer</option>
               <option value="composter">Composter</option>
               <option value="vendor">Vendor</option>
@@ -135,11 +147,15 @@ const Register = () => {
               <input
                 type="password"
                 placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
               />
               <input
                 type="password"
                 placeholder="Confirm Password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
               />
             </div>
