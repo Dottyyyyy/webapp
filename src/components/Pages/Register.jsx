@@ -1,21 +1,20 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import '../../index.css'
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import '../../index.css';
+import { authenticate } from "../../utils/helpers";
+import { toast } from "react-toastify";
 
 const Register = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [address, setAddress] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const navigate = useNavigate();
   const [avatar, setAvatar] = useState(null);
   const [role, setRole] = useState("farmer");
   const [preview, setPreview] = useState(null);
-
+  const navigate = useNavigate();
+  console.log(name, 'name')
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -25,7 +24,7 @@ const Register = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); // prevent form from refreshing the page
+    e.preventDefault(); // Prevent form from refreshing the page
 
     if (password !== confirmPassword) {
       toast.error("Passwords do not match.");
@@ -44,6 +43,7 @@ const Register = () => {
 
       console.log(formData, 'formData')
 
+      // Uncomment this part when the backend is ready
       const response = await axios.post(
         `${import.meta.env.VITE_API}/register`,
         formData,
@@ -53,10 +53,17 @@ const Register = () => {
       );
 
       if (response.data.success) {
-        toast.success("Registration successful!");
-        setTimeout(() => {
-          navigate("/login");
-        }, 2000);
+        const response = await axios.post(`${import.meta.env.VITE_API}/login`, {
+          email,
+          password,
+        });
+        // Handle successful login (e.g., save token, redirect to home page)
+        toast.success("Register successful:");
+        authenticate(response.data, () => {
+          // toast.success('Login Successfully.');
+          navigate("/addAddress");
+          window.location.reload();
+        });
       } else {
         toast.error(response.data.message || "Registration failed.");
       }
@@ -135,7 +142,6 @@ const Register = () => {
               onChange={(e) => setRole(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
             >
-              <option value="">Choose your role</option>
               <option value="farmer">Farmer</option>
               <option value="composter">Composter</option>
               <option value="vendor">Vendor</option>

@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Sidebar from '../Navigation/Sidebar';
 import { getUser } from '../../utils/helpers';
 import axios from 'axios';
@@ -6,8 +7,11 @@ import Footer from '../Navigation/Footer';
 import Chart from "chart.js/auto";
 
 function UserIndex() {
+    const navigate = useNavigate();
     const user = getUser();
-    const userId = user._id
+    const userId = user._id;
+
+    const [hasAddress, setHasAddress] = useState(!!user.address);
     const [wasteCollected, setWasteCollected] = useState(0);
     const [monthlyWasteCollected, setMonthlyWasteCollected] = useState(0);
     const [activePickupRequest, setActivePickupRequest] = useState(0);
@@ -79,22 +83,17 @@ function UserIndex() {
     const fetchNotifications = async () => {
         try {
             const { data } = await axios.get(`${import.meta.env.VITE_API}/notifications/users-get-notif/${userId}`);
-
             const newSackNotifications = data.notifications.filter(notification => notification.type === 'new_sack');
-
-            console.log(newSackNotifications);
             setNotifications(newSackNotifications);
         } catch (error) {
             console.error("Error fetching notifications:", error);
         }
     };
 
-
     useEffect(() => {
         fetchPickupSacks();
         fetchNotifications();
     }, [userId]);
-    console.log(notifications, 'Notif')
 
     const recentSacks = [
         { marketName: "Fresh Harvest Market", weight: 25, timeRemaining: "5 hours" },
@@ -170,34 +169,34 @@ function UserIndex() {
                         </div>
                     </div>
 
-                    {/* Stats */}
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
-                        <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-                            <h2 className="text-sm text-gray-500 font-medium">Total Collected</h2>
-                            <p className="text-3xl font-bold text-green-600 mt-2">{wasteCollected} kg</p>
-                        </div>
-                        <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-                            <h2 className="text-sm text-gray-500 font-medium">Monthly Average</h2>
-                            <p className="text-3xl font-bold text-green-600 mt-2">{monthlyWasteCollected} kg</p>
-                        </div>
-                        <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-                            <h2 className="text-sm text-gray-500 font-medium">Active Requests</h2>
-                            <p className="text-3xl font-bold text-green-600 mt-2">{activePickupRequest}</p>
-                        </div>
+                {/* Stats */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
+                    <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+                        <h2 className="text-sm text-gray-500 font-medium">Total Collected</h2>
+                        <p className="text-3xl font-bold text-green-600 mt-2">{wasteCollected} kg</p>
                     </div>
+                    <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+                        <h2 className="text-sm text-gray-500 font-medium">Monthly Average</h2>
+                        <p className="text-3xl font-bold text-green-600 mt-2">{monthlyWasteCollected} kg</p>
+                    </div>
+                    <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+                        <h2 className="text-sm text-gray-500 font-medium">Active Requests</h2>
+                        <p className="text-3xl font-bold text-green-600 mt-2">{activePickupRequest}</p>
+                    </div>
+                </div>
 
-                    {/* Quick Actions */}
-                    <div className="mb-10">
-                        <h2 className="text-xl font-semibold text-gray-800 mb-4">Quick Actions</h2>
-                        <div className="flex flex-col sm:flex-row gap-4">
-                            <a href="/viewstalls" className="px-6 py-3 bg-green-600 text-white font-semibold rounded-full shadow-md hover:bg-green-700 transition">
-                                View Available Sacks
-                            </a>
-                            <a href='/pickup' className="px-6 py-3 bg-white border border-green-600 text-green-600 font-semibold rounded-full shadow-md hover:bg-green-50 transition">
-                                Pickup Request
-                            </a>
-                        </div>
+                {/* Quick Actions */}
+                <div className="mb-10">
+                    <h2 className="text-xl font-semibold text-gray-800 mb-4">Quick Actions</h2>
+                    <div className="flex flex-col sm:flex-row gap-4">
+                        <a href="/viewstalls" className="px-6 py-3 bg-green-600 text-white font-semibold rounded-full shadow-md hover:bg-green-700 transition">
+                            View Available Sacks
+                        </a>
+                        <a href='/pickup' className="px-6 py-3 bg-white border border-green-600 text-green-600 font-semibold rounded-full shadow-md hover:bg-green-50 transition">
+                            Pickup Request
+                        </a>
                     </div>
+                </div>
 
                     {/* Recent Available Sacks */}
                     <div>
@@ -230,4 +229,4 @@ function UserIndex() {
     );
 }
 
-export default UserIndex
+export default UserIndex;
