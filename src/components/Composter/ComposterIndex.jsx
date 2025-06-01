@@ -2,6 +2,7 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 import { getUser } from '../../utils/helpers';
 import Footer from '../Navigation/Footer';
+import Chart from "chart.js/auto";
 
 function ComposterIndex() {
   const user = getUser();
@@ -10,6 +11,7 @@ function ComposterIndex() {
   const [monthlyWasteCollected, setMonthlyWasteCollected] = useState(0);
   const [activePickupRequest, setActivePickupRequest] = useState(0);
   const [notifications, setNotifications] = useState([]);
+  const [chartData, setChartData] = useState({ labels: [], values: [] });
 
 
   const fetchPickupSacks = async () => {
@@ -40,6 +42,32 @@ function ComposterIndex() {
         }
       });
 
+      const monthlyData = {};
+
+      completedPickups.forEach(pickup => {
+        const kilo = parseFloat(pickup.totalKilo || 0);
+        const pickupDate = new Date(pickup.pickupTimestamp);
+
+        const monthKey = pickupDate.toLocaleString('default', {
+          month: 'short',
+          year: 'numeric'
+        });
+
+        if (!monthlyData[monthKey]) {
+          monthlyData[monthKey] = 0;
+        }
+        monthlyData[monthKey] += kilo;
+      });
+
+      const sortedMonths = Object.keys(monthlyData).sort((a, b) => {
+        return new Date(a) - new Date(b);
+      });
+
+      setChartData({
+        labels: sortedMonths,
+        values: sortedMonths.map(month => monthlyData[month]),
+      });
+
       setWasteCollected(total);
       setMonthlyWasteCollected(thisMonthTotal);
       setActivePickupRequest(requestedPickups.length)
@@ -51,7 +79,7 @@ function ComposterIndex() {
 
   const fetchNotifications = async () => {
     try {
-      const { data } = await axios.get(`${import.meta.env.VITE_API}/notifications/users-get-notif/${userId}`);
+      const { data } = await axios.get(`${import.meta.env.VITE_API}/notifications/get-notif`);
       const spoiledNotifications = data.notifications.filter(notification => notification.type === 'spoiled');
       console.log(spoiledNotifications);
       setNotifications(spoiledNotifications);
@@ -65,7 +93,59 @@ function ComposterIndex() {
     fetchPickupSacks();
     fetchNotifications();
   }, [userId]);
-  console.log(notifications, 'Notif')
+
+
+  useEffect(() => {
+    if (!chartData.labels.length) return;
+
+    const ctx = document.getElementById('wasteChart').getContext('2d');
+
+    if (window.wasteChartInstance) {
+      window.wasteChartInstance.destroy();
+    }
+
+    window.wasteChartInstance = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: chartData.labels,
+        datasets: [{
+          label: 'Kg Collected',
+          data: chartData.values,
+          backgroundColor: '#32CD32',
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            callbacks: {
+              label: context => `${context.raw.toFixed(2)} kg`
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Kilograms'
+            }
+          },
+          x: {
+            title: {
+              display: true,
+              text: 'Month'
+            }
+          }
+        }
+      }
+    });
+  }, [chartData]);
+
   return (
     <>
       <div className="min-h-screen bg-gray-50">
@@ -77,6 +157,19 @@ function ComposterIndex() {
           </div>
 
           {/* Stats */}
+
+          {chartData.labels.length > 0 ? (
+            <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 mt-8">
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">Collected Waste Per Month</h2>
+              <div className="relative h-[300px] w-full">
+                <canvas id="wasteChart"></canvas>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 mt-8 text-center text-gray-500">
+              No collection data available yet.
+            </div>
+          )}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
             <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
               <h2 className="text-sm text-gray-500 font-medium">Total Collected</h2>
@@ -115,16 +208,19 @@ function ComposterIndex() {
 
               {/* Notifications */}
               {notifications.filter((notif) => !notif.isRead).length > 0 ? (
-                notifications.filter((notif) => !notif.isRead).map((notif, i) => (
-                  <div
-                    key={notif._id || i}
-                    className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded"
-                  >
-                    <p className="text-sm font-medium">{notif.message}</p>
-                  </div>
-                ))
+                notifications
+                  .filter((notif) => !notif.isRead)
+                  .slice(0, 5) // 👈 Limit to 5
+                  .map((notif, i) => (
+                    <div
+                      key={notif._id || i}
+                      className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded"
+                    >
+                      <p className="text-sm font-medium">{notif.message}</p>
+                    </div>
+                  ))
               ) : (
-                <h1>No New Spoiled Sacks</h1>
+                <h1>No New Waste Sacks</h1>
               )}
             </div>
           </div>

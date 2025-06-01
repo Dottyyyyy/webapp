@@ -31,7 +31,7 @@ const AdminDashboard = () => {
     const predictedWasteChartInstance = useRef(null);
 
 
-    // console.log(wasteGeneration)
+    console.log(wasteGeneration)
 
     const fetchStoreCounts = async () => {
         try {
@@ -113,7 +113,7 @@ const AdminDashboard = () => {
             console.error("Error fetching predicted waste data:", error);
         }
     };
-    // console.log(optimalSchedule);
+    console.log(optimalSchedule);
 
     useEffect(() => {
         if (predictedWaste.length > 0 && predictedWasteChartRef.current) {
@@ -124,7 +124,7 @@ const AdminDashboard = () => {
             predictedWasteChartInstance.current = new Chart(predictedWasteChartRef.current, {
                 type: "line",
                 data: {
-                    labels: predictedWaste.map((item) => item.date),
+                    labels: predictedWaste.map((_, index) => index),
                     datasets: [
                         {
                             label: "Predicted Waste for each Stall (kg)",
@@ -137,10 +137,35 @@ const AdminDashboard = () => {
                 options: {
                     responsive: true,
                     scales: {
-                        x: { title: { display: true, text: "Date" } },
-                        y: { title: { display: true, text: "Kg" } },
+                        x: {
+                            title: {
+                                display: true,
+                                text: "Index"
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: "Kg"
+                            }
+                        }
                     },
-                },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                title: function (context) {
+                                    const index = context[0].dataIndex;
+                                    return `Date: ${wasteGeneration[index].ds}`;
+                                },
+                                label: function (context) {
+                                    const index = context.dataIndex;
+                                    const yhat = wasteGeneration[index].yhat.toFixed(2);
+                                    return `Predicted: ${yhat} Kg`;
+                                },
+                            },
+                        },
+                    }
+                }
             });
         }
 
@@ -152,12 +177,12 @@ const AdminDashboard = () => {
             wasteGenerationChartInstance.current = new Chart(wasteGenerationChartRef.current, {
                 type: "line",
                 data: {
-                    labels: wasteGeneration.map((item) => item.ds),
+                    labels: wasteGeneration.map((_, index) => index), // use index for visual clarity
                     datasets: [
                         {
-                            label: "Waste Generation Trend (kg)",
-                            data: wasteGeneration.map((item) => item.yhat),
-                            borderColor: "rgba(255,99,132,1)",
+                            label: 'Prediction',
+                            data: wasteGeneration.map(d => d.yhat),
+                            borderColor: 'green',
                             fill: false,
                         },
                     ],
@@ -165,10 +190,35 @@ const AdminDashboard = () => {
                 options: {
                     responsive: true,
                     scales: {
-                        x: { title: { display: true, text: "Date" } },
-                        y: { title: { display: true, text: "Kg" } },
+                        x: {
+                            title: {
+                                display: true,
+                                text: "Index"
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: "Kg"
+                            }
+                        }
                     },
-                },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                title: function (context) {
+                                    const index = context[0].dataIndex;
+                                    return `Date: ${wasteGeneration[index].ds}`;
+                                },
+                                label: function (context) {
+                                    const index = context.dataIndex;
+                                    const yhat = wasteGeneration[index].yhat.toFixed(2);
+                                    return `Predicted: ${yhat} Kg`;
+                                },
+                            },
+                        },
+                    }
+                }
             });
         }
 
@@ -210,10 +260,44 @@ const AdminDashboard = () => {
                 options: {
                     responsive: true,
                     scales: {
-                        x: { title: { display: true, text: "Date" } },
-                        y: { title: { display: true, text: "Kg" } },
+                        x: {
+                            ticks: {
+                                display: false // 👈 Hide x-axis labels (dates)
+                            },
+                            grid: {
+                                display: false // 👈 Optional: hide grid lines
+                            },
+                            title: {
+                                display: true,
+                                text: "Index"
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: "Kg"
+                            }
+                        }
                     },
-                },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    const date = context.label;
+                                    const entriesForDate = optimalSchedule.filter(d => d.date === date);
+
+                                    const lines = entriesForDate.map(entry =>
+                                        `• ${entry.stallNumber}: ${entry.predicted_kilos.toFixed(2)} Kg`
+                                    );
+
+                                    const total = context.raw.toFixed(2);
+
+                                    return [`Total: ${total} Kg`, ...lines];
+                                }
+                            }
+                        }
+                    }
+                }
             });
         }
     }, [predictedWaste, wasteGeneration, optimalSchedule]);

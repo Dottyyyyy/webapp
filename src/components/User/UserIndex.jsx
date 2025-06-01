@@ -3,6 +3,7 @@ import Sidebar from '../Navigation/Sidebar';
 import { getUser } from '../../utils/helpers';
 import axios from 'axios';
 import Footer from '../Navigation/Footer';
+import Chart from "chart.js/auto";
 
 function UserIndex() {
     const user = getUser();
@@ -11,6 +12,7 @@ function UserIndex() {
     const [monthlyWasteCollected, setMonthlyWasteCollected] = useState(0);
     const [activePickupRequest, setActivePickupRequest] = useState(0);
     const [notifications, setNotifications] = useState([]);
+    const [chartData, setChartData] = useState({ labels: [], values: [] });
 
 
     const fetchPickupSacks = async () => {
@@ -41,6 +43,31 @@ function UserIndex() {
                 }
             });
 
+            const monthlyData = {};
+
+            completedPickups.forEach(pickup => {
+                const kilo = parseFloat(pickup.totalKilo || 0);
+                const pickupDate = new Date(pickup.pickupTimestamp);
+
+                const monthKey = pickupDate.toLocaleString('default', {
+                    month: 'short',
+                    year: 'numeric'
+                });
+
+                if (!monthlyData[monthKey]) {
+                    monthlyData[monthKey] = 0;
+                }
+                monthlyData[monthKey] += kilo;
+            });
+
+            const sortedMonths = Object.keys(monthlyData).sort((a, b) => {
+                return new Date(a) - new Date(b); // Sort ascending by date
+            });
+
+            setChartData({
+                labels: sortedMonths,
+                values: sortedMonths.map(month => monthlyData[month]),
+            });
             setWasteCollected(total);
             setMonthlyWasteCollected(thisMonthTotal);
             setActivePickupRequest(requestedPickups.length)
@@ -48,7 +75,6 @@ function UserIndex() {
             console.error('Error getting Pickups:', error.message);
         }
     };
-
 
     const fetchNotifications = async () => {
         try {
@@ -75,6 +101,58 @@ function UserIndex() {
         { marketName: "Green Garden Stall", weight: 18, timeRemaining: "3 hours" },
         { marketName: "Organic Oasis", weight: 30, timeRemaining: "1 hour" },
     ];
+
+    useEffect(() => {
+        if (!chartData.labels.length) return;
+
+        const ctx = document.getElementById('wasteChart').getContext('2d');
+
+        if (window.wasteChartInstance) {
+            window.wasteChartInstance.destroy();
+        }
+
+        window.wasteChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: chartData.labels,
+                datasets: [{
+                    label: 'Kg Collected',
+                    data: chartData.values,
+                    backgroundColor: '#32CD32',
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: context => `${context.raw.toFixed(2)} kg`
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Kilograms'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Month'
+                        }
+                    }
+                }
+            }
+        });
+    }, [chartData]);
+
     return (
         <>
             <div className="min-h-screen bg-gray-50">
@@ -83,6 +161,13 @@ function UserIndex() {
                     <div className="mb-6">
                         <h1 className="text-3xl font-bold text-gray-900">Welcome, {user.name}</h1>
                         <p className="text-gray-600 mt-1">Track and manage your waste collections efficiently.</p>
+                    </div>
+
+                    <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 mt-8">
+                        <h2 className="text-xl font-semibold text-gray-800 mb-4">Collected Waste Per Month</h2>
+                        <div className="relative h-[300px] w-full">
+                            <canvas id="wasteChart"></canvas>
+                        </div>
                     </div>
 
                     {/* Stats */}
@@ -121,24 +206,25 @@ function UserIndex() {
                             <button className="text-sm text-green-700 hover:underline">View All</button>
                         </div>
                         <div className="grid gap-4">
-
                             {/* Notifications */}
                             {notifications.filter((notif) => !notif.isRead).length > 0 ? (
-                                notifications.filter((notif) => !notif.isRead).map((notif, i) => (
-                                    <div
-                                        key={notif._id || i}
-                                        className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded"
-                                    >
-                                        <p className="text-sm font-medium">{notif.message}</p>
-                                    </div>
-                                ))
+                                notifications
+                                    .filter((notif) => !notif.isRead)
+                                    .slice(0, 5) // 👈 Limit to 5
+                                    .map((notif, i) => (
+                                        <div
+                                            key={notif._id || i}
+                                            className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded"
+                                        >
+                                            <p className="text-sm font-medium">{notif.message}</p>
+                                        </div>
+                                    ))
                             ) : (
                                 <h1>No New Waste Sacks</h1>
                             )}
                         </div>
                     </div>
                 </main>
-                <Footer />
             </div>
         </>
     );
