@@ -18,17 +18,33 @@ const Login = () => {
         email,
         password,
       });
-      // Handle successful login (e.g., save token, redirect to home page)
+
+      if (response.data.user?.isDeleted) {
+        toast.error('Account has been deleted.');
+        toast.error('"Contact Support: #09755663543, Lira Baltazar"');
+        return;
+      }
+
+      // Successful login
       console.log("Login successful:", response.data);
       authenticate(response.data, () => {
         toast.success('Login Successfully.');
         navigate("/");
         window.location.reload();
       });
-      // navigate('/');
+
     } catch (error) {
-      toast.error('Login Failed. Wrong email or Password.');
-      toast.error('Try Again.');
+      // Try to get error message from response
+      const errMsg = error.response?.data?.message || "Login Failed. Try Again";
+
+      if (errMsg === "Account has been deleted") {
+        toast.error('Account has been deleted. Contact support.');
+        toast.error('"Contact Support: #09755663543, Lira Baltazar"');
+      } else {
+        toast.error(errMsg);
+      }
+
+      // Optionally log for debugging
       console.error("Login failed:", error);
     }
   };
@@ -64,7 +80,7 @@ const Login = () => {
           </p>
         </div>
       </div>
-  
+
       {/* Right Panel - Login Form */}
       <div className="w-1/2 flex items-center justify-center bg-white">
         <div className="w-full max-w-md p-8 space-y-6">
@@ -150,7 +166,7 @@ const Login = () => {
         </div>
       </div>
     </div>
-  );  
+  );
 };
 
 export default Login;
