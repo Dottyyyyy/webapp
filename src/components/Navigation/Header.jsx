@@ -54,7 +54,7 @@ const Header = () => {
 
   return (
     <>
-      <header className="bg-[#fffff] p-6 shadow-lg">
+      <header className="bg-[#1CC55C] p-6 shadow-lg">
         <div className="container mx-auto flex justify-between items-center">
           <h1 className="text-3xl font-bold text-black">
             <a href="/" className="hover:text-gray-200">NoWaste</a>
@@ -63,14 +63,14 @@ const Header = () => {
             <ul className="flex items-center space-x-4">
               <li>
                 <a href="/"
-                  className="relative flex items-center gap-2 px-4 py-2 text-black font-semibold rounded-full bg-green border-2 border-green-600 rounded-md hover:text-green hover:bg-green-600 transition"
+                  className="relative inline-block px-6 py-2 font-bold text-black bg-white border-2 border-green-600 rounded-md hover:text-white hover:bg-green-600 transition"
                 >
                   {user ? "Dashboard" : "Home"}
                 </a>
               </li>
               <li>
                 <a href="/about"
-                  className="relative flex items-center gap-2 px-4 py-2 text-black font-semibold rounded-full bg-green border-2 border-green-600 rounded-md hover:text-green hover:bg-green-600 transition"
+                  className="relative inline-block px-6 py-2 font-bold text-black bg-white border-2 border-green-600 rounded-md hover:text-white hover:bg-green-600 transition"
                 >
                   About
                 </a>

@@ -2,7 +2,7 @@ import React from "react";
 import { getUser } from "../../utils/helpers";
 import Sidebar from "../Navigation/Sidebar";
 import AdminDashboard from "../Admin/Screen/AdminDashboard";
-import '../../index.css'
+import '../../index.css';
 import ComposterIndex from "../Composter/ComposterIndex";
 import UserIndex from "../User/UserIndex";
 import Footer from "../Navigation/Footer";
@@ -26,7 +26,7 @@ const Home = () => {
                 <span role="img" aria-label="leaf" className="text-white text-xl">🌱</span>
               </div>
             </div>
-            <h1 className="text-4xl font-bold text-gray-800 mb-4">NoWaste</h1>
+            <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-4">NoWaste</h1>
             <p className="text-gray-600 text-lg mb-6">
               A revolutionary platform connecting food vendors with farmers and composters to reduce waste and promote sustainability.
             </p>
@@ -49,8 +49,8 @@ const Home = () => {
 
         {/* How It Works */}
         <section id="how-it-works" className="bg-white py-16 px-6">
-          <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">How It Works</h2>
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <h2 className="text-3xl sm:text-4xl font-bold text-center text-gray-800 mb-12">How It Works</h2>
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             <div className="bg-white rounded-xl shadow p-6 text-center">
               <div className="bg-green-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 text-green-600 text-2xl font-bold">1</div>
               <h3 className="text-xl font-semibold mb-2">For Vendors</h3>
@@ -71,7 +71,7 @@ const Home = () => {
 
         {/* CTA Section */}
         <section className="py-16 px-6 bg-green-600 text-center text-white">
-          <h2 className="text-3xl font-bold mb-4">Join Our Mission</h2>
+          <h2 className="text-3xl sm:text-4xl font-bold mb-4">Join Our Mission</h2>
           <p className="text-lg mb-6 max-w-2xl mx-auto">
             Be part of the solution to reduce food waste and create a more sustainable future. Whether you're a vendor, farmer, or composter, your contribution matters.
           </p>
@@ -85,7 +85,7 @@ const Home = () => {
 
         {/* Footer */}
         <footer className="bg-gray-900 text-white py-10 px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-6xl mx-auto text-sm">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 max-w-6xl mx-auto text-sm">
             <div>
               <h4 className="font-semibold mb-2">Contact Us</h4>
               <p>Email: info@nowaste.com</p>
@@ -118,9 +118,8 @@ const Home = () => {
   // Logged-in user experience
   return (
     <>
-      <div className="bg-green-500 h-1 w-full">
-      </div>
-      <div className="flex w-full h-full fade-in">
+      <div className="bg-green-500 h-1 w-full"></div>
+      <div sty className="flex w-full h-full fade-in">
         <div className="flex-grow p-8 bg-gradient-to-br from-green-50 to-green-100 w-full h-full">
           {/* Admin View */}
           {user.role === "admin" && (
