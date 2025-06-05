@@ -17,35 +17,113 @@ const Home = () => {
       <>
         {/* Top Green Bar */}
         <div className="bg-green-500 h-1 w-full" />
+        <div style={{
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: '20px',
+          flexWrap: 'wrap',
+          background: 'linear-gradient(to bottom right, #d1fad1, #c1f7c1)',
 
-        {/* Hero Section */}
-        <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center px-4 py-20">
-          <div className="bg-white rounded-3xl shadow-lg p-10 max-w-4xl w-full text-center">
-            <div className="flex justify-center mb-6">
-              <div className="bg-green-500 rounded-full p-3">
-                <span role="img" aria-label="leaf" className="text-white text-xl">🌱</span>
+        }}
+        >
+          {/* Image Section */}
+          <div style={{
+            flex: '1 1 45%',
+            padding: '20px',
+            borderRadius: '8px',
+            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)'
+          }}>
+            <img
+              src="/images/taytay-market.jpg"
+              alt="Food waste management"
+              style={{
+                width: '100%',
+                height: 'auto',
+                objectFit: 'cover',
+                borderRadius: '8px'
+              }}
+            />
+          </div>
+
+          {/* Hero Section */}
+          <div style={{
+            minHeight: '100vh',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '80px 16px',
+            flex: '1 1 45%',
+            borderRadius: '8px',
+            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+            textAlign: 'center'
+          }}>
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '24px',
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+              padding: '40px',
+              maxWidth: '750px',
+              width: '100%'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '24px' }}>
+                <div style={{
+                  backgroundColor: '#48bb78',
+                  borderRadius: '50%',
+                  padding: '12px'
+                }}>
+                  <span role="img" aria-label="leaf" style={{ color: 'white', fontSize: '24px' }}>🌱</span>
+                </div>
               </div>
-            </div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-4">NoWaste</h1>
-            <p className="text-gray-600 text-lg mb-6">
-              A revolutionary platform connecting food vendors with farmers and composters to reduce waste and promote sustainability.
-            </p>
-            <div className="flex justify-center gap-4">
-              <a
-                href="/login"
-                className="bg-green-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-green-700 transition"
-              >
-                Get Started
-              </a>
-              <a
-                href="#how-it-works"
-                className="border-2 border-green-600 text-green-600 px-6 py-3 rounded-full font-semibold hover:bg-green-600 hover:text-white transition"
-              >
-                Learn More
-              </a>
+              <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#4a4a4a', marginBottom: '16px' }}>NoWaste</h1>
+              <p style={{ color: '#4a4a4a', fontSize: '1.125rem', marginBottom: '24px' }}>
+                A revolutionary platform connecting food vendors with farmers and composters to reduce waste and promote sustainability.
+              </p>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '16px' }}>
+                <a
+                  href="/login"
+                  style={{
+                    backgroundColor: '#2f855a',
+                    color: 'white',
+                    padding: '12px 24px',
+                    borderRadius: '9999px',
+                    fontWeight: '600',
+                    transition: 'background-color 0.3s'
+                  }}
+                  onMouseOver={(e) => e.target.style.backgroundColor = '#2c7a34'}
+                  onMouseOut={(e) => e.target.style.backgroundColor = '#2f855a'}
+                >
+                  Get Started
+                </a>
+                <a
+                  href="#how-it-works"
+                  style={{
+                    border: '2px solid #2f855a',
+                    color: '#2f855a',
+                    padding: '12px 24px',
+                    borderRadius: '9999px',
+                    fontWeight: '600',
+                    transition: 'background-color 0.3s, color 0.3s'
+                  }}
+                  onMouseOver={(e) => {
+                    e.target.style.backgroundColor = '#2f855a';
+                    e.target.style.color = 'white';
+                  }}
+                  onMouseOut={(e) => {
+                    e.target.style.backgroundColor = 'transparent';
+                    e.target.style.color = '#2f855a';
+                  }}
+                >
+                  Learn More
+                </a>
+              </div>
             </div>
           </div>
         </div>
+
+
 
         {/* How It Works */}
         <section id="how-it-works" className="bg-white py-16 px-6">
@@ -124,6 +202,7 @@ const Home = () => {
           {/* Admin View */}
           {user.role === "admin" && (
             <>
+              <Sidebar />
               <AdminDashboard />
               <Footer />
             </>
@@ -132,6 +211,7 @@ const Home = () => {
           {/* Vendor View */}
           {user.role === "vendor" && (
             <>
+              <Sidebar />
               <VendorIndex />
               <Footer />
             </>
@@ -140,6 +220,7 @@ const Home = () => {
           {/* Farmer View */}
           {user.role === "farmer" && (
             <>
+              <Sidebar />
               <UserIndex />
               <Footer />
             </>
@@ -147,6 +228,7 @@ const Home = () => {
 
           {user.role === "composter" && (
             <>
+              <Sidebar />
               <ComposterIndex />
               <Footer />
             </>

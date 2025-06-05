@@ -1,13 +1,35 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getUser, logout } from "../../utils/helpers";
 import { FaBars, FaTimes } from "react-icons/fa"; // Import icons for menu toggle
+import axios from "axios";
 
 const Sidebar = () => {
   const navigation = useNavigate();
   const [user, setUser] = React.useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
   // console.log(user._id,'User Data')
+  const [mySack, setMySacks] = useState([]);
+
+  const fetchMySacks = async () => {
+    try {
+      const { data } = await axios.get(`${import.meta.env.VITE_API}/sack/get-my-sacks/${userId}`);
+      const pendingSacks = data.mySack.filter(sack => sack.status === "pending");
+
+      setMySacks(pendingSacks);
+    } catch (error) {
+      // console.error("Error fetching:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchMySacks();
+    const interval = setInterval(() => {
+      fetchMySacks();
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
   const sidebarRef = React.useRef(null);
 
   React.useEffect(() => {
@@ -71,6 +93,16 @@ const Sidebar = () => {
     ],
     bottom: [
       {
+        name: "Dashboard",
+        icon: "📊",
+        action: () => navigation("/"),
+      },
+      {
+        name: "About",
+        icon: "ℹ️",
+        action: () => navigation("/about"),
+      },
+      {
         name: "Profile",
         icon: "👤",
         action: () => navigation("/profile"),
@@ -95,9 +127,16 @@ const Sidebar = () => {
         icon: "📦",
         action: () => navigation("/pickup"),
       },
-      { name: "Notifications", icon: "🔔" },
+      {
+        name: "My Sack", icon: "🗑️", badge: mySack.length || 0, action: () => navigation("/mysack"),
+      },
     ],
     bottom: [
+      {
+        name: "About",
+        icon: "ℹ️",
+        action: () => navigation("/about"),
+      },
       {
         name: "Profile",
         icon: "👤",
@@ -106,7 +145,7 @@ const Sidebar = () => {
       {
         name: "Dashboard",
         icon: "📊",
-        action: () => navigation("/dashboard"),
+        action: () => navigation("/"),
       },
       {
         name: "Logout",
@@ -117,10 +156,28 @@ const Sidebar = () => {
   };
 
   const composterMenuItems = {
-    top: [{ name: "View Market", icon: "♻️", action: () => navigation("/composter/market") },
-      { name: "Pickup", icon: "📦", action: () => navigation("/composter/pickup") }
+    top: [
+      {
+        name: "View Market", icon: "♻️", action: () => navigation("/composter/market")
+      },
+      {
+        name: "Pickup", icon: "📦", action: () => navigation("/composter/pickup")
+      },
+      {
+        name: "My Sack", icon: "🗑️", badge: mySack.length || 0, action: () => navigation("/mysack"),
+      },
     ],
     bottom: [
+      {
+        name: "Dashboard",
+        icon: "📊",
+        action: () => navigation("/"),
+      },
+      {
+        name: "About",
+        icon: "ℹ️",
+        action: () => navigation("/about"),
+      },
       {
         name: "Profile",
         icon: "👤",

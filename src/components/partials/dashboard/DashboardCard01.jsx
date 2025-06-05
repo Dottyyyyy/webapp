@@ -1,113 +1,185 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import LineChart from "../../../charts/LineChart01";
 import { chartAreaGradient } from "../../../charts/ChartjsConfig";
 import EditMenu from "../../Extras/DropdownEditMenu";
+import Chart from "chart.js/auto";
 
 // Import utilities
 import { adjustColorOpacity, getCssVariable } from "../../../utils/Utils";
+import { getUser } from "../../../utils/helpers";
+import axios from "axios";
 
 function DashboardCard01() {
-  const chartData = {
-    labels: [
-      "12-01-2022",
-      "01-01-2023",
-      "02-01-2023",
-      "03-01-2023",
-      "04-01-2023",
-      "05-01-2023",
-      "06-01-2023",
-      "07-01-2023",
-      "08-01-2023",
-      "09-01-2023",
-      "10-01-2023",
-      "11-01-2023",
-      "12-01-2023",
-      "01-01-2024",
-      "02-01-2024",
-      "03-01-2024",
-      "04-01-2024",
-      "05-01-2024",
-      "06-01-2024",
-      "07-01-2024",
-      "08-01-2024",
-      "09-01-2024",
-      "10-01-2024",
-      "11-01-2024",
-      "12-01-2024",
-      "01-01-2025",
-    ],
-    datasets: [
-      // Indigo line
-      {
-        data: [
-          732, 610, 610, 504, 504, 504, 349, 349, 504, 342, 504, 610, 391, 192,
-          154, 273, 191, 191, 126, 263, 349, 252, 423, 622, 470, 532,
-        ],
-        fill: true,
-        backgroundColor: function (context) {
-          const chart = context.chart;
-          const { ctx, chartArea } = chart;
-          return chartAreaGradient(ctx, chartArea, [
-            {
-              stop: 0,
-              color: adjustColorOpacity(getCssVariable("--color-green-500"), 0),
-            },
-            {
-              stop: 1,
-              color: adjustColorOpacity(
-                getCssVariable("--color-green-500"),
-                0.2
-              ),
-            },
-          ]);
-        },
-        borderColor: getCssVariable("--color-green-500"),
-        borderWidth: 2,
-        pointRadius: 0,
-        pointHoverRadius: 3,
-        pointBackgroundColor: getCssVariable("--color-green-500"),
-        pointHoverBackgroundColor: getCssVariable("--color-green-500"),
-        pointBorderWidth: 0,
-        pointHoverBorderWidth: 0,
-        clip: 20,
-        tension: 0.2,
-      },
-      // Gray line
-      {
-        data: [
-          532, 532, 532, 404, 404, 314, 314, 314, 314, 314, 234, 314, 234, 234,
-          314, 314, 314, 388, 314, 202, 202, 202, 202, 314, 720, 642,
-        ],
-        borderColor: adjustColorOpacity(
-          getCssVariable("--color-gray-500"),
-          0.25
-        ),
-        borderWidth: 2,
-        pointRadius: 0,
-        pointHoverRadius: 3,
-        pointBackgroundColor: adjustColorOpacity(
-          getCssVariable("--color-gray-500"),
-          0.25
-        ),
-        pointHoverBackgroundColor: adjustColorOpacity(
-          getCssVariable("--color-gray-500"),
-          0.25
-        ),
-        pointBorderWidth: 0,
-        pointHoverBorderWidth: 0,
-        clip: 20,
-        tension: 0.2,
-      },
-    ],
+  const [sacks, setSacks] = useState([]);
+  const [pieData, setPieData] = useState([]);
+  const [predictedWaste, setPredictedWaste] = useState([]);
+  const [co2Data, setCo2Data] = useState([]);
+  const [wasteData, setWasteData] = useState([]);
+  const [wasteGeneration, setWasteGeneration] = useState([]);
+  const lineChartRef = useRef(null);
+  const lineChartInstance = useRef(null);
+  const predictedWasteChartRef = useRef(null);
+  const predictedWasteChartInstance = useRef(null);
+
+  const fetchPredictedWaste = async () => {
+    try {
+
+      //predict-waste-data
+      const predictWaste = await axios.get(`${import.meta.env.VITE_API}/ml/predict-waste`);
+      setPredictedWaste(predictWaste.data);
+      //waste-collected-progress-data
+      const collectedProgress = await axios.get(`${import.meta.env.VITE_API}/ml/waste-collected-progress`);
+      const pastData = collectedProgress.data?.past_data || [];
+      // Process past data (Actual waste collected)
+      const wastePoints = pastData.map((item, index) => ({
+        value: item.total_kilo,
+        label: new Date(item.date).getDate().toString(),
+      }));
+      setWasteData(wastePoints);
+      const co2Points = pastData.map((item, index) => ({
+        value: item.total_kilo * 0.7,
+        label: new Date(item.date).getDate().toString(),
+      }));
+      setCo2Data(co2Points);
+
+      //waste-generation-trend-data
+      const wasteGeneration = await axios.get(`${import.meta.env.VITE_API}/ml/waste-generation-trend`);
+      // console.log("Waste Generation Data:", wasteGeneration.data);
+      setWasteGeneration(wasteGeneration.data);
+    } catch (error) {
+      console.error("Error fetching predicted waste data:", error);
+    }
   };
+  // console.log(optimalSchedule);
+
+  useEffect(() => {
+    if (predictedWaste.length > 0 && predictedWasteChartRef.current) {
+      if (predictedWasteChartInstance.current) {
+        predictedWasteChartInstance.current.destroy();
+      }
+
+      predictedWasteChartInstance.current = new Chart(predictedWasteChartRef.current, {
+        type: "line",
+        data: {
+          labels: predictedWaste.map((_, index) => index),
+          datasets: [
+            {
+              label: "Predicted Waste for each Stall (kg)",
+              data: predictedWaste.map((item) => item.predicted_kilos),
+              borderColor: "rgba(75,192,192,1)",
+              fill: false,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: "Index"
+              }
+            },
+            y: {
+              title: {
+                display: true,
+                text: "Kg"
+              }
+            }
+          },
+          plugins: {
+            tooltip: {
+              callbacks: {
+                title: function (context) {
+                  const index = context[0].dataIndex;
+                  return `Date: ${wasteGeneration[index].ds}`;
+                },
+                label: function (context) {
+                  const index = context.dataIndex;
+                  const yhat = wasteGeneration[index].yhat.toFixed(2);
+                  return `Predicted: ${yhat} Kg`;
+                },
+              },
+            },
+          }
+        }
+      });
+    }
+
+  }, [predictedWaste]);
+
+  const fetchReviewRating = async () => {
+    try {
+      const data = await axios.get(`${import.meta.env.VITE_API}/get-ratings-reviews`);
+      console.log(data.data, 'This is Review Rating')
+    } catch (error) {
+      console.error("Error fetching stalls:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchReviewRating(); 7
+    fetchPredictedWaste();
+  }, []);
+
+  useEffect(() => {
+    if (sacks.length > 0) {
+      const currentMonth = new Date().getMonth();
+      const currentYear = new Date().getFullYear();
+
+      const sacksThisMonth = sacks.filter((sack) => {
+        const createdAt = new Date(sack.createdAt);
+        return createdAt.getMonth() === currentMonth && createdAt.getFullYear() === currentYear;
+      });
+    }
+  }, [sacks, pieData]);
+
+  useEffect(() => {
+    if (wasteData.length && co2Data.length) {
+      const ctx = lineChartRef.current.getContext("2d");
+
+      if (lineChartInstance.current) {
+        lineChartInstance.current.destroy();
+      }
+
+      lineChartInstance.current = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: wasteData.map((item) => item.label),
+          datasets: [
+            {
+              label: "Waste Collected (kg)",
+              data: wasteData.map((item) => item.value),
+              borderColor: "#16A34A",
+              fill: false,
+              tension: 0.4,
+            },
+            {
+              label: "CO2 Saved (kg)",
+              data: co2Data.map((item) => item.value),
+              borderColor: "#4B5563",
+              fill: false,
+              tension: 0.4,
+            },
+          ],
+        },
+      });
+    }
+  }, [wasteData, co2Data]);
+
+  useEffect(() => {
+    return () => {
+      if (lineChartInstance.current) lineChartInstance.current.destroy();
+    };
+  }, []);
 
   return (
     <div className="flex flex-col col-span-full sm:col-span-6 xl:col-span-4 bg-white dark:bg-gray-800 shadow-xs rounded-xl">
       <div className="px-5 pt-5">
         <header className="flex justify-between items-start mb-2">
           <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">
-            Vegetable Vendors
+            CO2 & Waste Reserve
           </h2>
           {/* Menu button */}
           <EditMenu align="right" className="relative inline-flex">
@@ -137,9 +209,6 @@ function DashboardCard01() {
             </li>
           </EditMenu>
         </header>
-        <div className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase mb-1">
-          Waste Reduced
-        </div>
         <div className="flex items-start">
           <div className="text-3xl font-bold text-gray-800 dark:text-gray-100 mr-2">
             240 Kilos
@@ -149,7 +218,7 @@ function DashboardCard01() {
       {/* Chart built with Chart.js 3 */}
       <div className="grow max-sm:max-h-[128px] xl:max-h-[128px]">
         {/* Change the height attribute to adjust the chart height */}
-        <LineChart data={chartData} width={389} height={128} />
+        <canvas ref={lineChartRef} width={389} height={128} />
       </div>
     </div>
   );

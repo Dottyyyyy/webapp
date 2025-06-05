@@ -31,7 +31,7 @@ const AdminDashboard = () => {
     const predictedWasteChartInstance = useRef(null);
 
 
-    console.log(wasteGeneration)
+    // console.log(wasteGeneration)
 
     const fetchStoreCounts = async () => {
         try {
@@ -113,7 +113,7 @@ const AdminDashboard = () => {
             console.error("Error fetching predicted waste data:", error);
         }
     };
-    console.log(optimalSchedule);
+    // console.log(optimalSchedule);
 
     useEffect(() => {
         if (predictedWaste.length > 0 && predictedWasteChartRef.current) {
@@ -302,8 +302,17 @@ const AdminDashboard = () => {
         }
     }, [predictedWaste, wasteGeneration, optimalSchedule]);
 
+    const fetchReviewRating = async () => {
+        try {
+            const data = await axios.get(`${import.meta.env.VITE_API}/get-ratings-reviews`);
+            console.log(data.data, 'This is Review Rating')
+        } catch (error) {
+            console.error("Error fetching stalls:", error);
+        }
+    };
 
     useEffect(() => {
+        fetchReviewRating();7
         fetchPredictedWaste();
     }, []);
 
@@ -470,7 +479,7 @@ const AdminDashboard = () => {
     const totalWaste = wasteData.reduce((sum, item) => sum + item.value, 0);
     const totalCO2 = co2Data.reduce((sum, item) => sum + item.value, 0);
 
-    console.log(pieData, 'pieData')
+    // console.log(pieData, 'pieData')
     return (
         <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 p-8">
             <header className="mb-10">
