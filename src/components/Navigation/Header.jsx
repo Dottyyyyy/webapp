@@ -8,6 +8,7 @@ import Help from "../Extras/DropdownHelp";
 import UserMenu from "../Extras/DropdownProfile";
 import ThemeToggle from "../Extras/ThemeToggle";
 import axios from "axios";
+import Sidebar from "./Sidebar";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -54,28 +55,16 @@ const Header = () => {
 
   return (
     <>
-      <header className="bg-[#1CC55C] p-6 shadow-lg">
+      <header className="bg-[#FFFFFF] p-6 shadow-lg">
         <div className="container mx-auto flex justify-between items-center">
           <h1 className="text-3xl font-bold text-black">
             <a href="/" className="hover:text-gray-200">NoWaste</a>
           </h1>
           <nav>
             <ul className="flex items-center space-x-4">
-              <li>
-                <a href="/"
-                  className="relative inline-block px-6 py-2 font-bold text-black bg-white border-2 border-green-600 rounded-md hover:text-white hover:bg-green-600 transition"
-                >
-                  {user ? "Dashboard" : "Home"}
-                </a>
-              </li>
-              <li>
-                <a href="/about"
-                  className="relative inline-block px-6 py-2 font-bold text-black bg-white border-2 border-green-600 rounded-md hover:text-white hover:bg-green-600 transition"
-                >
-                  About
-                </a>
-              </li>
-
+              {user && (
+                <Sidebar />
+              )}
               {!user && (
                 <>
                   <li>

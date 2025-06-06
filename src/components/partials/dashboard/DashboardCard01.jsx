@@ -112,7 +112,7 @@ function DashboardCard01() {
   const fetchReviewRating = async () => {
     try {
       const data = await axios.get(`${import.meta.env.VITE_API}/get-ratings-reviews`);
-      console.log(data.data, 'This is Review Rating')
+      // console.log(data.data, 'This is Review Rating')
     } catch (error) {
       console.error("Error fetching stalls:", error);
     }
@@ -211,7 +211,7 @@ function DashboardCard01() {
         </header>
         <div className="flex items-start">
           <div className="text-3xl font-bold text-gray-800 dark:text-gray-100 mr-2">
-            240 Kilos
+           -------
           </div>
         </div>
       </div>

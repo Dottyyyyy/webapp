@@ -1,42 +1,108 @@
-import React from "react";
-import BarChart from "../../../charts/BarChart01";
-
-// Import utilities
-import { getCssVariable } from "../../../utils/Utils";
+import { useEffect, useRef, useState } from "react";
+import Chart from "chart.js/auto";
+import axios from "axios";
 
 function DashboardCard04() {
-  const chartData = {
-    labels: [
-      "12-01-2022",
-      "01-01-2023",
-      "02-01-2023",
-      "03-01-2023",
-      "04-01-2023",
-      "05-01-2023",
-    ],
-    datasets: [
-      // Light blue bars
-      {
-        label: "Pig Farmers",
-        data: [14, 17, 27, 48, 23, 45],
-        backgroundColor: getCssVariable("--color-sky-500"),
-        hoverBackgroundColor: getCssVariable("--color-sky-600"),
-        barPercentage: 0.7,
-        categoryPercentage: 0.7,
-        borderRadius: 4,
-      },
-      // Blue bars
-      {
-        label: "Composters",
-        data: [32, 14, 16, 27, 67, 55],
-        backgroundColor: getCssVariable("--color-green-500"),
-        hoverBackgroundColor: getCssVariable("--color-green-600"),
-        barPercentage: 0.7,
-        categoryPercentage: 0.7,
-        borderRadius: 4,
-      },
-    ],
-  };
+  const chartRef = useRef(null);
+  const chartInstanceRef = useRef(null);
+  const [chartData, setChartData] = useState(null);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const farmersResponse = await axios.get(
+          `${import.meta.env.VITE_API}/admin-farmers-pickup`
+        );
+        const compostersResponse = await axios.get(
+          `${import.meta.env.VITE_API}/admin-composters-pickup`
+        );
+
+        const farmersData = farmersResponse.data.data || [];
+        const compostersData = compostersResponse.data.data || [];
+
+        const formatDate = (dateStr) =>
+          new Date(dateStr).toISOString().slice(0, 10);
+
+        const allDatesSet = new Set([
+          ...farmersData.map((item) => formatDate(item._id.date)),
+          ...compostersData.map((item) => formatDate(item._id.date)),
+        ]);
+
+        const allDates = Array.from(allDatesSet).sort(
+          (a, b) => new Date(a) - new Date(b)
+        );
+
+        const farmersMap = new Map(
+          farmersData.map((item) => [formatDate(item._id.date), item.totalKilo])
+        );
+
+        const compostersMap = new Map(
+          compostersData.map((item) => [formatDate(item._id.date), item.totalKilo])
+        );
+
+        setChartData({
+          labels: allDates,
+          farmers: allDates.map((date) => farmersMap.get(date) || 0),
+          composters: allDates.map((date) => compostersMap.get(date) || 0),
+        });
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    }
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    if (chartData && chartRef.current) {
+      // Destroy previous chart instance if it exists
+      if (chartInstanceRef.current) {
+        chartInstanceRef.current.destroy();
+      }
+
+      chartInstanceRef.current = new Chart(chartRef.current, {
+        type: "bar",
+        data: {
+          labels: chartData.labels,
+          datasets: [
+            {
+              label: "Pig Farmers",
+              data: chartData.farmers,
+              backgroundColor: "#38bdf8", // Tailwind sky-500
+            },
+            {
+              label: "Composters",
+              data: chartData.composters,
+              backgroundColor: "#22c55e", // Tailwind green-500
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: {
+              ticks: {
+                display: false, // 👈 hide the dates
+              },
+              grid: {
+                display: false, // optional: hide x-axis grid lines
+              },
+            },
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: "Kilos",
+              },
+            },
+          },
+          plugins: {
+            legend: { display: false },
+          },
+        }
+      });
+    }
+  }, [chartData]);
 
   return (
     <div className="flex flex-col col-span-full sm:col-span-6 bg-white dark:bg-gray-800 shadow-xs rounded-xl">
@@ -45,9 +111,7 @@ function DashboardCard04() {
           Pig Farmers and Composters Monthly Waste Collection
         </h2>
       </header>
-      {/* Chart built with Chart.js 3 */}
-      {/* Change the height attribute to adjust the chart height */}
-      <BarChart data={chartData} width={595} height={248} />
+      <canvas ref={chartRef} width={595} height={248} />
     </div>
   );
 }

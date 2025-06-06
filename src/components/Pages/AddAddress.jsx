@@ -31,7 +31,7 @@ const AddAddress = () => {
         if (user._id) {
             fetchUser();
             const interval = setInterval(fetchUser, 3000);
-            return () => clearInterval(interval); // Clean up the interval on component unmount
+            return () => clearInterval(interval);
         }
     }, [user._id]);
 

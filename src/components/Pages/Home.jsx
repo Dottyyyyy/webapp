@@ -7,6 +7,7 @@ import ComposterIndex from "../Composter/ComposterIndex";
 import UserIndex from "../User/UserIndex";
 import Footer from "../Navigation/Footer";
 import VendorIndex from "../Vendor/VendorIndex";
+import Dashboard from "./Dashboard";
 
 const Home = () => {
   const user = getUser();
@@ -16,7 +17,6 @@ const Home = () => {
     return (
       <>
         {/* Top Green Bar */}
-        <div className="bg-green-500 h-1 w-full" />
         <div style={{
           display: 'flex',
           flexDirection: 'row',
@@ -69,13 +69,15 @@ const Home = () => {
               width: '100%'
             }}>
               <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '24px' }}>
-                <div style={{
-                  backgroundColor: '#48bb78',
-                  borderRadius: '50%',
-                  padding: '12px'
-                }}>
-                  <span role="img" aria-label="leaf" style={{ color: 'white', fontSize: '24px' }}>🌱</span>
-                </div>
+                <img
+                  src="/images/nw-preview.png"
+                  alt="Food waste management"
+                  style={{
+                    width: '40%',
+                    height: '30%',
+                    borderRadius: '8px'
+                  }}
+                />
               </div>
               <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#4a4a4a', marginBottom: '16px' }}>NoWaste</h1>
               <p style={{ color: '#4a4a4a', fontSize: '1.125rem', marginBottom: '24px' }}>
@@ -197,44 +199,45 @@ const Home = () => {
   return (
     <>
       <div className="bg-green-500 h-1 w-full"></div>
-      <div sty className="flex w-full h-full fade-in">
-        <div className="flex-grow p-8 bg-gradient-to-br from-green-50 to-green-100 w-full h-full">
-          {/* Admin View */}
-          {user.role === "admin" && (
-            <>
-              <Sidebar />
-              <AdminDashboard />
-              <Footer />
-            </>
-          )}
+      {user.role === "admin" && (
+        <>
+          <Sidebar />
+          <Dashboard />
+        </>
+      )}
+      {!user.role === "admin" && (
+        <div sty className="flex w-full h-full fade-in">
+          <div className="flex-grow p-8 bg-gradient-to-br from-green-50 to-green-100 w-full h-full">
+            {/* Admin View */}
 
-          {/* Vendor View */}
-          {user.role === "vendor" && (
-            <>
-              <Sidebar />
-              <VendorIndex />
-              <Footer />
-            </>
-          )}
+            {/* Vendor View */}
+            {user.role === "vendor" && (
+              <>
+                <Sidebar />
+                <VendorIndex />
+                <Footer />
+              </>
+            )}
 
-          {/* Farmer View */}
-          {user.role === "farmer" && (
-            <>
-              <Sidebar />
-              <UserIndex />
-              <Footer />
-            </>
-          )}
+            {/* Farmer View */}
+            {user.role === "farmer" && (
+              <>
+                <Sidebar />
+                <UserIndex />
+                <Footer />
+              </>
+            )}
 
-          {user.role === "composter" && (
-            <>
-              <Sidebar />
-              <ComposterIndex />
-              <Footer />
-            </>
-          )}
+            {user.role === "composter" && (
+              <>
+                <Sidebar />
+                <ComposterIndex />
+                <Footer />
+              </>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </>
   );
 };

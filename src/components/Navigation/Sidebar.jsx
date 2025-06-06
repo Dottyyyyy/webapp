@@ -65,8 +65,11 @@ const Sidebar = () => {
 
   const adminMenuItems = {
     top: [
-      { name: "Manage Users", icon: "👥" },
-      { name: "System Settings", icon: "⚙️" },
+      {
+        name: "Dashboard",
+        icon: "📊",
+        action: () => navigation("/dashboard"),
+      },
     ],
     bottom: [
       {

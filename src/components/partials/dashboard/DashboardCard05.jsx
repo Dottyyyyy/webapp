@@ -1,114 +1,292 @@
-import React, { useState, useEffect } from "react";
-import Tooltip from "../../../components/Extras/Tooltip";
-import { chartAreaGradient } from "../../../charts/ChartjsConfig";
-import RealtimeChart from "../../../charts/RealtimeChart";
-
-// Import utilities
-import { adjustColorOpacity, getCssVariable } from "../../../utils/Utils";
+import React, { useEffect, useRef, useState } from "react";
+import { getUser } from "../../../utils/helpers";
+import axios from "axios";
+import Chart from "chart.js/auto";
 
 function DashboardCard05() {
-  // Fake real-time data
-  const [counter, setCounter] = useState(0);
-  const [increment, setIncrement] = useState(0);
-  const [range, setRange] = useState(35);
+  const user = getUser();
+  const [roleCounts, setRoleCounts] = useState({ farmer: 0, composter: 0, vendor: 0 });
+  const [numStalls, setStalls] = useState(0);
+  const [sacks, setSacks] = useState([]);
+  const [pieData, setPieData] = useState([]);
+  const [predictedWaste, setPredictedWaste] = useState([]);
+  const [optimalSchedule, setOptimalSchedule] = useState([]);
+  const [co2Data, setCo2Data] = useState([]);
+  const [wasteData, setWasteData] = useState([]);
+  const [wasteGeneration, setWasteGeneration] = useState([]);
+  const wasteGenerationChartRef = useRef(null);
+  const optimalScheduleChartRef = useRef(null);
+  const predictedWasteChartRef = useRef(null);
 
-  // Dummy data to be looped
-  const data = [
-    57.81, 57.75, 55.48, 54.28, 53.14, 52.25, 51.04, 52.49, 55.49, 56.87, 53.73,
-    56.42, 58.06, 55.62, 58.16, 55.22, 58.67, 60.18, 61.31, 63.25, 65.91, 64.44,
-    65.97, 62.27, 60.96, 59.34, 55.07, 59.85, 53.79, 51.92, 50.95, 49.65, 48.09,
-    49.81, 47.85, 49.52, 50.21, 52.22, 54.42, 53.42, 50.91, 58.52, 53.37, 57.58,
-    59.09, 59.36, 58.71, 59.42, 55.93, 57.71, 50.62, 56.28, 57.37, 53.08, 55.94,
-    55.82, 53.94, 52.65, 50.25,
-  ];
+  const wasteGenerationChartInstance = useRef(null);
+  const optimalScheduleChartInstance = useRef(null);
+  const predictedWasteChartInstance = useRef(null);
 
-  const [slicedData, setSlicedData] = useState(data.slice(0, range));
 
-  // Generate fake dates from now to back in time
-  const generateDates = () => {
-    const now = new Date();
-    const dates = [];
-    data.forEach((v, i) => {
-      dates.push(new Date(now - 2000 - i * 2000));
-    });
-    return dates;
-  };
+  // console.log(wasteGeneration)
 
-  const [slicedLabels, setSlicedLabels] = useState(
-    generateDates().slice(0, range).reverse()
-  );
-
-  // Fake update every 2 seconds
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCounter(counter + 1);
-    }, 2000);
-    return () => clearInterval(interval);
-  }, [counter]);
-
-  // Loop through data array and update
-  useEffect(() => {
-    setIncrement(increment + 1);
-    if (increment + range < data.length) {
-      setSlicedData(([x, ...slicedData]) => [
-        ...slicedData,
-        data[increment + range],
-      ]);
-    } else {
-      setIncrement(0);
-      setRange(0);
+  const fetchStoreCounts = async () => {
+    try {
+      const data = await axios.get(`${import.meta.env.VITE_API}/get-all-stalls`);
+      setStalls(data.data.stalls.length);
+    } catch (error) {
+      console.error("Error fetching stalls:", error);
     }
-    setSlicedLabels(([x, ...slicedLabels]) => [...slicedLabels, new Date()]);
-    return () => setIncrement(0);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [counter]);
-
-  const chartData = {
-    labels: slicedLabels,
-    datasets: [
-      // Indigo line
-      {
-        data: slicedData,
-        fill: true,
-        backgroundColor: function (context) {
-          const chart = context.chart;
-          const { ctx, chartArea } = chart;
-          return chartAreaGradient(ctx, chartArea, [
-            {
-              stop: 0,
-              color: adjustColorOpacity(getCssVariable("--color-green-500"), 0),
-            },
-            {
-              stop: 1,
-              color: adjustColorOpacity(
-                getCssVariable("--color-green-500"),
-                0.2
-              ),
-            },
-          ]);
-        },
-        borderColor: getCssVariable("--color-green-500"),
-        borderWidth: 2,
-        pointRadius: 0,
-        pointHoverRadius: 3,
-        pointBackgroundColor: getCssVariable("--color-green-500"),
-        pointHoverBackgroundColor: getCssVariable("--color-green-500"),
-        pointBorderWidth: 0,
-        pointHoverBorderWidth: 0,
-        clip: 20,
-        tension: 0.2,
-      },
-    ],
   };
 
+  const fetchUserCounts = async () => {
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_API}/get-all-users`);
+      const counts = { farmer: 0, composter: 0, vendor: 0 };
+      response.data.users.forEach(user => {
+        if (user.role === "farmer") counts.farmer++;
+        else if (user.role === "composter") counts.composter++;
+        else if (user.role === "vendor") counts.vendor++;
+      });
+      setRoleCounts(counts);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    }
+  };
+
+  const fetchSackCounts = async () => {
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_API}/sack/get-sacks`);
+
+      const now = new Date();
+      const currentMonth = now.getMonth();
+      const currentYear = now.getFullYear();
+
+      const filtered = response.data.sacks.filter(sack => {
+        const createdAt = new Date(sack.createdAt);
+        return (
+          createdAt.getMonth() === currentMonth &&
+          createdAt.getFullYear() === currentYear
+        );
+      });
+      setSacks(filtered);
+    } catch (error) {
+      console.error("Error fetching sacks:", error);
+    }
+  };
+
+  const fetchPredictedWaste = async () => {
+    try {
+
+      //predict-waste-data
+      const predictWaste = await axios.get(`${import.meta.env.VITE_API}/ml/predict-waste`);
+      setPredictedWaste(predictWaste.data);
+
+      //optimal-collection-schedule-data
+      const optimalSchedule = await axios.get(`${import.meta.env.VITE_API}/ml/optimal-collection-schedule`);
+      setOptimalSchedule(optimalSchedule.data);
+
+      //waste-collected-progress-data
+      const collectedProgress = await axios.get(`${import.meta.env.VITE_API}/ml/waste-collected-progress`);
+      const pastData = collectedProgress.data?.past_data || [];
+      const predictions = collectedProgress.data?.predictions || [];
+      // Process past data (Actual waste collected)
+      const wastePoints = pastData.map((item, index) => ({
+        value: item.total_kilo,
+        label: new Date(item.date).getDate().toString(),
+      }));
+      setWasteData(wastePoints);
+      const co2Points = pastData.map((item, index) => ({
+        value: item.total_kilo * 0.7,
+        label: new Date(item.date).getDate().toString(),
+      }));
+      setCo2Data(co2Points);
+
+      //waste-generation-trend-data
+      const wasteGeneration = await axios.get(`${import.meta.env.VITE_API}/ml/waste-generation-trend`);
+      // console.log("Waste Generation Data:", wasteGeneration.data);
+      setWasteGeneration(wasteGeneration.data);
+    } catch (error) {
+      console.error("Error fetching predicted waste data:", error);
+    }
+  };
+  // console.log(optimalSchedule);
+
+  useEffect(() => {
+    if (predictedWaste.length > 0 && predictedWasteChartRef.current) {
+      if (predictedWasteChartInstance.current) {
+        predictedWasteChartInstance.current.destroy();
+      }
+
+      predictedWasteChartInstance.current = new Chart(predictedWasteChartRef.current, {
+        type: "line",
+        data: {
+          labels: predictedWaste.map((_, index) => index),
+          datasets: [
+            {
+              label: "Predicted Waste for each Stall (kg)",
+              data: predictedWaste.map((item) => item.predicted_kilos),
+              borderColor: "rgba(75,192,192,1)",
+              fill: false,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: {
+              title: {
+                display: true,
+              }
+            },
+            y: {
+              title: {
+                display: true,
+                text: "Kg"
+              }
+            }
+          },
+          plugins: {
+            tooltip: {
+              callbacks: {
+                title: function (context) {
+                  const index = context[0].dataIndex;
+                  return `Date: ${wasteGeneration[index].ds}`;
+                },
+                label: function (context) {
+                  const index = context.dataIndex;
+                  const yhat = wasteGeneration[index].yhat.toFixed(2);
+                  return `Predicted: ${yhat} Kg`;
+                },
+              },
+            },
+          }
+        }
+      });
+    }
+
+    if (wasteGeneration.length > 0 && wasteGenerationChartRef.current) {
+      if (wasteGenerationChartInstance.current) {
+        wasteGenerationChartInstance.current.destroy();
+      }
+
+      wasteGenerationChartInstance.current = new Chart(wasteGenerationChartRef.current, {
+        type: "line",
+        data: {
+          labels: wasteGeneration.map((_, index) => index), // use index for visual clarity
+          datasets: [
+            {
+              label: 'Prediction',
+              data: wasteGeneration.map(d => d.yhat),
+              borderColor: 'green',
+              fill: false,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: {
+              ticks: {
+                display: false, // 👈 hide the dates
+              },
+              grid: {
+                display: false, // optional: hide x-axis grid lines
+              },
+            },
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: "Kilos",
+              },
+            },
+          },
+          plugins: {
+            legend: { display: false },
+          },
+        }
+      });
+    }
+
+  }, [predictedWaste, wasteGeneration, optimalSchedule]);
+
+  const fetchReviewRating = async () => {
+    try {
+      const data = await axios.get(`${import.meta.env.VITE_API}/get-ratings-reviews`);
+      // console.log(data.data, 'This is Review Rating')
+    } catch (error) {
+      console.error("Error fetching stalls:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchReviewRating(); 7
+    fetchPredictedWaste();
+  }, []);
+
+  useEffect(() => {
+    fetchStoreCounts();
+    fetchUserCounts();
+    fetchSackCounts();
+  }, []);
+
+  useEffect(() => {
+    if (sacks.length > 0) {
+      const currentMonth = new Date().getMonth();
+      const currentYear = new Date().getFullYear();
+
+      const sacksThisMonth = sacks.filter((sack) => {
+        const createdAt = new Date(sack.createdAt);
+        return createdAt.getMonth() === currentMonth && createdAt.getFullYear() === currentYear;
+      });
+
+      const statusKilos = sacksThisMonth.reduce((acc, sack) => {
+        const status = sack.status.toLowerCase();
+        const kilo = parseFloat(sack.kilo) || 0;
+
+        acc[status] = (acc[status] || 0) + kilo;
+        return acc;
+      }, {});
+
+      const statusColors = {
+        spoiled: "#D70040",
+        claimed: "#097969",
+        posted: "#F88379",
+        pickup: "#EC5800"
+      };
+
+      const formattedPieData = Object.keys(statusKilos).map((status) => ({
+        value: statusKilos[status],
+        label: status.charAt(0).toUpperCase() + status.slice(1),
+        color: statusColors[status.toLowerCase()] || "#CCCCCC"
+      }));
+
+      // Check if the pie data really needs to be updated
+      if (JSON.stringify(pieData) !== JSON.stringify(formattedPieData)) {
+        setPieData(formattedPieData);
+      }
+
+      const statusCounts = sacks.reduce((acc, sack) => {
+        acc[sack.status] = (acc[sack.status] || 0) + 1;
+        return acc;
+      }, {});
+    }
+  }, [sacks, pieData]);
+
+  useEffect(() => {
+    return () => {
+      if (wasteGenerationChartInstance.current) wasteGenerationChartInstance.current.destroy();
+      if (optimalScheduleChartInstance.current) optimalScheduleChartInstance.current.destroy();
+      if (predictedWasteChartInstance.current) predictedWasteChartInstance.current.destroy();
+    };
+  }, []);
+
+  const totalWaste = wasteData.reduce((sum, item) => sum + item.value, 0);
+  const totalCO2 = co2Data.reduce((sum, item) => sum + item.value, 0);
   return (
     <div className="flex flex-col col-span-full sm:col-span-6 bg-white dark:bg-gray-800 shadow-xs rounded-xl">
       <header className="px-5 py-4 border-b border-gray-100 dark:border-gray-700/60 flex items-center">
         <h2 className="font-semibold text-gray-800 dark:text-gray-100">
-          Real Time Value
+          Waste Generation
         </h2>
       </header>
-      <RealtimeChart data={chartData} width={595} height={248} />
+      <canvas ref={wasteGenerationChartRef} width={595} height={256} />
     </div>
   );
 }
