@@ -173,7 +173,7 @@ function VendorIndex() {
             <div className="bg-white shadow rounded-xl p-6 max-w-3xl mx-auto mt-10">
                 <h2 className="text-lg font-semibold text-gray-700 mb-4">Waste Summary (kg)</h2>
                 <canvas ref={chartRef} height="100"></canvas>
-            </div> 
+            </div>
 
             {/* Stats Section */}
             <div className="grid grid-cols-1 md:grid-cols-5 gap-6 max-w-5xl mx-auto mb-10">
@@ -206,15 +206,15 @@ function VendorIndex() {
             <div className="flex justify-center gap-4">
                 <button
                     onClick={() => navigate(`/vendor/pickup`)}
-                    className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-full font-medium transition">
-                    View All Pending Sacks
+                    className="border border-green-600 text-green-600 hover:bg-green-50 px-6 py-2 rounded-full font-medium transition">
+                    Pickup Requests
                 </button>
                 <button className="border border-green-600 text-green-600 hover:bg-green-50 px-6 py-2 rounded-full font-medium transition">
                     Collection History
                 </button>
             </div>
-            <br/>
-            <br/>
+            <br />
+            <br />
             <div className="grid gap-4">
                 {/* Notifications */}
                 {notifications.filter((notif) => !notif.isRead).length > 0 ? (

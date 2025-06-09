@@ -78,7 +78,6 @@ function Dashboard() {
       {/* Content area */}
       <div className="relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
         {/* Header */}
-        <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
         {/* Main content with footer */}
         <main className="grow flex flex-col justify-between min-h-screen">
@@ -107,11 +106,10 @@ function Dashboard() {
 
             {/* Dashboard Cards */}
             <div className="grid grid-cols-12 gap-6">
-              <DashboardCard01 />
-              <DashboardCard02 />
-              <DashboardCard03 />
               <DashboardCard04 />
               <DashboardCard05 />
+              <DashboardCard02 />
+              <DashboardCard03 />
               <DashboardCard12 />
             </div>
           </div>

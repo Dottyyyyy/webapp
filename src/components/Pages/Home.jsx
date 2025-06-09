@@ -8,6 +8,7 @@ import UserIndex from "../User/UserIndex";
 import Footer from "../Navigation/Footer";
 import VendorIndex from "../Vendor/VendorIndex";
 import Dashboard from "./Dashboard";
+import Header from "../Navigation/Header";
 
 const Home = () => {
   const user = getUser();
@@ -205,39 +206,34 @@ const Home = () => {
           <Dashboard />
         </>
       )}
-      {!user.role === "admin" && (
-        <div sty className="flex w-full h-full fade-in">
-          <div className="flex-grow p-8 bg-gradient-to-br from-green-50 to-green-100 w-full h-full">
-            {/* Admin View */}
+      <div sty className="flex w-full h-full fade-in">
+        <div className="flex-grow p-8 bg-gradient-to-br from-green-50 to-green-100 w-full h-full">
+          {/* Admin View */}
 
-            {/* Vendor View */}
-            {user.role === "vendor" && (
-              <>
-                <Sidebar />
-                <VendorIndex />
-                <Footer />
-              </>
-            )}
+          {/* Vendor View */}
+          {user.role === "vendor" && (
+            <>
+              <VendorIndex />
+              <Footer />
+            </>
+          )}
 
-            {/* Farmer View */}
-            {user.role === "farmer" && (
-              <>
-                <Sidebar />
-                <UserIndex />
-                <Footer />
-              </>
-            )}
+          {/* Farmer View */}
+          {user.role === "farmer" && (
+            <>
+              <UserIndex />
+              <Footer />
+            </>
+          )}
 
-            {user.role === "composter" && (
-              <>
-                <Sidebar />
-                <ComposterIndex />
-                <Footer />
-              </>
-            )}
-          </div>
+          {user.role === "composter" && (
+            <>
+              <ComposterIndex />
+              <Footer />
+            </>
+          )}
         </div>
-      )}
+      </div>
     </>
   );
 };

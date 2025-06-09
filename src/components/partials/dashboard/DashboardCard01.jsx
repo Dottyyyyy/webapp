@@ -76,19 +76,38 @@ function DashboardCard01() {
           responsive: true,
           scales: {
             x: {
+              ticks: {
+                color: "#ffffff", // Pure white
+              },
               title: {
                 display: true,
-                text: "Index"
-              }
+                text: "Index",
+                color: "#ffffff", // Pure white
+              },
+              grid: {
+                color: "#ffffff", // Pure white grid lines
+              },
             },
             y: {
+              ticks: {
+                color: "#ffffff",
+              },
               title: {
                 display: true,
-                text: "Kg"
-              }
-            }
+                text: "Kg",
+                color: "#ffffff",
+              },
+              grid: {
+                color: "#ffffff",
+              },
+            },
           },
           plugins: {
+            legend: {
+              labels: {
+                color: "#ffffff", // Pure white legend
+              },
+            },
             tooltip: {
               callbacks: {
                 title: function (context) {
@@ -102,7 +121,7 @@ function DashboardCard01() {
                 },
               },
             },
-          }
+          },
         }
       });
     }
@@ -119,7 +138,7 @@ function DashboardCard01() {
   };
 
   useEffect(() => {
-    fetchReviewRating(); 7
+    fetchReviewRating(); 
     fetchPredictedWaste();
   }, []);
 
@@ -158,12 +177,40 @@ function DashboardCard01() {
             {
               label: "CO2 Saved (kg)",
               data: co2Data.map((item) => item.value),
-              borderColor: "#4B5563",
+              borderColor: "rgb(6, 23, 214)",
               fill: false,
               tension: 0.4,
             },
           ],
         },
+        options: {
+          responsive: true,
+          scales: {
+            x: {
+              ticks: {
+                color: "#ffffff", // Pure white
+              },
+              grid: {
+                color: "#ffffff", // Pure white grid lines
+              },
+            },
+            y: {
+              ticks: {
+                color: "#ffffff",
+              },
+              grid: {
+                color: "#ffffff",
+              },
+            },
+          },
+          plugins: {
+            legend: {
+              labels: {
+                color: "#ffffff",
+              },
+            },
+          },
+        }
       });
     }
   }, [wasteData, co2Data]);
@@ -175,50 +222,19 @@ function DashboardCard01() {
   }, []);
 
   return (
-    <div className="flex flex-col col-span-full sm:col-span-6 xl:col-span-4 bg-white dark:bg-gray-800 shadow-xs rounded-xl">
-      <div className="px-5 pt-5">
-        <header className="flex justify-between items-start mb-2">
-          <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">
-            CO2 & Waste Reserve
-          </h2>
-          {/* Menu button */}
-          <EditMenu align="right" className="relative inline-flex">
-            <li>
-              <Link
-                className="font-medium text-sm text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-200 flex py-1 px-3"
-                to="#0"
-              >
-                Option 1
-              </Link>
-            </li>
-            <li>
-              <Link
-                className="font-medium text-sm text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-200 flex py-1 px-3"
-                to="#0"
-              >
-                Option 2
-              </Link>
-            </li>
-            <li>
-              <Link
-                className="font-medium text-sm text-red-500 hover:text-red-600 flex py-1 px-3"
-                to="#0"
-              >
-                Remove
-              </Link>
-            </li>
-          </EditMenu>
-        </header>
-        <div className="flex items-start">
-          <div className="text-3xl font-bold text-gray-800 dark:text-gray-100 mr-2">
-           -------
+    <div className="flex flex-col col-span-full sm:col-span-6 bg-white dark:bg-gray-800 shadow-md rounded-2xl w-145">
+      <header className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center bg-[#4eff56]">
+        <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
+          CO2 & Waste Reserve
+        </h2>
+      </header>
+      <div style={{ backgroundColor: '#1D3B29', marginTop: 5, padding: 20 }}>
+        {/* Chart built with Chart.js 3 */}
+        <div className="grow h-64 px-5 pb-5 overflow-hidden h-100 w-135" style={{ borderWidth: 1, borderColor: 'white' }}>
+          <div className="grow h-64 px-5 pb-5 overflow-hidden h-100 w-200">
+            <canvas ref={lineChartRef} width={350} height={340} />
           </div>
         </div>
-      </div>
-      {/* Chart built with Chart.js 3 */}
-      <div className="grow max-sm:max-h-[128px] xl:max-h-[128px]">
-        {/* Change the height attribute to adjust the chart height */}
-        <canvas ref={lineChartRef} width={389} height={128} />
       </div>
     </div>
   );

@@ -32,6 +32,10 @@ import ComposterViewStall from "./components/Composter/Stall/ComposterViewStall"
 import CompPickup from "./components/Composter/Pickup/CompPickup";
 import AddAddress from "./components/Pages/AddAddress";
 import AddStall from "./components/Pages/addStall";
+import AdminDashboard from "./components/Admin/Screen/AdminDashboard";
+import Chats from "./components/User/Chats";
+import ChatRoom from "./components/User/ChatRoom";
+import MessengerLayout from "./components/User/Messenger";
 
 const App = () => {
   const [mySacks, setMySacks] = useState([]); // Lifted state for sacks
@@ -53,17 +57,19 @@ const App = () => {
         <Route path="/profile" element={<Profile />} />
 
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/admin/farmers" element={<Farmers />} />
         <Route path="/admin/create/farmer" element={<CreateFarmer />} />
         <Route path="/admin/composters" element={<Composters />} />
         <Route path="/admin/create/composter" element={<CreateComposter />} />
         <Route path="/admin/vendors" element={<Vendors />} />
         <Route path="/admin/create/vendor" element={<CreateVendor />} />
-        {/* <Route path="/admin/farmers" element={<Dashboard />} />
-        <Route path="/admin/farmers" element={<Dashboard />} /> */}
 
         {/* Farmer Sidebar */}
         <Route path="/viewstalls" element={<ViewStalls />} />
+        <Route path="/chats" element={<Chats />} />
+        <Route path="/chatroom/:userId/:receiverId" element={<ChatRoom />} />
+        <Route path="/messenger" element={<MessengerLayout />} />
         <Route
           path="/stalls/:id"
           element={<StallDetails mySacks={mySacks} setMySacks={setMySacks} />}
@@ -74,7 +80,7 @@ const App = () => {
         />
         <Route path="/pickup" element={<Pickup mySacks={mySacks} setMySacks={setMySacks} />} />
         <Route path="/pickup/see/:id" element={<PickupDetails mySacks={mySacks} setMySacks={setMySacks} />} />
-        
+
         {/* Composter Side */}
         <Route path="/composter/dashboard/" element={<ComposterIndex />} />
         <Route path="/composter/market/" element={<ComposterMarket />} />
