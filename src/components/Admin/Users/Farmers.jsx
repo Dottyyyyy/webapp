@@ -3,6 +3,8 @@ import axios from "axios";
 import Sidebar from "../../partials/Sidebar";
 import Header from "../../partials/Header";
 import Chart from "chart.js/auto";
+import CreateFarmer from "./CreateFarmer";
+import EditVendorModal from "./EditVendor";
 
 const Farmers = () => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -10,6 +12,18 @@ const Farmers = () => {
     const [activities, setActivities] = useState([]);
     const [showActivity, setShowActivity] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
+    const [showModal, setShowModal] = useState(false);
+    const [isEditOpen, setIsEditOpen] = useState(false);
+    const [selectedFarmer, setSelectedFarmer] = useState(null);
+    const handleEditClick = (farmer) => {
+        setSelectedFarmer(farmer);
+        setIsEditOpen(true);
+    };
+
+    const closeEditModal = () => {
+        setIsEditOpen(false);
+        setSelectedFarmer(null);
+    };
     const farmersPerPage = 5;
     const chartRef = useRef(null);
     const chartInstanceRef = useRef(null);
@@ -67,6 +81,11 @@ const Farmers = () => {
     useEffect(() => {
         fetchFarmers();
         fetchActivities();
+        const interval = setInterval(() => {
+            fetchFarmers();
+            fetchActivities();
+        }, 2000);
+        return () => clearInterval(interval);
     }, []);
     useEffect(() => {
         if (!showActivity || !chartRef.current || activities.length === 0) return;
@@ -130,22 +149,22 @@ const Farmers = () => {
 
                     {/* Main content with footer */}
                     <main className="grow flex flex-col justify-between min-h-screen">
-                        <div className="flex flex-col">
+                        <div className="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto">
                             {/* Header with buttons */}
                             <div className="flex items-center justify-between mb-6">
                                 <h1 className="text-3xl font-bold">Farmers Management</h1>
                                 <div className="flex gap-4">
-                                    <a
-                                        href="/admin/create/farmer"
+                                    <button
+                                        onClick={() => setShowModal(true)}
                                         className="bg-green-600 text-white px-5 py-2 rounded-full shadow hover:bg-green-700 transition"
                                     >
-                                        Create Farmer
-                                    </a>
+                                        Create Farmers
+                                    </button>
                                     <button
                                         onClick={() => setShowActivity(prev => !prev)}
                                         className="bg-blue-600 text-white px-5 py-2 rounded-full shadow hover:bg-blue-700 transition"
                                     >
-                                        {showActivity ? "Farmer Management" : "Farmers Activity"}
+                                        {showActivity ? "Farmers Management" : "Farmers Activity"}
                                     </button>
                                 </div>
                             </div>
@@ -176,12 +195,20 @@ const Farmers = () => {
                                                                     Restore
                                                                 </button>
                                                             ) : (
-                                                                <button
-                                                                    onClick={() => handleDeleteFarmer(farmer._id)}
-                                                                    className="px-4 py-1 bg-red-500 text-white rounded-full hover:bg-red-600"
-                                                                >
-                                                                    Delete
-                                                                </button>
+                                                                <>
+                                                                    <button
+                                                                        onClick={() => handleEditClick(farmer)}
+                                                                        className="px-4 py-1 bg-yellow-500 text-white rounded-full hover:bg-yellow-600"
+                                                                    >
+                                                                        Edit
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() => handleDeleteFarmer(farmer._id)}
+                                                                        className="px-4 py-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                                                                    >
+                                                                        Delete
+                                                                    </button>
+                                                                </>
                                                             )}
                                                         </div>
                                                     </li>
@@ -222,7 +249,15 @@ const Farmers = () => {
                                     </div>
                                 </div>
                             )}
+                            <EditVendorModal
+                                isOpen={isEditOpen}
+                                vendor={selectedFarmer}
+                                onClose={closeEditModal}
+                                onUpdate={fetchFarmers}
+                            />
+                            {showModal && <CreateFarmer onClose={() => setShowModal(false)} />}
                         </div>
+
                     </main>
                 </div>
             </div>

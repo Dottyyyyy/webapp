@@ -11,8 +11,8 @@ const Register = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [avatar, setAvatar] = useState(null);
-  const [role, setRole] = useState("farmer");
   const [preview, setPreview] = useState(null);
+  const [role, setRole] = useState("farmer");
   const navigate = useNavigate();
   console.log(name, 'name')
   const handleAvatarChange = (e) => {

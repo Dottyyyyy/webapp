@@ -3,6 +3,8 @@ import axios from "axios";
 import Sidebar from "../../partials/Sidebar";
 import Header from "../../partials/Header";
 import Chart from "chart.js/auto";
+import CreateComposter from "./CreateComposter";
+import EditVendorModal from "./EditVendor";
 
 const Composters = () => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -10,9 +12,21 @@ const Composters = () => {
     const [activities, setActivities] = useState([]);
     const [showActivity, setShowActivity] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
+    const [showModal, setShowModal] = useState(false);
     const compostersPerPage = 5;
     const chartRef = useRef(null);
     const chartInstanceRef = useRef(null);
+    const [isEditOpen, setIsEditOpen] = useState(false);
+    const [selectedFarmer, setSelectedFarmer] = useState(null);
+    const handleEditClick = (farmer) => {
+        setSelectedFarmer(farmer);
+        setIsEditOpen(true);
+    };
+
+    const closeEditModal = () => {
+        setIsEditOpen(false);
+        setSelectedFarmer(null);
+    };
 
     const fetchComposters = async () => {
         try {
@@ -48,12 +62,12 @@ const Composters = () => {
         }
     };
 
-    const handleRestoreFarmer = async (farmerId) => {
+    const handleRestoreComposter = async (composterId) => {
         try {
-            await axios.put(`${import.meta.env.VITE_API}/restore-user/${farmerId}`);
+            await axios.put(`${import.meta.env.VITE_API}/restore-user/${composterId}`);
             fetchComposters();
         } catch (error) {
-            console.error("Error restoring farmer", error);
+            console.error("Error restoring composter", error);
         }
     };
 
@@ -72,6 +86,11 @@ const Composters = () => {
     useEffect(() => {
         fetchComposters();
         fetchActivities();
+        const interval = setInterval(() => {
+            fetchComposters();
+            fetchActivities();
+        }, 2000);
+        return () => clearInterval(interval);
     }, []);
 
     useEffect(() => {
@@ -141,12 +160,12 @@ const Composters = () => {
                             <div className="flex items-center justify-between mb-6">
                                 <h1 className="text-3xl font-bold">Composters Management</h1>
                                 <div className="flex gap-4">
-                                    <a
-                                        href="/admin/create/composter"
+                                    <button
+                                        onClick={() => setShowModal(true)}
                                         className="bg-green-600 text-white px-5 py-2 rounded-full shadow hover:bg-green-700 transition"
                                     >
                                         Create Composter
-                                    </a>
+                                    </button>
                                     <button
                                         onClick={() => setShowActivity(prev => !prev)}
                                         className="bg-blue-600 text-white px-5 py-2 rounded-full shadow hover:bg-blue-700 transition"
@@ -164,30 +183,38 @@ const Composters = () => {
                                     ) : (
                                         <>
                                             <ul className="divide-y">
-                                                {currentComposters.map(farmer => (
+                                                {currentComposters.map(composter => (
                                                     <li
-                                                        key={farmer._id}
-                                                        className={`flex items-center justify-between py-4 ${farmer.isDeleted ? 'opacity-50' : ''}`}
+                                                        key={composter._id}
+                                                        className={`flex items-center justify-between py-4 ${composter.isDeleted ? 'opacity-50' : ''}`}
                                                     >
                                                         <div>
-                                                            <p className="font-semibold">{farmer.name}</p>
-                                                            <p className="text-sm text-gray-500">{farmer.email}</p>
+                                                            <p className="font-semibold">{composter.name}</p>
+                                                            <p className="text-sm text-gray-500">{composter.email}</p>
                                                         </div>
                                                         <div className="flex gap-2">
-                                                            {farmer.isDeleted ? (
+                                                            {composter.isDeleted ? (
                                                                 <button
-                                                                    onClick={() => handleRestoreFarmer(farmer._id)}
+                                                                    onClick={() => handleRestoreComposter(composter._id)}
                                                                     className="px-4 py-1 bg-green-500 text-white rounded-full hover:bg-green-600"
                                                                 >
                                                                     Restore
                                                                 </button>
                                                             ) : (
-                                                                <button
-                                                                    onClick={() => handleDeleteFarmer(farmer._id)}
-                                                                    className="px-4 py-1 bg-red-500 text-white rounded-full hover:bg-red-600"
-                                                                >
-                                                                    Delete
-                                                                </button>
+                                                                <>
+                                                                    <button
+                                                                        onClick={() => handleEditClick(composter)}
+                                                                        className="px-4 py-1 bg-yellow-500 text-white rounded-full hover:bg-yellow-600"
+                                                                    >
+                                                                        Edit
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() => handleDeleteComposter(composter._id)}
+                                                                        className="px-4 py-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                                                                    >
+                                                                        Delete
+                                                                    </button>
+                                                                </>
                                                             )}
                                                         </div>
                                                     </li>
@@ -228,6 +255,14 @@ const Composters = () => {
                                     </div>
                                 </div>
                             )}
+                            <EditVendorModal
+                                isOpen={isEditOpen}
+                                vendor={selectedFarmer}
+                                onClose={closeEditModal}
+                                onUpdate={fetchComposters}
+                            />
+
+                            {showModal && <CreateComposter onClose={() => setShowModal(false)} />}
                         </div>
                     </main>
                 </div>

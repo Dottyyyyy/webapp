@@ -3,6 +3,8 @@ import axios from "axios";
 import Sidebar from "../../partials/Sidebar";
 import Header from "../../partials/Header";
 import Chart from "chart.js/auto";
+import EditVendorModal from "./EditVendor";
+import CreateVendor from "./CreateVendor";
 
 const Vendors = () => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -10,6 +12,20 @@ const Vendors = () => {
     const [activities, setActivities] = useState([]);
     const [showActivity, setShowActivity] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
+    const [isEditOpen, setIsEditOpen] = useState(false);
+    const [selectedVendor, setSelectedVendor] = useState(null);
+    const [showModal, setShowModal] = useState(false);
+
+    const handleEditClick = (vendor) => {
+        setSelectedVendor(vendor);
+        setIsEditOpen(true);
+    };
+
+    const closeEditModal = () => {
+        setIsEditOpen(false);
+        setSelectedVendor(null);
+    };
+
     const vendorsPerPage = 5;
     const chartRef = useRef(null);
     const chartInstanceRef = useRef(null);
@@ -44,12 +60,12 @@ const Vendors = () => {
         }
     };
 
-    const handleRestoreFarmer = async (farmerId) => {
+    const handleRestoreVendor = async (vendorId) => {
         try {
-            await axios.put(`${import.meta.env.VITE_API}/restore-user/${farmerId}`);
+            await axios.put(`${import.meta.env.VITE_API}/restore-user/${vendorId}`);
             fetchVendors();
         } catch (error) {
-            console.error("Error restoring farmer", error);
+            console.error("Error restoring vendor", error);
         }
     };
 
@@ -68,6 +84,11 @@ const Vendors = () => {
     useEffect(() => {
         fetchVendors();
         fetchActivities();
+        const interval = setInterval(() => {
+            fetchVendors();
+            fetchActivities();
+        }, 2000);
+        return () => clearInterval(interval);
     }, []);
 
     useEffect(() => {
@@ -136,12 +157,12 @@ const Vendors = () => {
                             <div className="flex items-center justify-between mb-6">
                                 <h1 className="text-3xl font-bold">Vendors Management</h1>
                                 <div className="flex gap-4">
-                                    <a
-                                        href="/admin/create/vendor"
+                                    <button
+                                        onClick={() => setShowModal(true)}
                                         className="bg-green-600 text-white px-5 py-2 rounded-full shadow hover:bg-green-700 transition"
                                     >
                                         Create Vendor
-                                    </a>
+                                    </button>
                                     <button
                                         onClick={() => setShowActivity(prev => !prev)}
                                         className="bg-blue-600 text-white px-5 py-2 rounded-full shadow hover:bg-blue-700 transition"
@@ -159,30 +180,38 @@ const Vendors = () => {
                                     ) : (
                                         <>
                                             <ul className="divide-y">
-                                                {currentVendors.map(farmer => (
+                                                {currentVendors.map(vendor => (
                                                     <li
-                                                        key={farmer._id}
-                                                        className={`flex items-center justify-between py-4 ${farmer.isDeleted ? 'opacity-50' : ''}`}
+                                                        key={vendor._id}
+                                                        className={`flex items-center justify-between py-4 ${vendor.isDeleted ? 'opacity-50' : ''}`}
                                                     >
                                                         <div>
-                                                            <p className="font-semibold">{farmer.name}</p>
-                                                            <p className="text-sm text-gray-500">{farmer.email}</p>
+                                                            <p className="font-semibold">{vendor.name}</p>
+                                                            <p className="text-sm text-gray-500">{vendor.email}</p>
                                                         </div>
                                                         <div className="flex gap-2">
-                                                            {farmer.isDeleted ? (
+                                                            {vendor.isDeleted ? (
                                                                 <button
-                                                                    onClick={() => handleRestoreFarmer(farmer._id)}
+                                                                    onClick={() => handleRestoreVendor(vendor._id)}
                                                                     className="px-4 py-1 bg-green-500 text-white rounded-full hover:bg-green-600"
                                                                 >
                                                                     Restore
                                                                 </button>
                                                             ) : (
-                                                                <button
-                                                                    onClick={() => handleDeleteFarmer(farmer._id)}
-                                                                    className="px-4 py-1 bg-red-500 text-white rounded-full hover:bg-red-600"
-                                                                >
-                                                                    Delete
-                                                                </button>
+                                                                <>
+                                                                    <button
+                                                                        onClick={() => handleEditClick(vendor)}
+                                                                        className="px-4 py-1 bg-yellow-500 text-white rounded-full hover:bg-yellow-600"
+                                                                    >
+                                                                        Edit
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() => handleDeleteVendor(vendor._id)}
+                                                                        className="px-4 py-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                                                                    >
+                                                                        Delete
+                                                                    </button>
+                                                                </>
                                                             )}
                                                         </div>
                                                     </li>
@@ -223,6 +252,13 @@ const Vendors = () => {
                                     </div>
                                 </div>
                             )}
+                            <EditVendorModal
+                                isOpen={isEditOpen}
+                                vendor={selectedVendor}
+                                onClose={closeEditModal}
+                                onUpdate={fetchVendors}
+                            />
+                            {showModal && <CreateVendor onClose={() => setShowModal(false)} />}
                         </div>
                     </main>
                 </div>

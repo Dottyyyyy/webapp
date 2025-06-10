@@ -102,7 +102,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen, variant = "default" }) {
               >
                 •••
               </span>
-              <span style={{ color: 'white' }} className="lg:hidden lg:sidebar-expanded:block 2xl:block">
+              <span style={{ color: 'black' }} className="lg:hidden lg:sidebar-expanded:block 2xl:block">
                 Pages
               </span>
             </h3>

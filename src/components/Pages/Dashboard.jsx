@@ -68,6 +68,12 @@ function Dashboard() {
     fetchUserCounts();
     fetchStoreCounts();
     fetchSackCounts();
+    const interval = setInterval(() => {
+      fetchUserCounts();
+    fetchStoreCounts();
+    fetchSackCounts();
+    }, 3000);
+    return () => clearInterval(interval);
   }, []);
 
   return (

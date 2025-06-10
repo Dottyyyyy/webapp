@@ -163,13 +163,6 @@ const styles = {
         padding: "10px",
         display: "flex",
         flexDirection: "column",
-    },
-    messagesContainer: {
-        flex: 1,
-        overflowY: "auto",
-        padding: "10px",
-        display: "flex",
-        flexDirection: "column",
         minHeight: 0,
     },
     chatAvatar: {
