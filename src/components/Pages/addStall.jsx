@@ -12,18 +12,17 @@ const AddStall = () => {
         stallDescription: '',
         stallAddress: '',
         stallNumber: '',
-        stallHours: '',
+        openHours: '',
+        closeHours: '',
     });
     const [formErrors, setFormErrors] = useState({});
+    const [preview, setPreview] = useState(null);
 
-    const pickImage = (e) => {
+    const handleAvatarChange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setAvatar(reader.result);
-            };
-            reader.readAsDataURL(file);
+            setAvatar(file);
+            setPreview(URL.createObjectURL(file));
         }
     };
 
@@ -39,8 +38,9 @@ const AddStall = () => {
         const errors = {};
         if (!formValues.stallDescription) errors.stallDescription = 'Description is required';
         if (!formValues.stallAddress) errors.stallAddress = 'Address is required';
-        if (!formValues.stallHours) errors.stallHours = 'Hours are required';
         if (!formValues.stallNumber) errors.stallNumber = 'Stall number is required';
+        if (!formValues.openHours) errors.openHours = 'Opening hours are required';
+        if (!formValues.closeHours) errors.closeHours = 'Closing hours are required';
         setFormErrors(errors);
         return Object.keys(errors).length === 0;
     };
@@ -48,15 +48,46 @@ const AddStall = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        // Ensure time values are in the correct format (HH:mm)
+        const formatTime = (time) => {
+            if (!time || !time.match(/^(\d{2}):(\d{2})$/)) {
+                return '';
+            }
+            const [hours, minutes] = time.split(':');
+            return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
+        };
+
+        const formattedOpenHours = formatTime(formValues.openHours);
+        const formattedCloseHours = formatTime(formValues.closeHours);
+
+        const updatedFormValues = {
+            ...formValues,
+            openHours: formattedOpenHours,
+            closeHours: formattedCloseHours,
+        };
+
         if (validateForm()) {
             try {
-                const response = await axios.post(`${import.meta.env.VITE_API}/vendor/add-stall/${user._id || user?.user?._id}`, {
-                    ...formValues,
-                    avatar,
+                const formData = new FormData();
+                formData.append('stallDescription', updatedFormValues.stallDescription);
+                formData.append('stallAddress', updatedFormValues.stallAddress);
+                formData.append('stallNumber', updatedFormValues.stallNumber);
+                formData.append('openHours', updatedFormValues.openHours);
+                formData.append('closeHours', updatedFormValues.closeHours);
+
+                // If an avatar is selected, append it as well
+                if (avatar) {
+                    formData.append('avatar', avatar);
+                }
+
+                const response = await axios.put(`${import.meta.env.VITE_API}/vendor/add-stall/${user?._id}`, formData, {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
                 });
 
                 toast.success('Stall added successfully!');
-                navigate('/'); // Redirect to the vendor tab or appropriate route
+                navigate('/');
             } catch (error) {
                 console.error(error);
                 toast.error('Failed to add stall. Please try again.');
@@ -67,69 +98,139 @@ const AddStall = () => {
     };
 
     return (
-        <div className="container">
-            <h1>Add Vendor Stall</h1>
-            <form onSubmit={handleSubmit}>
-                <div className="form-group">
-                    <label htmlFor="avatar">Stall Image</label>
-                    <input type="file" id="avatar" accept="image/*" onChange={pickImage} />
-                    {avatar && <img src={avatar} alt="Avatar" className="preview-img" />}
-                </div>
+        <div className="container" style={{ justifyItems: 'center' }}>
+            <br />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8" style={{ alignSelf: 'center', marginLeft: 100 }}>
+                <div className="bg-white p-6 rounded-lg shadow-md col-span-1">
+                    <h2 className="text-xl font-semibold mb-4">New Taytay Market</h2>
+                    <div className="flex flex-col items-start space-y-2">
+                        {/* Image of the market */}
+                        <img
+                            src="/images/taytay-market.jpg"
+                            alt="Taytay Market"
+                            className="w-full h-48 object-cover rounded-md mb-4"
+                        />
 
-                <div className="form-group">
-                    <label htmlFor="stallDescription">Description</label>
-                    <textarea
-                        id="stallDescription"
-                        name="stallDescription"
-                        value={formValues.stallDescription}
-                        onChange={handleInputChange}
-                        rows="5"
-                        placeholder="Stall Description"
-                    />
-                    {formErrors.stallDescription && <div className="error">{formErrors.stallDescription}</div>}
-                </div>
+                        {/* City and Market Details */}
+                        <p><strong>City:</strong> Taytay, Rizal</p>
+                        <p><strong>Location:</strong> Heart of Taytay, easily accessible to vendors and local consumers.</p>
 
-                <div className="form-group">
-                    <label htmlFor="stallAddress">Stall Address</label>
-                    <input
-                        type="text"
-                        id="stallAddress"
-                        name="stallAddress"
-                        value={formValues.stallAddress}
-                        onChange={handleInputChange}
-                        placeholder="Stall Address"
-                    />
-                    {formErrors.stallAddress && <div className="error">{formErrors.stallAddress}</div>}
-                </div>
+                        {/* How NoWaste helps */}
+                        <h3 className="text-lg font-semibold mt-4">How NoWaste Helps:</h3>
+                        <ul className="list-disc pl-5 space-y-2">
+                            <li><strong>Waste Management:</strong> Converts vegetable waste into compost for local farms.</li>
+                            <li><strong>Pig Feeds:</strong> Turns unsellable vegetable scraps into pig feed, reducing costs for farmers.</li>
+                            <li><strong>Natural Fertilizers:</strong> Uses waste to create chemical-free fertilizers for better soil health.</li>
+                        </ul>
 
-                <div className="form-group">
-                    <label htmlFor="stallNumber">Stall Number</label>
-                    <input
-                        type="text"
-                        id="stallNumber"
-                        name="stallNumber"
-                        value={formValues.stallNumber}
-                        onChange={handleInputChange}
-                        placeholder="Stall Number"
-                    />
-                    {formErrors.stallNumber && <div className="error">{formErrors.stallNumber}</div>}
+                        <p className="mt-4">NoWaste is working with Taytay Market to ensure sustainable waste management, benefiting the environment and supporting local farmers.</p>
+                    </div>
                 </div>
+                <div className="bg-white p-6 rounded-lg shadow-md col-span-1 space-y-5" style={{ padding: 40, borderWidth: 2, borderColor: 'black' }}>
+                    <h1 style={{ textAlign: 'center' }}>Add Vendor Stall</h1>
+                    <form onSubmit={handleSubmit}>
+                        {/* Profile Upload Circle */}
+                        <div className="flex justify-center mb-6 relative">
+                            <label htmlFor="avatar-upload" className="cursor-pointer group">
+                                <div className="w-24 h-24 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden bg-gray-100 hover:border-green-600 transition">
+                                    {preview ? (
+                                        <img
+                                            src={preview}
+                                            alt="Avatar Preview"
+                                            className="w-full h-full object-cover"
+                                        />
+                                    ) : (
+                                        <span className="text-3xl text-gray-400 group-hover:text-green-600">+</span>
+                                    )}
+                                </div>
+                                <input
+                                    id="avatar-upload"
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleAvatarChange}
+                                    className="hidden"
+                                />
+                            </label>
+                        </div>
 
-                <div className="form-group">
-                    <label htmlFor="stallHours">Stall Hours</label>
-                    <input
-                        type="text"
-                        id="stallHours"
-                        name="stallHours"
-                        value={formValues.stallHours}
-                        onChange={handleInputChange}
-                        placeholder="Stall Hours"
-                    />
-                    {formErrors.stallHours && <div className="error">{formErrors.stallHours}</div>}
+                        <h4 style={{ textAlign: 'center' }}>Description</h4>
+                        <div className="form-group">
+                            <textarea
+                                id="stallDescription"
+                                name="stallDescription"
+                                value={formValues.stallDescription}
+                                onChange={handleInputChange}
+                                rows="2"
+                                placeholder="Stall Description"
+                                style={{ width: '100%' }}
+                            />
+                            {formErrors.stallDescription && <div className="error">{formErrors.stallDescription}</div>}
+                        </div>
+
+                        <div style={{ display: 'flex', flexDirection: 'row', gap: '20px', marginTop: 20 }}>
+                            <label htmlFor="stallAddress">Stall Address</label>
+                            <label htmlFor="stallNumber" style={{ marginLeft: 120 }}>Stall Number</label>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'row', gap: '20px' }}>
+                            <div className="form-group">
+                                <input
+                                    type="text"
+                                    id="stallAddress"
+                                    name="stallAddress"
+                                    value={formValues.stallAddress}
+                                    onChange={handleInputChange}
+                                    placeholder="Stall Address"
+                                />
+                                {formErrors.stallAddress && <div className="error">{formErrors.stallAddress}</div>}
+                            </div>
+                            <div className="form-group">
+                                <input
+                                    type="text"
+                                    id="stallNumber"
+                                    name="stallNumber"
+                                    value={formValues.stallNumber}
+                                    onChange={handleInputChange}
+                                    placeholder="Stall Number"
+                                />
+                                {formErrors.stallNumber && <div className="error">{formErrors.stallNumber}</div>}
+                            </div>
+                        </div>
+
+                        <div style={{ display: 'flex', flexDirection: 'row', gap: '20px', marginTop: 20 }}>
+                            <label htmlFor="openHours">Opening Hours</label>
+                            <label htmlFor="closeHours" style={{ marginLeft: 110 }}>Closing Hours</label>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'row', gap: '20px' }}>
+                            <div className="form-group">
+                                <input
+                                    type="time"
+                                    id="openHours"
+                                    name="openHours"
+                                    value={formValues.openHours}
+                                    onChange={handleInputChange}
+                                    placeholder="Opening Hours"
+                                />
+                                {formErrors.openHours && <div className="error">{formErrors.openHours}</div>}
+                            </div>
+                            <div className="form-group" style={{ marginLeft: 83 }}>
+                                <input
+                                    type="time"
+                                    id="closeHours"
+                                    name="closeHours"
+                                    value={formValues.closeHours}
+                                    onChange={handleInputChange}
+                                    placeholder="Closing Hours"
+                                />
+                                {formErrors.closeHours && <div className="error">{formErrors.closeHours}</div>}
+                            </div>
+                        </div>
+
+                        <button type="submit" className="w-full py-3 bg-green-600 text-white mt-10 text-lg rounded-md hover:bg-green-700 focus:outline-none">
+                            Add Stall
+                        </button>
+                    </form>
                 </div>
-
-                <button type="submit" className="submit-button">Add Stall</button>
-            </form>
+            </div>
         </div>
     );
 };

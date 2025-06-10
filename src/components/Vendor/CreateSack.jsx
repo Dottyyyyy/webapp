@@ -15,16 +15,15 @@ const CreateSack = () => {
     const [kilo, setKilo] = useState(0);
     const [dbSpoil, setDbSpoil] = useState('');
     const [error, setError] = useState('');
+    const [preview, setPreview] = useState(null);
 
     // console.log(user.stall.stallNumber, 'User')
 
-    const handleImageChange = (e) => {
+    const handleAvatarChange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            const reader = new FileReader();
-            reader.onload = () => setImagePreview(reader.result);
-            reader.readAsDataURL(file);
             setImage(file);
+            setPreview(URL.createObjectURL(file));
         }
     };
 
@@ -93,19 +92,28 @@ const CreateSack = () => {
                     Create Sack
                 </h2>
                 <form className="space-y-6" onSubmit={handleSubmit}>
-                    <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageChange}
-                        className="w-full mb-3"
-                    />
-
-                    {imagePreview && (
-                        <img
-                            src={imagePreview}
-                            alt="Image Preview"
-                            className="w-24 h-24 object-cover rounded-full mb-4"
-                        />)}
+                    <div className="flex justify-center mb-6 relative">
+                        <label htmlFor="avatar-upload" className="cursor-pointer group">
+                            <div className="w-24 h-24 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden bg-gray-100 hover:border-green-600 transition">
+                                {preview ? (
+                                    <img
+                                        src={preview}
+                                        alt="Avatar Preview"
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    <span className="text-3xl text-gray-400 group-hover:text-green-600">+</span>
+                                )}
+                            </div>
+                            <input
+                                id="avatar-upload"
+                                type="file"
+                                accept="image/*"
+                                onChange={handleAvatarChange}
+                                className="hidden"
+                            />
+                        </label>
+                    </div>
 
                     <div className="space-y-1">
                         <label
