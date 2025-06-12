@@ -57,13 +57,8 @@ const AddStall = () => {
             return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
         };
 
-        const formattedOpenHours = formatTime(formValues.openHours);
-        const formattedCloseHours = formatTime(formValues.closeHours);
-
         const updatedFormValues = {
-            ...formValues,
-            openHours: formattedOpenHours,
-            closeHours: formattedCloseHours,
+            ...formValues
         };
 
         if (validateForm()) {
@@ -72,8 +67,8 @@ const AddStall = () => {
                 formData.append('stallDescription', updatedFormValues.stallDescription);
                 formData.append('stallAddress', updatedFormValues.stallAddress);
                 formData.append('stallNumber', updatedFormValues.stallNumber);
-                formData.append('openHours', updatedFormValues.openHours);
-                formData.append('closeHours', updatedFormValues.closeHours);
+                formData.append('openHours', formValues.openHours);
+                formData.append('closeHours', formValues.closeHours);
 
                 // If an avatar is selected, append it as well
                 if (avatar) {
@@ -96,6 +91,21 @@ const AddStall = () => {
             toast.error('Please fill in all required fields.');
         }
     };
+
+    const generateTimeOptions = () => {
+        const times = [];
+        const pad = (n) => (n < 10 ? `0${n}` : n);
+        for (let h = 1; h <= 12; h++) {
+            for (let m = 0; m < 60; m += 15) {
+                ['am', 'pm'].forEach((ampm) => {
+                    times.push(`${pad(h)}:${pad(m)} ${ampm}`);
+                });
+            }
+        }
+        return times;
+    };
+
+    const timeOptions = generateTimeOptions();
 
     return (
         <div className="container" style={{ justifyItems: 'center' }}>
@@ -196,32 +206,40 @@ const AddStall = () => {
                             </div>
                         </div>
 
-                        <div style={{ display: 'flex', flexDirection: 'row', gap: '20px', marginTop: 20 }}>
-                            <label htmlFor="openHours">Opening Hours</label>
-                            <label htmlFor="closeHours" style={{ marginLeft: 110 }}>Closing Hours</label>
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'row', gap: '20px' }}>
-                            <div className="form-group">
-                                <input
-                                    type="time"
-                                    id="openHours"
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4" style={{ display: 'flex', justifyContent: 'center' }}>
+                            <div style={{ width: '20%' }}>
+                                <label className="block text-sm font-medium mb-1">Open Hours</label>
+                                <select
                                     name="openHours"
                                     value={formValues.openHours}
                                     onChange={handleInputChange}
-                                    placeholder="Opening Hours"
-                                />
-                                {formErrors.openHours && <div className="error">{formErrors.openHours}</div>}
+                                    className="w-full px-3 py-2 border rounded"
+                                    required
+                                >
+                                    <option value="">Open Time</option>
+                                    {timeOptions.map((time) => (
+                                        <option key={time} value={time}>
+                                            {time}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
-                            <div className="form-group" style={{ marginLeft: 83 }}>
-                                <input
-                                    type="time"
-                                    id="closeHours"
+                            <div style={{ width: '20%' }}>
+                                <label className="block text-sm font-medium mb-1">Close Hours</label>
+                                <select
                                     name="closeHours"
                                     value={formValues.closeHours}
                                     onChange={handleInputChange}
-                                    placeholder="Closing Hours"
-                                />
-                                {formErrors.closeHours && <div className="error">{formErrors.closeHours}</div>}
+                                    className="w-full px-3 py-2 border rounded"
+                                    required
+                                >
+                                    <option value="">Close Time</option>
+                                    {timeOptions.map((time) => (
+                                        <option key={time} value={time}>
+                                            {time}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
                         </div>
 

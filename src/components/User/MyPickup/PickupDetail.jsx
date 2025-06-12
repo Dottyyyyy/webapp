@@ -2,11 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useNavigation } from 'react-router-dom';
 import { getUser } from '../../../utils/helpers';
 import axios from 'axios';
-import { FaCarSide } from 'react-icons/fa'; // You can import specific icons from FontAwesome
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import '../../../index.css'
-import Sidebar from '../../Navigation/Sidebar';
 import Footer from '../../Navigation/Footer';
 import GoogleMapService from '../../Pages/Maps';
 
@@ -88,27 +86,30 @@ const PickupDetails = () => {
         fetchAllSackStatuses();
     }, [userId]);
 
-    //Handle Review
+
     const handleReviewChange = (e) => setReview(e.target.value);
 
-    // Handle rating selection
     const handleRatingClick = (ratingValue) => setRating(ratingValue);
 
-    // Handle form submission
-    const handleFormSubmit = async (e) => {
-        e.preventDefault(); // prevent default form behavior
+    const handleFormSubmit = async (e, sackId) => {
+        e.preventDefault();
+
         try {
-            const { data } = await axios.put(`${import.meta.env.VITE_API}/sack/rate-transaction/${pickup._id}`,
-                { review, rating }
-            )
+            const { data } = await axios.put(`${import.meta.env.VITE_API}/sack/rate-transaction/${sackId}`, {
+                review,
+                rating
+            });
 
-            if (data?.pickup) {
-                setNewPickup(data.pickup); // update local state with returned pickup
-            }
+            toast.success(
+                <div>
+                    <p>Thankyou for your review.</p>
+                    <p>We wil make our market better.</p>
+                </div>
+            );
 
-            navigate(-1);
-            toast.success("Your Review Was Sent!!");
-            // window.location.reload();
+            setTimeout(() => {
+                navigate(-1);
+            }, 1500);
         } catch (error) {
             console.log('Error in completing pickup status', error.message)
         }
@@ -122,7 +123,9 @@ const PickupDetails = () => {
                     <p>All orders are all claimed. Thankyou for your service.</p>
                 </div>
             );
-            navigate(-1)
+            setTimeout(() => {
+                navigate(-1);
+            }, 1500);
         } catch (error) {
             console.log('Error in completing pickup status', error.message)
         }
@@ -131,14 +134,14 @@ const PickupDetails = () => {
     return (
         <>
             <div className="p-6 bg-gray-100 min-h-screen text-gray-800">
-
+                <ToastContainer />
                 {/* Header */}
                 <div className="flex justify-between items-center mb-6">
                     <div>
                         <h1 className="text-3xl font-bold">Pick up Detail</h1>
                         <p className="text-sm text-gray-600">Pickup #: <span className="font-semibold">{pickup._id}</span></p>
                         {pickupStatus === "completed" && (
-                            <p className="text-sm">Picked Up Date: 📅
+                            <p className="text-sm">Picked Up Complete Date: 📅
                                 {new Date(new Date(pickup.pickedUpDate).getTime() - 24 * 60 * 60 * 1000).toLocaleDateString("en-US", {
                                     year: "numeric",
                                     month: "long",
@@ -198,40 +201,16 @@ const PickupDetails = () => {
                                 Start Pickup
                             </button>
                         )}
+                        {pickup.status === 'pickup' && (
+                            <button
+                                className="bg-green-500 hover:bg-green-600 text-white px-5 py-2 rounded-lg shadow"
+                                onClick={handleCompletePickUpStatus}
+                            >
+                                Complete Pickup
+                            </button>
+                        )}
                     </div>
                 </div>
-
-                {pickupStatus === "completed" && (
-                    <form onSubmit={handleFormSubmit} className="p-6 bg-white rounded-lg shadow-lg mt-6">
-                        <h3 className="text-xl font-semibold mb-4">Write a Review</h3>
-
-                        <textarea
-                            value={review}
-                            onChange={handleReviewChange}
-                            placeholder="Write your review here..."
-                            className="w-full p-2 border text-black rounded-md mb-4"
-                            rows="4"
-                        />
-
-                        <div className="flex items-center mb-4">
-                            <span className="mr-2 text-black">Rate:</span>
-                            {[1, 2, 3, 4, 5].map((star) => (
-                                <button
-                                    key={star}
-                                    onClick={() => handleRatingClick(star)}
-                                    type="button"
-                                    className={`text-xl ${rating >= star ? 'text-yellow-500' : 'text-gray-400'}`}
-                                >
-                                    ★
-                                </button>
-                            ))}
-                        </div>
-
-                        <button type="submit" className="bg-blue-500 text-white p-2 rounded-md w-full">
-                            Submit Review
-                        </button>
-                    </form>
-                )}
 
                 {/* Pickup Info Section */}
                 {pickup?.sacks?.map((item) => (
@@ -271,6 +250,37 @@ const PickupDetails = () => {
                                     </div>
                                 </div>
                             </div>
+                            {pickupStatus === "completed" && (
+                                <form onSubmit={(e) => handleFormSubmit(e, item.sackId)} className="p-6 bg-white rounded-lg shadow-lg mt-6">
+                                    <h3 className="text-xl font-semibold mb-4">Write a Review</h3>
+
+                                    <textarea
+                                        value={review}
+                                        onChange={handleReviewChange}
+                                        placeholder="Write your review here..."
+                                        className="w-full p-2 border text-black rounded-md mb-4"
+                                        rows="4"
+                                    />
+
+                                    <div className="flex items-center mb-4">
+                                        <span className="mr-2 text-black">Rate:</span>
+                                        {[1, 2, 3, 4, 5].map((star) => (
+                                            <button
+                                                key={star}
+                                                onClick={() => handleRatingClick(star)}
+                                                type="button"
+                                                className={`text-xl ${rating >= star ? 'text-yellow-500' : 'text-gray-400'}`}
+                                            >
+                                                ★
+                                            </button>
+                                        ))}
+                                    </div>
+
+                                    <button type="submit" className="bg-blue-500 text-white p-2 rounded-md w-full">
+                                        Submit Review
+                                    </button>
+                                </form>
+                            )}
                         </div>
                     </div>
                 ))}
