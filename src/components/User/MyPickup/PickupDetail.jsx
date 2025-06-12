@@ -8,6 +8,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import '../../../index.css'
 import Sidebar from '../../Navigation/Sidebar';
 import Footer from '../../Navigation/Footer';
+import GoogleMapService from '../../Pages/Maps';
 
 const PickupDetails = () => {
     const location = useLocation();
@@ -22,7 +23,9 @@ const PickupDetails = () => {
     const navigate = useNavigate();
     const user = getUser();
     const userId = user._id;
-    console.log(pickup)
+    // console.log(pickup)
+    const [showMapModal, setShowMapModal] = useState(false);
+
 
     useEffect(() => {
         const fetchSackSellers = async () => {
@@ -128,14 +131,39 @@ const PickupDetails = () => {
     return (
         <>
             <div className="p-6 bg-gray-100 min-h-screen text-gray-800">
+
                 {/* Header */}
                 <div className="flex justify-between items-center mb-6">
                     <div>
                         <h1 className="text-3xl font-bold">Pick up Detail</h1>
                         <p className="text-sm text-gray-600">Pickup #: <span className="font-semibold">{pickup._id}</span></p>
+                        {pickupStatus === "completed" && (
+                            <p className="text-sm">Picked Up Date: 📅
+                                {new Date(new Date(pickup.pickedUpDate).getTime() - 24 * 60 * 60 * 1000).toLocaleDateString("en-US", {
+                                    year: "numeric",
+                                    month: "long",
+                                    day: "numeric",
+                                })}{" "}
+                                {new Date(pickup.pickedUpDate).toLocaleTimeString("en-US", {
+                                    timeZone: "UTC",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                    hour12: true,
+                                })}
+                            </p>
+                        )}
                     </div>
 
                     <div className="flex items-center gap-4">
+                        <button
+                            onClick={() => setShowMapModal(true)}
+                            className="bg-blue-400 text-white rounded hover:bg-blue-600"
+                            style={{ borderRadius: 20, padding: 4, width: 100 }}
+                        >
+                            <strong style={{ fontSize: 12, }}>
+                                View Map
+                            </strong>
+                        </button>
                         <span
                             className={`text-white px-3 py-1 rounded-full text-sm font-medium ${pickup.status === "pending"
                                 ? "bg-blue-400"
@@ -246,6 +274,22 @@ const PickupDetails = () => {
                         </div>
                     </div>
                 ))}
+                {showMapModal && (
+                    <div className="fixed inset-0 bg-opacity-50 flex justify-center items-center z-50">
+                        <div className="bg-[#4eff56] rounded-lg p-6 w-full max-w-4xl shadow-lg relative">
+                            <button
+                                onClick={() => setShowMapModal(false)}
+                                className="absolute top-2 right-2 text-gray-500 hover:text-gray-800 text-2xl"
+                            >
+                                &times;
+                            </button>
+                            <h2 className="text-xl font-bold mb-4">Map View</h2>
+                            <div className="w-full h-[500px]">
+                                <GoogleMapService pickup={pickup} />
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
             <Footer />
         </>
