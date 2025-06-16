@@ -70,13 +70,13 @@ const Sidebar = () => {
         icon: "📊",
         action: () => navigation("/dashboard"),
       },
+      {
+        name: "Market",
+        icon: "🥬",
+        action: () => navigation("/admin/market"),
+      },
     ],
     bottom: [
-      {
-        name: "Profile",
-        icon: "👤",
-        action: () => navigation("/profile"),
-      },
       {
         name: "Logout",
         icon: "🔓",

@@ -28,16 +28,22 @@ function ComposterMarket() {
 
     useEffect(() => {
         fetchStalls();
+        const interval = setInterval(() => {
+            fetchStalls();
+        }, 2000);
+        return () => clearInterval(interval);
     }, []);
 
     return (
         <>
-            <div className="flex w-full min-h-screen bg-gray-100 text-black">
+            <div className="flex w-full min-h-screen text-black">
                 {user && user.role === "composter" && (
                     <>
-                        <div className="flex-grow p-8">
-                            <h1 className="text-3xl font-bold mb-6">Vendor Stalls</h1>
-                            <p className="text-gray-600 mb-8">Browse through all available vendor stalls in the market</p>
+                        <div className="flex-grow p-8" style={{
+                            background: 'linear-gradient(to bottom right, #0A4724, #116937)',
+                        }}>
+                            <h1 className="text-3xl font-bold mb-6 text-white">Vendor Stalls</h1>
+                            <p className="text-white mb-8">Browse through all available vendor stalls in the market</p>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {stalls.map((stall) => (
@@ -80,7 +86,6 @@ function ComposterMarket() {
                     </>
                 )}
             </div>
-            <Footer />
         </>
     );
 }

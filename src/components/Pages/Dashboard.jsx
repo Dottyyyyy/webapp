@@ -70,8 +70,8 @@ function Dashboard() {
     fetchSackCounts();
     const interval = setInterval(() => {
       fetchUserCounts();
-    fetchStoreCounts();
-    fetchSackCounts();
+      fetchStoreCounts();
+      fetchSackCounts();
     }, 3000);
     return () => clearInterval(interval);
   }, []);
@@ -86,11 +86,11 @@ function Dashboard() {
         {/* Header */}
 
         {/* Main content with footer */}
-        <main className="grow flex flex-col justify-between min-h-screen">
-          <div className="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto">
+        <main className="grow flex flex-col justify-between min-h-screen bg-[#116937]">
+          <div className="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto bg-[#116937]">
             {/* Dashboard Title */}
             <div className="sm:flex sm:justify-between sm:items-center mb-8">
-              <h1 className="text-2xl md:text-3xl text-gray-800 dark:text-gray-100 font-bold">
+              <h1 className="text-2xl md:text-3xl text-white-800 white:text-white-100 font-bold" style={{color:'white'}}>
                 Dashboard
               </h1>
             </div>

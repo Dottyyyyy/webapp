@@ -59,27 +59,39 @@ const SeePickUp = () => {
         try {
             const sackIds = mySacks.map(sack => sack.sackId);
             const response = await axios.put(`${import.meta.env.VITE_API}/sack/update-status`, { status: 'claimed', sackIds });
-            const data = await axios.put(`${import.meta.env.VITE_API}/sack/complete-pickup/${pickup._id}`)
 
             // console.log(response.data);
-            toast.success("Complete Process!! Job Well Done");
-            navigation(-1)
+            toast.success(
+                <div>
+                    <p>All orders are all claimed. Thankyou for your service.</p>
+                </div>
+            );
+            setTimeout(() => {
+                navigate(-1);
+            }, 1500);
         } catch (e) {
             console.error("Error updating sacks:", e);
         }
     };
+
     return (
         <>
-            <div className="min-h-screen bg-gray-100 text-gray-800 p-6">
-                <div className="bg-white rounded-lg shadow-md p-6 relative">
+            <div className="min-h-screen text-gray-800 p-6"
+                style={{
+                    background: 'linear-gradient(to bottom right, #0A4724, #116937)', padding: 10
+                }}>
+                <ToastContainer />
+                <div className="rounded-lg shadow-md p-6 relative"
+                >
                     {/* Status Badge */}
                     <span className="absolute top-4 right-4 bg-red-200 text-red-700 text-sm px-3 py-1 rounded-full">
                         {status}
                     </span>
 
                     {/* Header */}
-                    <h1 className="text-2xl font-bold mb-1">Pickup Request Details</h1>
-                    <p className="text-sm text-gray-500 mb-6">Request #{pickup._id || 'REQ-2023-001'}</p>
+                    <h1 className="text-2xl font-bold mb-1 text-white">Pickup Request Details</h1>
+                    <p className="text-sm mb-6"
+                        style={{ color: 'rgb(85, 212, 140)' }}>Request #{pickup._id || 'REQ-2023-001'}</p>
 
                     {/* Summary */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -108,7 +120,7 @@ const SeePickUp = () => {
                     {/* Collector Details */}
                     {buyer && (
                         <div className="mb-6">
-                            <h2 className="text-lg font-bold mb-2">Collector Details</h2>
+                            <h2 className="text-lg font-bold mb-2" style={{ color: 'rgb(85, 212, 140)' }}>Collector Details</h2>
                             <img
                                 src={buyer.avatar?.url || "https://via.placeholder.com/100"}
                                 alt="buyer"
@@ -124,8 +136,19 @@ const SeePickUp = () => {
                         </div>
                     )}
 
+                    {/* Confirm Button */}
+                    {pickup.status !== "completed" && (
+                        <div className="text-center mt-6">
+                            <button
+                                onClick={handleCompleteSackStatus}
+                                className="bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700 transition"
+                            >
+                                Handed Sacks Complete
+                            </button>
+                        </div>
+                    )}
                     {/* Sacks Details */}
-                    <h2 className="text-lg font-bold mb-3">Sacks Details</h2>
+                    <h2 className="text-lg font-bold mb-3" style={{ color: 'rgb(85, 212, 140)' }}>Sacks Details</h2>
                     <div className="border rounded-lg divide-y">
                         {mySacks.map((item, idx) => (
                             <div key={item._id} className="p-4 flex justify-between items-center">
@@ -136,30 +159,17 @@ const SeePickUp = () => {
                                         className="w-16 h-16 object-cover rounded-lg mr-4"
                                     />
                                     <div>
-                                        <p className="font-semibold">Stall {item.stallNumber}</p>
-                                        <p className="text-sm text-gray-600">{item.kilo} kg</p>
-                                        <p className="text-sm text-gray-500">{item.description}</p>
+                                        <p className="font-semibold text-white">Stall {item.stallNumber}</p>
+                                        <p className="text-sm text-white">{item.kilo} kg</p>
+                                        <p className="text-sm text-white">{item.description}</p>
                                     </div>
                                 </div>
-                                <div className="text-sm text-gray-500 text-right">{item.location}</div>
+                                <div className="text-sm text-white text-right">{item.location}</div>
                             </div>
                         ))}
                     </div>
-
-                    {/* Confirm Button */}
-                    {pickup.status !== "completed" && (
-                        <div className="text-center mt-6">
-                            <button
-                                onClick={handleCompleteSackStatus}
-                                className="bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700 transition"
-                            >
-                                Confirm Pickup
-                            </button>
-                        </div>
-                    )}
                 </div>
             </div>
-            <Footer />
         </>
     );
 };

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { getUser } from "../../utils/helpers";
 import Sidebar from "../Navigation/Sidebar";
 import AdminDashboard from "../Admin/Screen/AdminDashboard";
@@ -9,189 +9,200 @@ import Footer from "../Navigation/Footer";
 import VendorIndex from "../Vendor/VendorIndex";
 import Dashboard from "./Dashboard";
 import Header from "../Navigation/Header";
+import axios from "axios";
 
 const Home = () => {
   const user = getUser();
+  const [topVendors, setTopVendors] = useState([]);
+  const [vendorCount, setVendorCount] = useState(0);
+  const [overallAverageRating, setOverallAverageRating] = useState(0);
+
+  const fetchTopVendors = async () => {
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_API}/get-all-users`);
+      const allUsers = response.data.users;
+
+      const filteredVendors = allUsers
+        .filter(user => user.role === 'vendor')
+        .map(vendor => {
+          const ratings = vendor.stall?.rating || [];
+          const ratingSum = ratings.reduce((sum, r) => sum + r.value, 0);
+          const avgRating = ratings.length > 0 ? ratingSum / ratings.length : 0;
+          return { ...vendor, avgRating, ratingCount: ratings.length, ratingSum };
+        });
+
+      const sortedVendors = filteredVendors
+        .sort((a, b) => b.avgRating - a.avgRating)
+        .slice(0, 3);
+
+      const totalRatings = filteredVendors.reduce((acc, vendor) => acc + vendor.ratingCount, 0);
+      const totalRatingValue = filteredVendors.reduce((acc, vendor) => acc + vendor.ratingSum, 0);
+      const averageOfAllRatings = totalRatings > 0 ? totalRatingValue / totalRatings : 0;
+
+      setTopVendors(sortedVendors);
+      setVendorCount(filteredVendors.length);
+      setOverallAverageRating(averageOfAllRatings.toFixed(2));
+    } catch (error) {
+      console.error('Error in getting the users', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchTopVendors();
+    const interval = setInterval(() => {
+      fetchTopVendors();
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
+
+
+  const features = [
+    {
+      title: 'Fresh & Organic',
+      desc: 'All our vendors are committed to providing the freshest, highest quality organic produce straight from their farms.',
+      icon: '🥗'
+    },
+    {
+      title: 'Fast Pickup',
+      desc: 'Schedule convenient pickup times and track your orders in real-time. Get your fresh produce when you need it.',
+      icon: '🛻'
+    },
+    {
+      title: 'Local Community',
+      desc: 'Support local farmers and small businesses while building stronger community connections through fresh food.',
+      icon: '🤝'
+    },
+  ];
 
   if (!user) {
     // Show landing page for unauthenticated users
     return (
       <>
-        {/* Top Green Bar */}
-        <div style={{
-          display: 'flex',
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          gap: '20px',
-          flexWrap: 'wrap',
-          background: 'linear-gradient(to bottom right, #d1fad1, #c1f7c1)',
+        <div id="home" className="text-white px-6 py-20" style={{
+          background: 'linear-gradient(to bottom right, #0A4724, #116937)',
+        }}>
+          <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12">
+            {/* Left Content */}
+            <div className="flex-1">
+              <div className="mb-4 inline-block bg-green-900 px-4 py-2 rounded-full text-sm font-medium border border-green-300">
+                🌱 Connect with local partners and reduce waste
+              </div>
+              <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-4">
+                Bridging Waste Alternatives<br />at Your Fingertips
+              </h1>
+              <p className="text-lg text-green-100 mb-6">
+                Discover the best local farmers and vendors at NPTM Market. Fresh vegetables, fruits, and artisanal products delivered straight from farm to table.
+              </p>
+              <div className="flex gap-4 mb-6">
+                <a href="#stalls" className="bg-white text-green-700 px-6 py-3 rounded-lg font-semibold shadow hover:bg-green-100 transition">
+                  Top Stalls ⭐
+                </a>
+                <a href="/about" className="border border-white text-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-green-800 transition">
+                  Learn More
+                </a>
+              </div>
+              <div className="flex gap-8 text-green-100 font-medium">
+                <div><span className="text-white text-xl font-bold">{vendorCount}</span><br />Local Vendors</div>
+                <div><span className="text-white text-xl font-bold">500+</span><br />Happy Customers</div>
+                <div><span className="text-white text-xl font-bold">{overallAverageRating}★</span><br />Average Rating</div>
+              </div>
+            </div>
 
-        }}
-        >
-          {/* Image Section */}
-          <div style={{
-            flex: '1 1 45%',
-            padding: '20px',
-            borderRadius: '8px',
-            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)'
-          }}>
-            <img
-              src="/images/taytay-market.jpg"
-              alt="Food waste management"
-              style={{
-                width: '100%',
-                height: 'auto',
-                objectFit: 'cover',
-                borderRadius: '8px'
-              }}
-            />
-          </div>
-
-          {/* Hero Section */}
-          <div style={{
-            minHeight: '100vh',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '80px 16px',
-            flex: '1 1 45%',
-            borderRadius: '8px',
-            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-            textAlign: 'center'
-          }}>
-            <div style={{
-              backgroundColor: 'white',
-              borderRadius: '24px',
-              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-              padding: '40px',
-              maxWidth: '750px',
-              width: '100%'
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '24px' }}>
+            {/* Right Content - Placeholder for Image */}
+            <div className="flex-1">
+              <div className="w-full h-full bg-green-700 rounded-xl flex items-center justify-center text-lg text-white border border-green-300">
                 <img
-                  src="/images/nw-preview.png"
+                  src="/images/taytay-market.jpg"
                   alt="Food waste management"
                   style={{
-                    width: '40%',
-                    height: '30%',
+                    width: '100%',
+                    height: '100%',
                     borderRadius: '8px'
                   }}
                 />
-              </div>
-              <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#4a4a4a', marginBottom: '16px' }}>NoWaste</h1>
-              <p style={{ color: '#4a4a4a', fontSize: '1.125rem', marginBottom: '24px' }}>
-                A revolutionary platform connecting food vendors with farmers and composters to reduce waste and promote sustainability.
-              </p>
-              <div style={{ display: 'flex', justifyContent: 'center', gap: '16px' }}>
-                <a
-                  href="/login"
-                  style={{
-                    backgroundColor: '#2f855a',
-                    color: 'white',
-                    padding: '12px 24px',
-                    borderRadius: '9999px',
-                    fontWeight: '600',
-                    transition: 'background-color 0.3s'
-                  }}
-                  onMouseOver={(e) => e.target.style.backgroundColor = '#2c7a34'}
-                  onMouseOut={(e) => e.target.style.backgroundColor = '#2f855a'}
-                >
-                  Get Started
-                </a>
-                <a
-                  href="#how-it-works"
-                  style={{
-                    border: '2px solid #2f855a',
-                    color: '#2f855a',
-                    padding: '12px 24px',
-                    borderRadius: '9999px',
-                    fontWeight: '600',
-                    transition: 'background-color 0.3s, color 0.3s'
-                  }}
-                  onMouseOver={(e) => {
-                    e.target.style.backgroundColor = '#2f855a';
-                    e.target.style.color = 'white';
-                  }}
-                  onMouseOut={(e) => {
-                    e.target.style.backgroundColor = 'transparent';
-                    e.target.style.color = '#2f855a';
-                  }}
-                >
-                  Learn More
-                </a>
               </div>
             </div>
           </div>
         </div>
 
-
-
-        {/* How It Works */}
-        <section id="how-it-works" className="bg-white py-16 px-6">
-          <h2 className="text-3xl sm:text-4xl font-bold text-center text-gray-800 mb-12">How It Works</h2>
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            <div className="bg-white rounded-xl shadow p-6 text-center">
-              <div className="bg-green-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 text-green-600 text-2xl font-bold">1</div>
-              <h3 className="text-xl font-semibold mb-2">For Vendors</h3>
-              <p className="text-gray-600">List unused and surplus food items instead of discarding them. Reduce waste and contribute to a sustainable future.</p>
+        <div id="about" className="bg-white text-gray-800 px-6 py-20">
+          <div className="max-w-6xl mx-auto text-center">
+            <h2 className="text-3xl md:text-4xl font-bold mb-6" style={{ color: '#0A4724' }}>Why Choose NPTM Market?</h2>
+            <p className="text-gray-600 mb-12">
+              Experience the best of local farming with our curated selection of vendors and seamless shopping experience.
+            </p>
+            <div className="grid gap-8 md:grid-cols-3">
+              {features.map((item, index) => (
+                <div key={index} className="bg-white border border-green-200 rounded-xl shadow p-6 text-left hover:shadow-md transition">
+                  <div className="bg-green-100 rounded-full w-12 h-12 flex items-center justify-center mb-4 text-green-600 text-xl font-bold">
+                    {item.icon}
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2">{item.title}</h3>
+                  <p className="text-gray-600">{item.desc}</p>
+                </div>
+              ))}
             </div>
-            <div className="bg-white rounded-xl shadow p-6 text-center">
-              <div className="bg-green-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 text-green-600 text-2xl font-bold">2</div>
-              <h3 className="text-xl font-semibold mb-2">For Farmers</h3>
-              <p className="text-gray-600">Connect with vendors to collect food waste for animal feed. Free collection service that benefits both parties.</p>
-            </div>
-            <div className="bg-white rounded-xl shadow p-6 text-center">
-              <div className="bg-green-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 text-green-600 text-2xl font-bold">3</div>
-              <h3 className="text-xl font-semibold mb-2">Track & Reduce</h3>
-              <p className="text-gray-600">Monitor waste data, measure environmental impact, and promote sustainable practices in your community.</p>
+          </div>
+        </div>
+
+        <section id="stalls" className="bg-[#116937] text-white py-12 px-4">
+          <div className="max-w-6xl mx-auto text-center">
+            <h2 className="text-3xl font-bold mb-2">Featured Stalls</h2>
+            <p className="text-green-100 mb-10">
+              Discover some of our most popular vendors offering the best local produce and artisanal goods.
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              {topVendors.map((vendor, index) => {
+                const {
+                  name,
+                  stall: { stallDescription, stallImage, stallAddress, stallNumber, status },
+                  _id
+                } = vendor;
+
+                const isOpen = status === 'open';
+                const badgeColors = ['bg-yellow-400', 'bg-gray-300', 'bg-orange-400'];
+                const badgeColor = badgeColors[index] || 'bg-green-500';
+
+                return (
+                  <div
+                    key={_id}
+                    className="bg-green-800 rounded-xl shadow-lg overflow-hidden border border-green-700 flex flex-col relative"
+                  >
+                    {/* Top Rank Badge */}
+                    <div className={`absolute top-2 left-2 px-3 py-1 rounded-full text-xs font-semibold text-black ${badgeColor}`}>
+                      Top #{index + 1}
+                    </div>
+
+                    <div className="bg-green-600 h-40 flex items-center justify-center">
+                      <img
+                        src={stallImage?.url}
+                        alt={name}
+                        className="object-cover h-full w-full"
+                      />
+                    </div>
+                    <div className="p-4 flex-1 flex flex-col justify-between">
+                      <div>
+                        <h3 className="font-bold text-lg">{name}</h3>
+                        <p className="text-green-100 text-sm mb-2">{stallDescription}</p>
+                        <div className="flex items-center justify-between text-sm text-gray-300">
+                          <span>{stallAddress}</span>
+                          <span className="bg-gray-700 px-2 py-0.5 rounded text-xs">{stallNumber}</span>
+                        </div>
+                        <div className="flex items-center justify-between mt-1 text-sm">
+                          <span>
+                            {isOpen ? 'Open' : 'Closed'}
+                            <span className={`ml-2 w-2 h-2 inline-block rounded-full ${isOpen ? 'bg-green-400' : 'bg-red-400'}`} />
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </section>
-
-        {/* CTA Section */}
-        <section className="py-16 px-6 bg-green-600 text-center text-white">
-          <h2 className="text-3xl sm:text-4xl font-bold mb-4">Join Our Mission</h2>
-          <p className="text-lg mb-6 max-w-2xl mx-auto">
-            Be part of the solution to reduce food waste and create a more sustainable future. Whether you're a vendor, farmer, or composter, your contribution matters.
-          </p>
-          <a
-            href="/register"
-            className="bg-white text-green-700 px-6 py-3 rounded-full font-semibold shadow hover:bg-green-100 transition"
-          >
-            Sign Up for Free
-          </a>
-        </section>
-
-        {/* Footer */}
-        <footer className="bg-gray-900 text-white py-10 px-6">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 max-w-6xl mx-auto text-sm">
-            <div>
-              <h4 className="font-semibold mb-2">Contact Us</h4>
-              <p>Email: info@nowaste.com</p>
-              <p>Phone: (555) 123-4567</p>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-2">Location</h4>
-              <p>Rizal Avenue Brgy.</p>
-              <p>San Juan, 1920 Taytay</p>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-2">FAQs</h4>
-              <p>How it works</p>
-              <p>Terms of Service</p>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-2">Social Media</h4>
-              <div className="flex gap-3">
-                <a href="#" className="hover:text-green-400">🐦</a>
-                <a href="#" className="hover:text-green-400">📘</a>
-                <a href="#" className="hover:text-green-400">📸</a>
-              </div>
-            </div>
-          </div>
-        </footer>
       </>
     );
   }
@@ -207,14 +218,10 @@ const Home = () => {
         </>
       )}
       <div sty className="flex w-full h-full fade-in">
-        <div className="flex-grow p-8 bg-gradient-to-br from-green-50 to-green-100 w-full h-full">
-          {/* Admin View */}
-
-          {/* Vendor View */}
+        <div className="w-full">
           {user.role === "vendor" && (
             <>
               <VendorIndex />
-              <Footer />
             </>
           )}
 
@@ -222,14 +229,12 @@ const Home = () => {
           {user.role === "farmer" && (
             <>
               <UserIndex />
-              <Footer />
             </>
           )}
 
           {user.role === "composter" && (
             <>
               <ComposterIndex />
-              <Footer />
             </>
           )}
         </div>

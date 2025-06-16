@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 // Utils
@@ -31,9 +31,7 @@ const Header = () => {
   useEffect(() => {
     if (userId) {
       fetchMySacks();
-      const interval = setInterval(() => {
-        fetchMySacks();
-      }, 5000);
+      const interval = setInterval(() => fetchMySacks(), 5000);
       return () => clearInterval(interval);
     }
   }, [userId]);
@@ -57,124 +55,112 @@ const Header = () => {
 
   return (
     <>
-      <header className="bg-[#FFFFFF] p-6 shadow-lg">
+      <header className="bg-[#EBFFF3] p-6 shadow-lg">
         <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-black">
-            <a href="/" className="hover:text-gray-200">NoWaste</a>
-          </h1>
-          <nav>
-            <ul className="flex items-center space-x-4">
+          {/* Logo and App Title */}
+          <Link to="/">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 rounded-lg bg-green-700 flex items-center justify-center shadow-md">
+                <span className="text-white text-2xl font-bold">♻️</span>
+              </div>
+              <div>
+                <h1 className="text-xl font-semibold text-green-900">
+                  {user ? "No Waste" : "NPTM Market"}
+                </h1>
+                <p className="text-xs text-green-700 -mt-1">
+                  {user
+                    ? "Bridging waste from NPTM to Pig Farmers / Composters"
+                    : "Local • Sustainable • Waste"}
+                </p>
+              </div>
+            </div>
+          </Link>
 
-              {user?.role === "admin" && (
-                <Sidebar />
-              )}
+          {/* Navigation */}
+          <nav className="flex items-center space-x-6">
+            {/* Admin View */}
+            {user?.role === "admin" && <Sidebar />}
 
-              {!user || user.role !== "admin" && (
-                <>
-                  <li>
-                    <a
-                      href="/"
-                      className="relative flex items-center gap-2 px-5 py-2 text-black font-semibold rounded-full bg-green border-2 border-green-600 rounded-md hover:text-green hover:bg-green-600 transition"
-                    >
-                      {user ? "Dashboard" : "Home"}
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="/messenger"
-                      className="relative flex items-center gap-2 px-5 py-2 text-black font-semibold rounded-full bg-green border-2 border-green-600 rounded-md hover:text-green hover:bg-green-600 transition"
-                    >
-                      Chats
-                    </a>
-                  </li>
+            {/* Vendor View */}
+            {user?.role === "vendor" && (
+              <>
+                <div className="flex items-center space-x-8 text-green-900 font-medium">
+                  <a href='/' className="hover:underline">Home</a>
+                  <button onClick={() => navigate(`/vendor/myStall/${user._id}`)} className="hover:underline underline-offset-4 decoration-green-600">My stall</button>
+                  <a href="/about" className="hover:underline">About</a>
+                  <a href="/messenger" className="hover:underline">Chats</a>
+                  <a href='/vendor/pickup' className="hover:underline font-semibold">Pick up</a>
+                </div>
 
-                  {user?.role === "farmer" && (
-                    <li className="flex items-center gap-4">
-                      <a href="/viewStalls"
-                        className="relative flex items-center gap-2 px-5 py-2 text-black font-semibold rounded-full bg-green border-2 border-green-600 rounded-md hover:text-green hover:bg-green-600 transition"
-                      >Stalls</a>
-                      <a href="/pickup"
-                        className="relative flex items-center gap-2 px-5 py-2 text-black font-semibold rounded-full bg-green border-2 border-green-600 rounded-md hover:text-green hover:bg-green-600 transition"
-                      >Pickup</a>
-                      <a href="/mySack"
-                        className="relative flex items-center gap-2 px-5 py-2 text-black font-semibold rounded-full bg-green border-2 border-green-600 rounded-md hover:text-green hover:bg-green-600 transition"
+                <div className="flex items-center space-x-4 ml-6">
+                  <div className="relative group">
+                    <button className="flex items-center gap-2 px-4 py-2 bg-green-400 hover:bg-green-500 text-white font-semibold transition" style={{ borderTopLeftRadius: 10, borderTopRightRadius: 10 }}>
+                      <span className="text-xl">👤</span> {user?.name} ▼
+                    </button>
+                    <div className="absolute right-0 w-40 bg-white border border-gray-200 rounded shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all duration-200 z-50" style={{ borderBottomLeftRadius: 10, borderBottomRightRadius: 10 }}>
+                      <a href="/profile" className="block px-4 py-2 hover:bg-gray-100">Profile</a>
+                      <a href="/vendor/market-list" className="block px-4 py-2 hover:bg-gray-100">MarketList</a>
+                      <button
+                        onClick={handleLogout}
+                        className="w-full text-left px-4 py-2 hover:bg-gray-100"
                       >
-                        <span className="absolute -top-1 -right-1 flex items-center justify-center w-4 h-4 text-xs bg-green-500 text-white font-bold rounded-full">
-                          {mySack.length || 0}
-                        </span>
-                        🗑️
-                      </a>
-                      <button onClick={handleLogout}
-                        className="relative flex items-center gap-2 px-5 py-2 text-black font-semibold rounded-full bg-red border-2 border-red-600 rounded-md hover:text-red hover:bg-red-600 transition"
+                        Log out
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Farmer/Composter View */}
+            {(user?.role === "farmer" || user?.role === "composter") && (
+              <>
+                <div className="flex items-center space-x-8 text-green-900 font-medium">
+                  <a href="/" className="hover:underline underline-offset-4 decoration-green-600">Home</a>
+                  <a href={user.role === "farmer" ? "/viewStalls" : "/composter/market"} className="hover:underline">Stalls</a>
+                  <a href="/about" className="hover:underline">About</a>
+                  <a href="/messenger" className="hover:underline">Chats</a>
+                  <a href={user.role === "farmer" ? "/pickup" : "/composter/pickup"} className="hover:underline font-semibold">Pick up</a>
+                </div>
+
+                <div className="flex items-center space-x-4 ml-6">
+                  <div className="relative group">
+                    <button className="flex items-center gap-2 px-4 py-2 bg-green-400 hover:bg-green-500 text-white font-semibold transition" style={{ borderTopLeftRadius: 10, borderTopRightRadius: 10 }}>
+                      <span className="text-xl">👤</span> {user?.name || "Farmer"} ▼
+                    </button>
+                    <div className="absolute right-0 w-40 bg-white border border-gray-200 rounded shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all duration-200 z-50" style={{ borderBottomLeftRadius: 10, borderBottomRightRadius: 10 }}>
+                      <a href="/mySack" className="block px-4 py-2 hover:bg-gray-100">My Sack</a>
+                      <a href="/profile" className="block px-4 py-2 hover:bg-gray-100">Profile</a>
+                      <button
+                        onClick={handleLogout}
+                        className="w-full text-left px-4 py-2 hover:bg-gray-100"
                       >
-                        Logout
+                        Log out
                       </button>
-                    </li>
-                  )}
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
 
-                  {user?.role === "composter" && (
-                    <li className="flex items-center gap-4">
-                      <a href="/composter/market"
-                        className="relative flex items-center gap-2 px-5 py-2 text-black font-semibold rounded-full bg-green border-2 border-green-600 rounded-md hover:text-green hover:bg-green-600 transition">                        Stalls</a>
-                      <a href="/composter/pickup"
-                        className="relative flex items-center gap-2 px-5 py-2 text-black font-semibold rounded-full bg-green border-2 border-green-600 rounded-md hover:text-green hover:bg-green-600 transition">                        Pickup</a>
-                      <a href="/mySack"
-                        className="relative flex items-center gap-2 px-5 py-2 text-black font-semibold rounded-full bg-green border-2 border-green-600 rounded-md hover:text-green hover:bg-green-600 transition">                        <span className="absolute -top-1 -right-1 flex items-center justify-center w-4 h-4 text-xs bg-green-500 text-white font-bold rounded-full">
-                          {mySack.length || 0}
-                        </span>
-                        🗑️
-                      </a>
-                      <button onClick={handleLogout}
-                        className="relative flex items-center gap-2 px-5 py-2 text-black font-semibold rounded-full bg-red border-2 border-red-600 rounded-md hover:text-red hover:bg-red-600 transition">                        Logout
-                      </button>
-                    </li>
-                  )}
-                </>
-              )}
-              {user && (user.role === "vendor") ? (
-                <li className="flex items-center gap-4">
-                  {/* Logout Button */}
-                  <button
-                    onClick={() => navigate(`/vendor/myStall/${user._id}`)}
-                    className="relative flex items-center gap-2 px-5 py-2 text-black font-semibold rounded-full bg-green border-2 border-green-600 rounded-md hover:text-green hover:bg-green-600 transition"
-                  >
-                    My Stall
-                  </button>
-                  <a
-                    href='/vendor/pickup'
-                    className="relative flex items-center gap-2 px-5 py-2 text-black font-semibold rounded-full bg-green border-2 border-green-600 rounded-md hover:text-green hover:bg-green-600 transition"
-                  >
-                    Pickup
-                  </a>
-                  <button
-                    onClick={handleLogout}
-                    className="relative flex items-center gap-2 px-5 py-2 text-black font-semibold rounded-full bg-red border-2 border-red-600 rounded-md hover:text-red hover:bg-red-600 transition"
-                  >
-                    Logout
-                  </button>
-                </li>
-
-              ) : null}
-              {!user && (
-                <>
-                  <li>
-                    <a href="/register"
-                      className="relative flex items-center gap-2 px-5 py-2 text-black font-semibold rounded-full bg-green border-2 border-green-600 rounded-md hover:text-green hover:bg-green-600 transition"
-                    >Register</a>
-                  </li>
-                  <li>
-                    <a href="/login"
-                      className="relative flex items-center gap-2 px-5 py-2 text-black font-semibold rounded-full bg-green border-2 border-green-600 rounded-md hover:text-green hover:bg-green-600 transition"
-                    >Login</a>
-                  </li>
-                </>
-              )}
-
-            </ul>
+            {/* Guest View */}
+            {!user && (
+              <>
+                <div className="flex items-center space-x-8 text-green-900 font-medium">
+                  <a href="/" className="hover:underline">Home</a>
+                  <a href="/about" className="hover:underline">About</a>
+                </div>
+                <div className="flex items-center space-x-4">
+                  <Link to="/login" className="text-green-900 font-medium hover:underline">Login</Link>
+                  <Link to="/register" className="bg-green-500 hover:bg-green-600 text-white font-semibold px-5 py-2 rounded-full shadow">Get Started</Link>
+                </div>
+              </>
+            )}
           </nav>
         </div>
       </header>
 
+      {/* Accent Divider */}
       <div className="bg-green-500 h-2 w-full"></div>
 
       {/* Optional: Search Modal */}

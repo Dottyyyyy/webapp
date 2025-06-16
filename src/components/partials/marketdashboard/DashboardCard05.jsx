@@ -12,28 +12,15 @@ const DashboardCard05 = () => {
         const { data } = await axios.get(`${import.meta.env.VITE_API}/get-ratings-reviews`);
         const combinedReviews = [];
 
-        // Get start and end of current week (Sunday to Saturday)
-        const now = new Date();
-        const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
-        startOfWeek.setHours(0, 0, 0, 0);
-
-        const endOfWeek = new Date(startOfWeek);
-        endOfWeek.setDate(endOfWeek.getDate() + 6);
-        endOfWeek.setHours(23, 59, 59, 999);
-
         data?.data?.forEach((user) => {
           const reviewsArray = user.stall?.review;
 
           if (Array.isArray(reviewsArray)) {
             reviewsArray.forEach((review) => {
-              const reviewDate = new Date(review.date);
-              const isThisWeek =
-                reviewDate >= startOfWeek && reviewDate <= endOfWeek;
-
-              if (isThisWeek && typeof review.text === "string" && review.text.trim() !== "") {
+              if (typeof review.text === "string" && review.text.trim() !== "") {
                 combinedReviews.push({
                   text: review.text,
-                  date: reviewDate,
+                  date: new Date(review.date),
                   userName: user.name || "Unknown",
                   userEmail: user.email || "",
                 });
@@ -51,7 +38,8 @@ const DashboardCard05 = () => {
     fetchReviewRating();
     const interval = setInterval(() => {
       fetchReviewRating();
-    }, 5000);
+    }, 2000);
+
     return () => clearInterval(interval);
   }, []);
 
@@ -82,7 +70,7 @@ const DashboardCard05 = () => {
             >
               <p>“{review.text}”</p>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                — {review.userName} {review.userEmail && `(${review.userEmail})`}
+               To — {review.userName} {review.userEmail && `(${review.userEmail})`}
               </p>
             </div>
           ))

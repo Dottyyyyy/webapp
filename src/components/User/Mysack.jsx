@@ -52,12 +52,14 @@ const Mysack = () => {
 
     return (
         <>
-            <div className="flex w-full h-full fade-in">
+            <div className="flex w-full h-119 fade-in" style={{
+                background: 'linear-gradient(to bottom right,rgb(7, 122, 57),rgb(21, 169, 85))', padding: 10
+            }}>
                 <ToastContainer />
                 <div className="flex-grow p-6">
                     <div className="flex items-center justify-between mb-4">
-                        <h1 className="text-3xl font-bold text-gray-800">My Sack</h1>
-                        {user && (user.role === "farmer" || user.role === "composter") && (
+                        <h1 className="text-3xl font-bold text-white">My Sack</h1>
+                        {user && (user.role === "farmer" || user.role === "composter" || mySack.length === 0) && (
                             <button
                                 onClick={handlePickUpSacks}
                                 className="px-4 py-2 bg-green-600 text-white text-sm rounded shadow hover:bg-green-700 transition"
@@ -67,12 +69,12 @@ const Mysack = () => {
                         )}
                     </div>
 
-                    <div className="text-lg font-semibold text-gray-700 mb-6">
+                    <div className="text-lg font-semibold text-white mb-6">
                         Total weight of sacks: {totalKilos} kg
                     </div>
 
                     {mySack.length === 0 ? (
-                        <div className="text-gray-500">No pending sacks found.</div>
+                        <div className="text-white">No pending sacks found.</div>
                     ) : (
                         <div className="space-y-6">
                             {mySack.map((entry, index) => (
@@ -107,7 +109,14 @@ const Mysack = () => {
                                                     <div><strong>Weight:</strong> {sack.kilo || 0} kg</div>
                                                     <div><strong>Description:</strong> {sack.description || "N/A"}</div>
                                                     <div><strong>Location:</strong> {sack.location || "N/A"}</div>
-                                                    <div><strong>Spoilage Date:</strong> {sack.dbSpoil ? new Date(sack.dbSpoil).toLocaleDateString() : "N/A"}</div>
+                                                    <div><strong>Spoilage Date:</strong>
+                                                        {" "}
+                                                        {new Date(new Date(sack.dbSpoil).getTime() - 24 * 60 * 60 * 1000).toLocaleDateString("en-US", {
+                                                            year: "numeric",
+                                                            month: "long",
+                                                            day: "numeric",
+                                                        })}
+                                                    </div>
                                                 </div>
                                             </div>
                                         ))}
@@ -118,7 +127,6 @@ const Mysack = () => {
                     )}
                 </div>
             </div>
-            <Footer />
         </>
     );
 };

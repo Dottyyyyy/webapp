@@ -7,7 +7,11 @@ const About = () => {
   const user = getUser(); // Fetch the user object
 
   return (
-    <div className="min-h-screen bg-white text-gray-800">
+    // bg-[#EBFFF3]
+    <div className="min-h-screen 
+     text-gray-800" style={{
+        background: 'linear-gradient(to bottom right, #0A4724, #116937)',
+      }}>
       {/* Hero Section */}
       <div className="max-w-6xl mx-auto px-6 py-16 flex flex-col md:flex-row items-center">
         <div className="w-full md:w-1/2 mb-10 md:mb-0">
@@ -18,10 +22,10 @@ const About = () => {
           />
         </div>
         <div className="w-full md:w-1/2 md:pl-12">
-          <h1 className="text-3xl md:text-4xl font-bold mb-4">
+          <h1 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: 'white' }}>
             Revolutionizing Food Waste Management
           </h1>
-          <p className="text-gray-700 text-lg">
+          <p className="text-gray-700 text-lg" style={{ color: 'white' }}>
             NoWaste is a groundbreaking marketplace that connects food vendors with farmers and composters,
             creating a sustainable ecosystem for food waste management. Our platform enables efficient redistribution
             of surplus food, reducing environmental impact while creating value for all participants.
@@ -30,9 +34,9 @@ const About = () => {
       </div>
 
       {/* Team Section */}
-      <section className="bg-gray-50 py-12">
+      <section className="bg-[#EBFFF3] py-12">
         <div className="max-w-6xl mx-auto px-6">
-          <h2 className="text-2xl font-bold text-center mb-10">Meet Our Team</h2>
+          <h2 className="text-2xl font-bold text-center mb-10" style={{ color: '#0A4724' }}>Meet Our Team</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-8 text-center">
             {[
               {
@@ -59,8 +63,8 @@ const About = () => {
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <p className="font-semibold">{member.name}</p>
-                <p className="text-sm text-gray-500">{member.role}</p>
+                <p className="font-semibold" style={{ color: '#0A4724' }}>{member.name}</p>
+                <p className="text-sm text-gray-500" style={{ color: '#0A4724' }}>{member.role}</p>
               </div>
             ))}
           </div>
@@ -71,7 +75,7 @@ const About = () => {
       {/* Our Work Section */}
       <section className="py-12">
         <div className="max-w-6xl mx-auto px-6">
-          <h2 className="text-2xl font-bold text-center mb-10">Our Work</h2>
+          <h2 className="text-2xl font-bold text-center mb-10" style={{ color: 'white' }}>Our Work</h2>
           <div className="grid md:grid-cols-3 gap-8">
             {[
               {
@@ -105,35 +109,6 @@ const About = () => {
           </div>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="bg-gray-800 text-white py-10 mt-12">
-        <div className="max-w-6xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8">
-          <div>
-            <h4 className="font-semibold mb-3">Contact Us</h4>
-            <p className="text-sm">Email: info@nowaste.com</p>
-            <p className="text-sm">Phone: (123) 456-7890</p>
-          </div>
-          <div>
-            <h4 className="font-semibold mb-3">Location</h4>
-            <p className="text-sm">123 Green Street</p>
-            <p className="text-sm">Eco City, EC 12345</p>
-          </div>
-          <div>
-            <h4 className="font-semibold mb-3">FAQs</h4>
-            <p className="text-sm">How it works</p>
-            <p className="text-sm">Terms of Service</p>
-          </div>
-          <div>
-            <h4 className="font-semibold mb-3">Social Media</h4>
-            <div className="flex gap-4 text-xl">
-              <i className="fab fa-facebook-f"></i>
-              <i className="fab fa-twitter"></i>
-              <i className="fab fa-instagram"></i>
-            </div>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 };

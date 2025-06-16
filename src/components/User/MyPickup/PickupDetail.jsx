@@ -130,18 +130,18 @@ const PickupDetails = () => {
             console.log('Error in completing pickup status', error.message)
         }
     }
-
     return (
         <>
-            <div className="p-6 bg-gray-100 min-h-screen text-gray-800">
+            <div className="p-6 min-h-screen text-gray-800" style={{
+                background: 'linear-gradient(to bottom right, #0A4724, #116937)',
+            }}>
                 <ToastContainer />
-                {/* Header */}
                 <div className="flex justify-between items-center mb-6">
                     <div>
-                        <h1 className="text-3xl font-bold">Pick up Detail</h1>
-                        <p className="text-sm text-gray-600">Pickup #: <span className="font-semibold">{pickup._id}</span></p>
+                        <h1 className="text-3xl font-bold text-white">Pick up Detail</h1>
+                        <p className="text-sm text-gray-600" style={{ color: 'rgb(85, 212, 140)' }}>Pickup #: <span className="font-semibold">{pickup._id}</span></p>
                         {pickupStatus === "completed" && (
-                            <p className="text-sm">Picked Up Complete Date: 📅
+                            <p className="text-sm" style={{ color: 'rgb(85, 212, 140)' }}>Picked Up Complete Date: 📅
                                 {new Date(new Date(pickup.pickedUpDate).getTime() - 24 * 60 * 60 * 1000).toLocaleDateString("en-US", {
                                     year: "numeric",
                                     month: "long",
@@ -158,15 +158,17 @@ const PickupDetails = () => {
                     </div>
 
                     <div className="flex items-center gap-4">
-                        <button
-                            onClick={() => setShowMapModal(true)}
-                            className="bg-blue-400 text-white rounded hover:bg-blue-600"
-                            style={{ borderRadius: 20, padding: 4, width: 100 }}
-                        >
-                            <strong style={{ fontSize: 12, }}>
-                                View Map
-                            </strong>
-                        </button>
+                        {/* {(pickup.status === 'pending' || pickup.status === 'pickup') && ( */}
+                            <button
+                                onClick={() => setShowMapModal(true)}
+                                className="bg-blue-400 text-white rounded hover:bg-blue-600"
+                                style={{ borderRadius: 20, padding: 4, width: 100 }}
+                            >
+                                <strong style={{ fontSize: 12, }}>
+                                    View Map
+                                </strong>
+                            </button>
+                        {/* )} */}
                         <span
                             className={`text-white px-3 py-1 rounded-full text-sm font-medium ${pickup.status === "pending"
                                 ? "bg-blue-400"
@@ -214,7 +216,7 @@ const PickupDetails = () => {
 
                 {/* Pickup Info Section */}
                 {pickup?.sacks?.map((item) => (
-                    <div key={item._id} className="bg-white rounded-xl p-6 mb-6 flex gap-6 shadow">
+                    <div key={item._id} className="bg-[#E9FFF3] rounded-xl p-6 mb-6 flex gap-6 shadow">
                         {/* Left Column: Image + Stall Info */}
                         <div className="w-1/3">
                             <img
@@ -226,7 +228,19 @@ const PickupDetails = () => {
                                 <h3 className="font-bold">Taytay Rizal Market</h3>
                                 <p className="text-sm mt-1">Stall #: {item.stallNumber}</p>
                                 <p className="text-sm">{sellers[item.seller]?.stall?.stallAddress || "Taytay Rizal New Market"}</p>
-                                <p className="text-sm">📅 {new Date(pickup.pickupTimestamp).toLocaleDateString()} {new Date(pickup.pickupTimestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                                <p className="text-sm">📅
+                                    {new Date(new Date(pickup.pickupTimestamp).getTime() - 24 * 60 * 60 * 1000).toLocaleDateString("en-US", {
+                                        year: "numeric",
+                                        month: "long",
+                                        day: "numeric",
+                                    })}{" "}
+                                    {new Date(pickup.pickupTimestamp).toLocaleTimeString("en-US", {
+                                        timeZone: "UTC",
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                        hour12: true,
+                                    })}
+                                </p>
                             </div>
                         </div>
 
@@ -246,7 +260,13 @@ const PickupDetails = () => {
                                             <p className="font-bold">{item.kilo} kg</p>
                                         </div>
                                         <p className="text-sm">Description: {item.description || 'Mixed Vegetables'}</p>
-                                        <p className="text-sm">Spoilage Date: {item.spoilageDate || '12/18/23'}</p>
+                                        <p className="text-sm">Spoilage Date:{" "}
+                                            {new Date(new Date(item.dbSpoil).getTime() - 24 * 60 * 60 * 1000).toLocaleDateString("en-US", {
+                                                year: "numeric",
+                                                month: "long",
+                                                day: "numeric",
+                                            })}{" "}
+                                        </p>
                                     </div>
                                 </div>
                             </div>
@@ -301,7 +321,6 @@ const PickupDetails = () => {
                     </div>
                 )}
             </div>
-            <Footer />
         </>
     );
 };

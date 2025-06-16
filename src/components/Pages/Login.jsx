@@ -82,7 +82,7 @@ const Login = () => {
       </div>
 
       {/* Right Panel - Login Form */}
-      <div className="w-1/2 flex items-center justify-center bg-white">
+      <div className="w-1/2 flex items-center justify-center">
         <div className="w-full max-w-md p-8 space-y-6">
           <h2 className="text-2xl font-bold text-center text-gray-900">
             Welcome Back

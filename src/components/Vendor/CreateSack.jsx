@@ -6,13 +6,13 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import '../../index.css'
 
-const CreateSack = () => {
+const CreateSack = ({ onClose }) => {
     const [description, setDescription] = useState("");
     const navigate = useNavigate();
     const user = getUser();
     const [image, setImage] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
-    const [kilo, setKilo] = useState(0);
+    const [kilo, setKilo] = useState(5);
     const [dbSpoil, setDbSpoil] = useState('');
     const [error, setError] = useState('');
     const [preview, setPreview] = useState(null);
@@ -60,9 +60,9 @@ const CreateSack = () => {
             toast.success("Create Sack Successful!");
             setTimeout(() => {
                 if (response.data.success) {
-                    navigate(-1);
+                    onClose();
                 } else {
-                    toast.error(response.data.message || "Registration failed.");
+                    toast.error(response.data.message || "Failed to create sack.");
                 }
             }, 1500);
         } catch (error) {
@@ -76,21 +76,27 @@ const CreateSack = () => {
     };
 
     const decrement = () => {
-        if (kilo > 0) setKilo((prev) => prev - 1);
+        if (kilo > 5) setKilo((prev) => prev - 1);
     };
 
     const handleChangeText = (e) => {
         const value = parseInt(e.target.value, 10) || 0;
-        setKilo(value > 99999 ? 99999 : value);
+        if (value < 5) {
+            setKilo(5);
+        } else if (value > 99999) {
+            setKilo(50);
+        } else {
+            setKilo(value);
+        }
     };
-
     return (
-        <div className="flex items-center fade-in justify-center min-h-screen bg-gradient-to-r from-[#1F7D53] via-[#3A7D44] to-[#4CAF50]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-50">
             <ToastContainer />
-            <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
-                <h2 className="text-2xl font-bold text-center text-gray-900">
-                    Create Sack
-                </h2>
+            <div className="w-full max-w-md p-6 space-y-6 rounded-lg shadow-md relative" style={{
+                background: 'linear-gradient(to bottom right,rgb(5, 107, 49),rgb(35, 241, 124))',
+            }}>
+                <button onClick={onClose} className="absolute top-2 right-2 text-gray-500 hover:text-black">✕</button>
+                <h2 className="text-2xl font-bold text-center text-gray-900">Create Sack</h2>
                 <form className="space-y-6" onSubmit={handleSubmit}>
                     <div className="flex justify-center mb-6 relative">
                         <label htmlFor="avatar-upload" className="cursor-pointer group">
@@ -148,6 +154,7 @@ const CreateSack = () => {
                                 type="number"
                                 value={kilo}
                                 onChange={handleChangeText}
+                                min={5}
                                 max={99999}
                                 className="w-20 text-center px-2 py-2 border border-gray-300 rounded"
                             />
@@ -161,11 +168,22 @@ const CreateSack = () => {
                         </div>
                     </div>
 
+
                     <input
                         type="number"
                         placeholder="How Many Days before spoilage?"
                         value={dbSpoil}
-                        onChange={(e) => setDbSpoil(e.target.value)}
+                        onChange={(e) => {
+                            const value = parseInt(e.target.value, 10);
+                            if (value >= 1 && value <= 4) {
+                                setDbSpoil(value);
+                            } else if (e.target.value === "") {
+                                setDbSpoil("");
+                            }
+                        }}
+                        min={1}
+                        max={4}
+                        required
                         style={{
                             height: '50px',
                             border: '1px solid #ccc',
@@ -177,10 +195,7 @@ const CreateSack = () => {
                         }}
                     />
 
-                    <button
-                        type="submit"
-                        className="w-full px-4 py-2 text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >
+                    <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md">
                         Create Sack
                     </button>
                 </form>

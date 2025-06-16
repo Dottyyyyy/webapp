@@ -44,9 +44,6 @@ const Profile = () => {
 
   return (
     <div className="flex w-full h-full fade-in">
-      <Sidebar />
-
-      {/* Main Content */}
       <div className="flex-grow flex items-center justify-center min-h-screen bg-gradient-to-r from-[#1F7D53] via-[#3A7D44] to-[#4CAF50]">
         <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
           <h2 className="text-2xl font-bold text-center text-gray-900">Profile</h2>

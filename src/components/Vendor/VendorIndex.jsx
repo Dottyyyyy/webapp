@@ -16,7 +16,7 @@ function VendorIndex() {
     const [monthlyAverage, setMonthlyAverage] = useState(0);
     const [notifications, setNotifications] = useState([]);
     const chartRef = useRef(null);
-    const chartInstanceRef = useRef(null); // to store chart instance
+    const chartInstanceRef = useRef(null);
 
     useEffect(() => {
         const fetchSackCounts = async () => {
@@ -85,7 +85,6 @@ function VendorIndex() {
     useEffect(() => {
         if (!chartRef.current) return;
 
-        // Destroy previous chart instance if it exists
         if (chartInstanceRef.current) {
             chartInstanceRef.current.destroy();
         }
@@ -93,7 +92,7 @@ function VendorIndex() {
         const ctx = chartRef.current.getContext('2d');
 
         chartInstanceRef.current = new Chart(ctx, {
-            type: 'bar',
+            type: 'line',
             data: {
                 labels: ['Total Waste', 'Monthly Waste'],
                 datasets: [
@@ -137,7 +136,6 @@ function VendorIndex() {
             },
         });
 
-        // Clean up on unmount
         return () => {
             if (chartInstanceRef.current) {
                 chartInstanceRef.current.destroy();
@@ -147,29 +145,48 @@ function VendorIndex() {
 
 
     return (
-        <div className="min-h-screen bg-gray-50 px-4 py-8">
+        <>
+
+            {/* Hero Section */}
+            <section
+                id="home"
+                className="px-6"
+                style={{
+                    background: 'linear-gradient(to bottom right, #0A4724, #116937)', padding: 10
+                }}
+            >
+                <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12">
+                    {/* Left Side */}
+                    <div className="flex-1">
+                        <h1 className="text-3xl font-bold text-gray-900 mb-2 text-white">
+                            Welcome, {user.name}
+                        </h1>
+                        <div className="inline-block bg-green-900 px-4 py-2 rounded-full text-sm font-medium text-white mb-6 border border-green-300">
+                            🌱 Connect with local partners and reduce waste
+                        </div>
+                        <h2 className="text-4xl md:text-5xl font-bold leading-tight mb-4 text-white">
+                            Why reuse your <br /> vegetable waste?
+                        </h2>
+                        <p className="text-lg text-white mb-6">
+                            Manage your waste sacks and requests efficiently
+                            and learn how your vegetable waste can bring new value!
+                        </p>
+                    </div>
+
+                    {/* Right Side - Image */}
+                    <div className="flex-1">
+                        <div className="w-full h-full rounded-xl overflow-hidden border border-green-300 shadow-lg">
+                            <img
+                                src="/images/taytay-market.jpg"
+                                alt="Food waste management"
+                                className="w-full h-full object-cover"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             {/* Header */}
-            <div className="text-center mb-8">
-                <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900">
-                    Welcome, Market Vendor
-                </h1>
-                <p className="mt-2 text-gray-600 text-md max-w-2xl mx-auto">
-                    Manage your waste sacks and requests efficiently and learn how your vegetable waste can bring new value!
-                </p>
-            </div>
-
-            {/* Campaign Section */}
-            <div className="bg-white p-6 rounded-xl shadow max-w-4xl mx-auto mb-10">
-                <h2 className="text-xl font-semibold text-green-800 mb-3">
-                    Why reuse your vegetable waste?
-                </h2>
-                <p className="text-gray-700">
-                    Every kilo of vegetable waste you throw away can become something valuable from livestock feed to compost and organic fertilizer.
-                    Start making a difference today by offering your waste to farmers and composters who need it. Together, we can create a cleaner, more
-                    sustainable marketplace.
-                </p>
-            </div>
-
             <div className="bg-white shadow rounded-xl p-6 max-w-3xl mx-auto mt-10">
                 <h2 className="text-lg font-semibold text-gray-700 mb-4">Waste Summary (kg)</h2>
                 <canvas ref={chartRef} height="100"></canvas>
@@ -215,25 +232,36 @@ function VendorIndex() {
             </div>
             <br />
             <br />
-            <div className="grid gap-4">
-                {/* Notifications */}
-                {notifications.filter((notif) => !notif.isRead).length > 0 ? (
-                    notifications
-                        .filter((notif) => !notif.isRead)
-                        .slice(0, 5) // 👈 Limit to 5
-                        .map((notif, i) => (
-                            <div
-                                key={notif._id || i}
-                                className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded"
-                            >
-                                <p className="text-sm font-medium">{notif.message}</p>
-                            </div>
-                        ))
-                ) : (
-                    <h1>No New Waste Sacks</h1>
-                )}
+            <div
+                style={{
+                    background: 'linear-gradient(to bottom right, #0A4724, #116937)', padding: 50,
+                }}
+            >
+                <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-xl font-semibold text-white">Recent Available Sacks</h2>
+                    <a href="/pickup" className="text-sm text-white hover:underline">
+                        View All
+                    </a>
+                </div>
+                <div className="grid gap-4">
+                    {notifications.filter((notif) => !notif.isRead).length > 0 ? (
+                        notifications
+                            .filter((notif) => !notif.isRead)
+                            .slice(0, 5)
+                            .map((notif, i) => (
+                                <div
+                                    key={notif._id || i}
+                                    className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded"
+                                >
+                                    <p className="text-sm font-medium">{notif.message}</p>
+                                </div>
+                            ))
+                    ) : (
+                        <h1 className="text-gray-500">No New Waste Sacks</h1>
+                    )}
+                </div>
             </div>
-        </div>
+        </>
     );
 }
 
