@@ -79,7 +79,7 @@ const Header = () => {
           {/* Navigation */}
           <nav className="flex items-center space-x-6">
             {/* Admin View */}
-            {user?.role === "admin" && <Sidebar />}
+            {user?.role === "admin"}
 
             {/* Vendor View */}
             {user?.role === "vendor" && (

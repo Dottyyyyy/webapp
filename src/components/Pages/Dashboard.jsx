@@ -13,6 +13,8 @@ import DashboardCard12 from "../partials/dashboard/DashboardCard12";
 import '../../index.css'
 import axios from "axios";
 import Footer from "../Navigation/Footer";
+import DashboardCard14 from "../partials/MarketDashboard/DashboardCard04";
+import DashboardCard15 from "../partials/MarketDashboard/DashboardCard05";
 
 function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -87,36 +89,56 @@ function Dashboard() {
 
         {/* Main content with footer */}
         <main className="grow flex flex-col justify-between min-h-screen bg-[#116937]">
-          <div className="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto bg-[#116937]">
+          <div className="px-4 sm:px-6 lg:px-8 py-8 max-w-9xl mx-auto bg-[#116937]">
             {/* Dashboard Title */}
             <div className="sm:flex sm:justify-between sm:items-center mb-8">
-              <h1 className="text-2xl md:text-3xl text-white-800 white:text-white-100 font-bold" style={{color:'white'}}>
+              <h1 className="text-2xl md:text-3xl text-white-800 white:text-white-100 font-bold" style={{ color: 'white' }}>
                 Dashboard
               </h1>
             </div>
 
-            {/* Stat Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+            {/* Stat Header Boxes */}
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
               <a href="/admin/farmers" className="text-white hover:text-gray-200">
-                <StatCard title="Total Farmers" count={roleCounts.farmer} icon="🌾" />
+                <StatCard title="Farmer" count={roleCounts.farmer} icon="🌾" />
               </a>
               <a href="/admin/composters" className="text-white hover:text-gray-200">
-                <StatCard title="Total Composters" count={roleCounts.composter} icon="♻️" />
+                <StatCard title="Composter" count={roleCounts.composter} icon="♻️" />
               </a>
+              <StatCard title="Sack Collected" count={sacks.length} icon="🗑️" />
               <a href="/admin/vendors" className="text-white hover:text-gray-200">
-                <StatCard title="Total Vendors" count={roleCounts.vendor} icon="🧺" />
+                <StatCard title="Vendors" count={roleCounts.vendor} icon="🧺" />
               </a>
-              <StatCard title="Market Stalls" count={numStalls} icon="🏬" />
-              <StatCard title="Sacks This Month" count={sacks.length} icon="🗑️" />
+              <StatCard title="Stalls" count={numStalls} icon="🏬" />
             </div>
 
-            {/* Dashboard Cards */}
-            <div className="grid grid-cols-12 gap-6">
-              <DashboardCard04 />
-              <DashboardCard05 />
-              <DashboardCard02 />
-              <DashboardCard03 />
-              <DashboardCard12 />
+
+            {/* Monthly Collection & Recent Activity Chart */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+              <div className="md:col-span-2 bg-white rounded-xl shadow-lg p-4">
+                <DashboardCard04 />
+              </div>
+              <div className="bg-white rounded-xl shadow-lg p-4">
+                <DashboardCard14 />
+              </div>
+            </div>
+            {/* Activity, Top Rated, Reviews */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-gradient-to-br from-green-300 to-green-600 rounded-xl p-4 text-white shadow-lg">
+                <h2 className="font-semibold text-lg mb-2">Recent Activity</h2>
+                <DashboardCard12 />
+              </div>
+              <div className="bg-gradient-to-br from-green-300 to-green-600 rounded-xl p-4 text-white shadow-lg">
+                <h2 className="font-semibold text-lg mb-2">Waste Collected Monthly</h2>
+               <DashboardCard02/>
+               <br></br>
+               <DashboardCard03/>
+               
+              </div>
+              <div className="bg-gradient-to-br from-green-300 to-green-600 rounded-xl p-4 text-white shadow-lg">
+                <h2 className="font-semibold text-lg mb-2">User Reviews</h2>
+               <DashboardCard15 />
+              </div>
             </div>
           </div>
         </main>
@@ -124,15 +146,16 @@ function Dashboard() {
     </div>
   );
 }
-
 const StatCard = ({ title, count, icon }) => (
-  <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200 flex items-center space-x-4 hover:shadow-xl transition">
-    <div className="text-4xl">{icon}</div>
-    <div>
-      <h2 className="text-lg font-semibold text-gray-700">{title}</h2>
-      <p className="text-3xl font-bold text-green-700">{count}</p>
+  <div className="bg-gradient-to-r h-30 from-green-300 to-green-500 rounded-xl py-6 px-6 shadow-md hover:shadow-lg transition font-['Inter'] text-center flex flex-col items-center justify-center">
+    <div className="flex items-center space-x-2 mb-3">
+      <div className="text-[22px]">{icon}</div>
+      <h2 className="font-bold text-[22px] text-black">{title}</h2>
     </div>
+    <p className="text-[16px] font-bold text-black">{count}</p>
   </div>
 );
+
+
 
 export default Dashboard;

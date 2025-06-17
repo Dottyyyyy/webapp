@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
-const DashboardCard05 = () => {
+const DashboardCard15 = () => {
   const [reviews, setReviews] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const reviewsPerPage = 4;
@@ -53,11 +53,7 @@ const DashboardCard05 = () => {
 
   return (
     <div className="flex flex-col col-span-full sm:col-span-6 bg-white dark:bg-gray-800 shadow-md rounded-2xl" style={{ backgroundColor: '#1D3B29' }}>
-      <header className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center bg-[#4eff56]">
-        <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
-          Users Reviews
-        </h2>
-      </header>
+      
 
       <div className="p-6 space-y-4 min-h-[250px]">
         {paginatedReviews.length === 0 ? (
@@ -97,4 +93,4 @@ const DashboardCard05 = () => {
   );
 };
 
-export default DashboardCard05;
+export default DashboardCard15;

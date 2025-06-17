@@ -267,33 +267,6 @@ const Composters = () => {
                     </main>
                 </div>
             </div>
-            <footer className="bg-gray-800 text-white py-10">
-                <div className="max-w-6xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8">
-                    <div>
-                        <h4 className="font-semibold mb-3">Contact Us</h4>
-                        <p className="text-sm">Email: info@nowaste.com</p>
-                        <p className="text-sm">Phone: (123) 456-7890</p>
-                    </div>
-                    <div>
-                        <h4 className="font-semibold mb-3">Location</h4>
-                        <p className="text-sm">123 Green Street</p>
-                        <p className="text-sm">Eco City, EC 12345</p>
-                    </div>
-                    <div>
-                        <h4 className="font-semibold mb-3">FAQs</h4>
-                        <p className="text-sm">How it works</p>
-                        <p className="text-sm">Terms of Service</p>
-                    </div>
-                    <div>
-                        <h4 className="font-semibold mb-3">Social Media</h4>
-                        <div className="flex gap-4 text-xl">
-                            <i className="fab fa-facebook-f"></i>
-                            <i className="fab fa-twitter"></i>
-                            <i className="fab fa-instagram"></i>
-                        </div>
-                    </div>
-                </div>
-            </footer>
         </>
     );
 };

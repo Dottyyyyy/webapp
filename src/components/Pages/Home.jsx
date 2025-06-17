@@ -211,14 +211,14 @@ const Home = () => {
   return (
     <>
       <div className="bg-green-500 h-1 w-full"></div>
-      {user.role === "admin" && (
-        <>
-          <Sidebar />
-          <Dashboard />
-        </>
-      )}
-      <div sty className="flex w-full h-full fade-in">
+      <div sty className="flex w-auto h-auto fade-in">
         <div className="w-full">
+          {user.role === "admin" && (
+            <>
+              {/* <Sidebar /> */}
+              <Dashboard />
+            </>
+          )}
           {user.role === "vendor" && (
             <>
               <VendorIndex />

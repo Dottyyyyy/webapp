@@ -7,10 +7,11 @@ import Header from "../../partials/Header";
 import DashboardCard02 from "../../partials/MarketDashboard/DashboardCard02";
 import DashboardCard03 from "../../partials/MarketDashboard/DashboardCard03";
 import DashboardCard04 from "../../partials/MarketDashboard/DashboardCard04";
-import DashboardCard05 from "../../partials/MarketDashboard/DashboardCard05";
 import DashboardCard12 from "../../partials/MarketDashboard/DashboardCard12";
 import MarketDashboardCard01 from "../../partials/MarketDashboard/DashboardCard01";
 import DashboardCard01 from "../../partials/dashboard/DashboardCard01";
+import DashboardCard14 from "../../partials/MarketDashboard/DashboardCard04";
+import DashboardCard15 from "../../partials/MarketDashboard/DashboardCard05";
 
 function Dashboard() {
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -75,7 +76,7 @@ function Dashboard() {
 
                 {/* Main content with footer */}
                 <main className="grow flex flex-col justify-between min-h-screen">
-                    <div className="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto">
+                    <div className="px-4 sm:px-6 lg:px-8 py-8 max-w-9xl mx-auto">
                         {/* Dashboard Title */}
                         <div className="sm:flex sm:justify-between sm:items-center mb-8">
                             <h1 className="text-2xl md:text-3xl text-gray-800 dark:text-gray-100 font-bold">
@@ -95,8 +96,8 @@ function Dashboard() {
 
                         {/* Dashboard Cards */}
                         <div className="grid grid-cols-12 gap-6">
-                            <DashboardCard04 />
-                            <DashboardCard05 />
+                            <DashboardCard14 />
+                            <DashboardCard15 />
                             <MarketDashboardCard01 />
                             <DashboardCard01 />
                         </div>
