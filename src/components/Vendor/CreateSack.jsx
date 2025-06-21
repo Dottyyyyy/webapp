@@ -15,6 +15,7 @@ const CreateSack = ({ onClose }) => {
     const [kilo, setKilo] = useState(5);
     const [dbSpoil, setDbSpoil] = useState('');
     const [error, setError] = useState('');
+    const [status, setStatus] = useState('');
     const [preview, setPreview] = useState(null);
 
     // console.log(user.stall.stallNumber, 'User')
@@ -35,6 +36,7 @@ const CreateSack = ({ onClose }) => {
             formData.append("kilo", kilo);
             formData.append("dbSpoil", dbSpoil);
             formData.append("seller", user._id);
+            formData.append("sackStatus", status);
             formData.append("stallNumber", user.stall.stallNumber);
             if (image) {
                 formData.append("image", image);
@@ -168,32 +170,54 @@ const CreateSack = ({ onClose }) => {
                         </div>
                     </div>
 
-
-                    <input
-                        type="number"
-                        placeholder="How Many Days before spoilage?"
-                        value={dbSpoil}
-                        onChange={(e) => {
-                            const value = parseInt(e.target.value, 10);
-                            if (value >= 1 && value <= 4) {
-                                setDbSpoil(value);
-                            } else if (e.target.value === "") {
-                                setDbSpoil("");
-                            }
-                        }}
-                        min={1}
-                        max={4}
-                        required
-                        style={{
-                            height: '50px',
-                            border: '1px solid #ccc',
-                            borderRadius: '8px',
-                            padding: '0 16px',
-                            marginBottom: '8px',
-                            backgroundColor: '#fff',
-                            width: '80%',
-                        }}
-                    />
+                    <div className="space-y-1">
+                        <label className="block text-sm font-medium text-gray-700">Status</label>
+                        <select
+                            value={status}
+                            onChange={(e) => {
+                                const value = e.target.value;
+                                setStatus(value);
+                                if (value === 'spoiled') {
+                                    setDbSpoil(1);
+                                } else {
+                                    setDbSpoil('');
+                                }
+                            }}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none"
+                            required
+                        >
+                            <option value="" disabled>Select status</option>
+                            <option value="posted">Good Alternative</option>
+                            <option value="spoiled">Spoiled Alternative</option>
+                        </select>
+                    </div>
+                    {status === 'posted' && (
+                        <input
+                            type="number"
+                            placeholder="How Many Days before spoilage?"
+                            value={dbSpoil}
+                            onChange={(e) => {
+                                const value = parseInt(e.target.value, 10);
+                                if (value >= 1 && value <= 4) {
+                                    setDbSpoil(value);
+                                } else if (e.target.value === "") {
+                                    setDbSpoil("");
+                                }
+                            }}
+                            min={1}
+                            max={4}
+                            required
+                            style={{
+                                height: '50px',
+                                border: '1px solid #ccc',
+                                borderRadius: '8px',
+                                padding: '0 16px',
+                                marginBottom: '8px',
+                                backgroundColor: '#fff',
+                                width: '80%',
+                            }}
+                        />
+                    )}
 
                     <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md">
                         Create Sack
