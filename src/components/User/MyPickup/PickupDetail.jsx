@@ -18,6 +18,8 @@ const PickupDetails = () => {
     const [review, setReview] = useState('');
     const [rating, setRating] = useState(0);
     const [sellers, setSellers] = useState({});
+    const [showCompleteModal, setShowCompleteModal] = useState(false);
+    const [isCompleting, setIsCompleting] = useState(false);
     const navigate = useNavigate();
     const user = getUser();
     const userId = user._id;
@@ -115,21 +117,31 @@ const PickupDetails = () => {
         }
     };
 
-    const handleCompletePickUpStatus = async () => {
+    const handleCompletePickUpStatus = () => {
+        setShowCompleteModal(true);
+    };
+
+    const confirmCompletePickup = async () => {
         try {
-            const data = await axios.put(`${import.meta.env.VITE_API}/sack/complete-pickup/${pickup._id}`)
+            setIsCompleting(true);
+            await axios.put(`${import.meta.env.VITE_API}/sack/complete-pickup/${pickup._id}`);
             toast.success(
                 <div>
-                    <p>All orders are all claimed. Thankyou for your service.</p>
+                    <p>All sacks have been claimed. Thank you for your service!</p>
                 </div>
             );
+            setShowCompleteModal(false);
             setTimeout(() => {
                 navigate(-1);
             }, 1500);
         } catch (error) {
-            console.log('Error in completing pickup status', error.message)
+            console.log("Error in completing pickup status", error.message);
+            toast.error("Something went wrong.");
+        } finally {
+            setIsCompleting(false);
         }
-    }
+    };
+
     return (
         <>
             <div className="p-6 min-h-screen text-gray-800" style={{
@@ -158,7 +170,7 @@ const PickupDetails = () => {
                     </div>
 
                     <div className="flex items-center gap-4">
-                        {/* {(pickup.status === 'pending' || pickup.status === 'pickup') && ( */}
+                        {(pickup.status === 'pending' || pickup.status === 'pickup') && (
                             <button
                                 onClick={() => setShowMapModal(true)}
                                 className="bg-blue-400 text-white rounded hover:bg-blue-600"
@@ -168,7 +180,7 @@ const PickupDetails = () => {
                                     View Map
                                 </strong>
                             </button>
-                        {/* )} */}
+                        )}
                         <span
                             className={`text-white px-3 py-1 rounded-full text-sm font-medium ${pickup.status === "pending"
                                 ? "bg-blue-400"
@@ -193,7 +205,7 @@ const PickupDetails = () => {
                         </div>
                         <div className="bg-white p-3 rounded-lg shadow text-center">
                             <p className="text-sm">Pending Items</p>
-                            <p className="font-bold text-lg">{pickup.sacks?.length}</p>
+                            <p className="font-bold text-lg">{pickup.sacks.filter(s => s.status !== "cancelled").length}</p>
                         </div>
                         {pickup.status === 'pending' && (
                             <button
@@ -215,7 +227,7 @@ const PickupDetails = () => {
                 </div>
 
                 {/* Pickup Info Section */}
-                {pickup?.sacks?.map((item) => (
+                {pickup?.sacks?.filter(item => item.status !== 'cancelled').map((item) => (
                     <div key={item._id} className="bg-[#E9FFF3] rounded-xl p-6 mb-6 flex gap-6 shadow">
                         {/* Left Column: Image + Stall Info */}
                         <div className="w-1/3">
@@ -306,20 +318,53 @@ const PickupDetails = () => {
                 ))}
                 {showMapModal && (
                     <div className="fixed inset-0 bg-opacity-50 flex justify-center items-center z-50">
-                        <div className="bg-[#4eff56] rounded-lg p-6 w-full max-w-4xl shadow-lg relative">
+                        <div className="rounded-lg p-6 w-full max-w-4xl shadow-lg relative" style={{
+                            background: 'linear-gradient(to bottom right,rgb(15, 90, 47),rgb(33, 181, 97))',
+                        }}>
                             <button
                                 onClick={() => setShowMapModal(false)}
-                                className="absolute top-2 right-2 text-gray-500 hover:text-gray-800 text-2xl"
+                                className="absolute top-2 right-2 text-white hover:text-white text-2xl"
                             >
                                 &times;
                             </button>
-                            <h2 className="text-xl font-bold mb-4">Map View</h2>
+                            <h2 className="text-xl text-white font-bold mb-4">Map View</h2>
                             <div className="w-full h-[500px]">
                                 <GoogleMapService pickup={pickup} />
                             </div>
                         </div>
                     </div>
                 )}
+                {showCompleteModal && (
+                    <div className="fixed inset-0 z-50 bg-opacity-50 flex items-center justify-center">
+                        <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full text-center" style={{
+                            background: 'linear-gradient(to bottom right,rgb(15, 90, 47),rgb(33, 181, 97))',
+                        }}>
+                            <h2 className="text-xl font-semibold mb-3 text-white">Complete Pickup Confirmation</h2>
+                            <p className="text-white mb-6">
+                                Are you sure all sacks were handed over?
+                                <br />
+                                Any sacks that weren’t claimed will be redistributed to their respective stalls.
+                            </p>
+                            <div className="flex justify-center gap-4">
+                                <button
+                                    onClick={confirmCompletePickup}
+                                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+                                    disabled={isCompleting}
+                                >
+                                    {isCompleting ? "Processing..." : "Yes, Complete Pickup"}
+                                </button>
+                                <button
+                                    onClick={() => setShowCompleteModal(false)}
+                                    className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded"
+                                    disabled={isCompleting}
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
             </div>
         </>
     );

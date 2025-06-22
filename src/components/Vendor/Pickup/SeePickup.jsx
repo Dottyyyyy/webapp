@@ -63,11 +63,11 @@ const SeePickUp = () => {
             // console.log(response.data);
             toast.success(
                 <div>
-                    <p>All orders are all claimed. Thankyou for your service.</p>
+                    <p>All orders are all claimed. Thank you for your service.</p>
                 </div>
             );
             setTimeout(() => {
-                navigate(-1);
+                navigation(-1);
             }, 1500);
         } catch (e) {
             console.error("Error updating sacks:", e);

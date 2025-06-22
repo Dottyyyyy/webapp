@@ -26,11 +26,11 @@ const GoogleMapService = () => {
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1rem', gap: '0.75rem' }}>
                             <span style={{ fontSize: '1.5rem', color: '#FF6B6B' }}>📍</span>
-                            <strong>New Taytay Public Market, Taytay, Rizal</strong>
+                            <strong style={{color:'white'}}>New Taytay Public Market, Taytay, Rizal</strong>
                         </div>
                         <div style={{ flex: '1 1 200px', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                             <span style={{ fontSize: '1.5rem', color: '#FFD700' }}>⏰</span>
-                            <strong>Open: 5AM - 11PM (DAILY)</strong>
+                            <strong style={{color:'white'}}>Open: 5AM - 11PM (DAILY)</strong>
                         </div>
                     </div>
                 </div>

@@ -39,6 +39,7 @@ import MessengerLayout from "./components/User/Messenger";
 import Market from "./components/Admin/Market/Market";
 import Footer from "./components/Navigation/Footer";
 import MarketList from "./components/Vendor/MarketList";
+import ProtectedRoute from "./utils/ProtectedRoutes";
 
 const App = () => {
   const [mySacks, setMySacks] = useState([]); // Lifted state for sacks
@@ -49,56 +50,54 @@ const App = () => {
         <Header />
         <div className="content">
           <Routes>
+            {/* Public Routes */}
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/addAddress" element={<AddAddress />} />
-            <Route path="/addStall" element={<AddStall />} />
-
             <Route path="/register" element={<Register />} />
             <Route path="/forgotpassword" element={<ForgotPassword />} />
-
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
-            <Route path="/profile" element={<Profile />} />
 
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/admin/dashboard" element={<AdminDashboard />} />
-            <Route path="/admin/market" element={<Market />} />
-            <Route path="/admin/farmers" element={<Farmers />} />
-            <Route path="/admin/create/farmer" element={<CreateFarmer />} />
-            <Route path="/admin/composters" element={<Composters />} />
-            <Route path="/admin/create/composter" element={<CreateComposter />} />
-            <Route path="/admin/vendors" element={<Vendors />} />
-            <Route path="/admin/create/vendor" element={<CreateVendor />} />
+            {/* Protected Routes */}
+            <Route element={<ProtectedRoute />}>
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/addAddress" element={<AddAddress />} />
+              <Route path="/addStall" element={<AddStall />} />
+              <Route path="/viewstalls" element={<ViewStalls />} />
+              <Route path="/chats" element={<Chats />} />
+              <Route path="/chatroom/:userId/:receiverId" element={<ChatRoom />} />
+              <Route path="/messenger" element={<MessengerLayout />} />
+              <Route path="/stalls/:id" element={<StallDetails mySacks={mySacks} setMySacks={setMySacks} />} />
+              <Route path="/mysack" element={<MySack mySacks={mySacks} setMySacks={setMySacks} />} />
+              <Route path="/pickup" element={<Pickup mySacks={mySacks} setMySacks={setMySacks} />} />
+              <Route path="/pickup/see/:id" element={<PickupDetails mySacks={mySacks} setMySacks={setMySacks} />} />
 
-            {/* Farmer Sidebar */}
-            <Route path="/viewstalls" element={<ViewStalls />} />
-            <Route path="/chats" element={<Chats />} />
-            <Route path="/chatroom/:userId/:receiverId" element={<ChatRoom />} />
-            <Route path="/messenger" element={<MessengerLayout />} />
-            <Route
-              path="/stalls/:id"
-              element={<StallDetails mySacks={mySacks} setMySacks={setMySacks} />}
-            />
-            <Route
-              path="/mysack"
-              element={<MySack mySacks={mySacks} setMySacks={setMySacks} />}
-            />
-            <Route path="/pickup" element={<Pickup mySacks={mySacks} setMySacks={setMySacks} />} />
-            <Route path="/pickup/see/:id" element={<PickupDetails mySacks={mySacks} setMySacks={setMySacks} />} />
+              {/* Vendor Routes */}
+              <Route path="/vendor/myStall/:id" element={<MyStall />} />
+              <Route path="/vendor/create-sack" element={<CreateSack />} />
+              <Route path="/vendor/pickup" element={<VendorPickup />} />
+              <Route path="/vendor/pickup-detail/:id" element={<SeePickUp />} />
+              <Route path="/vendor/market-list" element={<MarketList />} />
 
-            {/* Composter Side */}
-            <Route path="/composter/dashboard/" element={<ComposterIndex />} />
-            <Route path="/composter/market/" element={<ComposterMarket />} />
-            <Route path="/composter/market/detail/:id" element={<ComposterViewStall />} />
-            <Route path="/composter/pickup/" element={<CompPickup />} />
+              {/* Composter Routes */}
+              <Route path="/composter/dashboard/" element={<ComposterIndex />} />
+              <Route path="/composter/market/" element={<ComposterMarket />} />
+              <Route path="/composter/market/detail/:id" element={<ComposterViewStall />} />
+              <Route path="/composter/pickup/" element={<CompPickup />} />
+            </Route>
 
-            {/* Vendor Sidebar */}
-            <Route path="/vendor/myStall/:id" element={<MyStall />} />
-            <Route path="/vendor/create-sack" element={<CreateSack />} />
-            <Route path="/vendor/pickup" element={<VendorPickup />} />
-            <Route path="/vendor/pickup-detail/:id" element={<SeePickUp />} />
-            <Route path="/vendor/market-list" element={<MarketList />} />
+            {/* Admin Protected Routes */}
+            <Route element={<ProtectedRoute isAdmin={true} />}>
+              <Route path="/admin/dashboard" element={<AdminDashboard />} />
+              <Route path="/admin/market" element={<Market />} />
+              <Route path="/admin/farmers" element={<Farmers />} />
+              <Route path="/admin/create/farmer" element={<CreateFarmer />} />
+              <Route path="/admin/composters" element={<Composters />} />
+              <Route path="/admin/create/composter" element={<CreateComposter />} />
+              <Route path="/admin/vendors" element={<Vendors />} />
+              <Route path="/admin/create/vendor" element={<CreateVendor />} />
+            </Route>
           </Routes>
         </div>
         <Footer />

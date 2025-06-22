@@ -1,41 +1,126 @@
-import React from "react";
-import DoughnutChart from "../../../charts/DoughnutChart";
-
-// Import utilities
-import { getCssVariable } from "../../../utils/Utils";
+import React, { useEffect, useState, useRef } from "react";
+import axios from "axios";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import Chart from "chart.js/auto";
 
 function DashboardCard06() {
-  const chartData = {
-    labels: ["United States", "Italy", "Other"],
-    datasets: [
-      {
-        label: "Top Countries",
-        data: [35, 30, 35],
-        backgroundColor: [
-          getCssVariable("--color-violet-500"),
-          getCssVariable("--color-sky-500"),
-          getCssVariable("--color-violet-800"),
-        ],
-        hoverBackgroundColor: [
-          getCssVariable("--color-violet-600"),
-          getCssVariable("--color-sky-600"),
-          getCssVariable("--color-violet-900"),
-        ],
-        borderWidth: 0,
-      },
-    ],
+  const [pickupData, setPickupData] = useState([]);
+  const chartRef = useRef(null);
+  const chartInstance = useRef(null);
+
+  const fetchAllPickupSackStatus = async () => {
+    try {
+      const res = await axios.get(`${import.meta.env.VITE_API}/sack/get-all-pickup-sack-status`);
+      setPickupData(res.data.pickups);
+    } catch (error) {
+      toast.warning("Error In Fetching Pickup Sack..");
+    }
   };
 
+  useEffect(() => {
+    fetchAllPickupSackStatus();
+    const interval = setInterval(() => {
+      fetchAllPickupSackStatus();
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (!pickupData.length) return;
+
+    const cancelled = {};
+    const claimed = {};
+
+    const getWeekKey = (dateStr) => {
+      const date = new Date(dateStr);
+      const firstDayOfWeek = new Date(date.setDate(date.getDate() - date.getDay()));
+      return firstDayOfWeek.toISOString().slice(0, 10);
+    };
+
+    pickupData.forEach((pickup) => {
+      const weekKey = getWeekKey(pickup.pickedUpDate || pickup.createdAt);
+
+      pickup.sacks.forEach((sack) => {
+        if (sack.status === "cancelled") {
+          cancelled[weekKey] = (cancelled[weekKey] || 0) + 1;
+        } else if (pickup.status === "completed") {
+          claimed[weekKey] = (claimed[weekKey] || 0) + 1;
+        }
+      });
+    });
+
+    const allKeys = Array.from(new Set([...Object.keys(claimed), ...Object.keys(cancelled)])).sort();
+
+    const labels = allKeys.map((key) => {
+      const date = new Date(key);
+      return date.toLocaleDateString("en-US", {
+        month: "long",
+        day: "numeric",
+      });
+    });
+
+    const claimedData = allKeys.map((key) => claimed[key] || 0);
+    const cancelledData = allKeys.map((key) => cancelled[key] || 0);
+
+    if (chartInstance.current) {
+      chartInstance.current.destroy();
+    }
+
+    const ctx = chartRef.current.getContext("2d");
+    chartInstance.current = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels,
+        datasets: [
+          {
+            label: "Claimed Sacks",
+            data: claimedData,
+            backgroundColor: "rgba(34,197,94,0.8)",
+          },
+          {
+            label: "Cancelled Sacks",
+            data: cancelledData,
+            backgroundColor: "rgba(239,68,68,0.8)",
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: "top" },
+          title: {
+            display: true,
+            text: "Weekly Sack Status Summary",
+          },
+        },
+        scales: {
+          x: {
+            ticks: {
+              autoSkip: false,
+              maxRotation: 45,
+              minRotation: 30,
+              callback: function (value, index, ticks) {
+                return this.getLabelForValue(value);
+              },
+            },
+          },
+          y: {
+            beginAtZero: true,
+            ticks: {
+              precision: 0,
+            },
+          },
+        },
+      },
+    });
+  }, [pickupData]);
+
   return (
-    <div className="flex flex-col col-span-full sm:col-span-6 xl:col-span-4 bg-white dark:bg-gray-800 shadow-xs rounded-xl">
-      <header className="px-5 py-4 border-b border-gray-100 dark:border-gray-700/60">
-        <h2 className="font-semibold text-gray-800 dark:text-gray-100">
-          Top Countries
-        </h2>
-      </header>
-      {/* Chart built with Chart.js 3 */}
-      {/* Change the height attribute to adjust the chart height */}
-      <DoughnutChart data={chartData} width={389} height={260} />
+    <div className="flex flex-col col-span-full sm:col-span-6 xl:col-span-4 bg-white dark:bg-gray-800 shadow-xs rounded-xl p-4">
+      <ToastContainer />
+      <h2 className="text-xl font-bold mb-4 text-center text-gray-800 dark:text-white">Weekly Sack Report</h2>
+      <canvas ref={chartRef} />
     </div>
   );
 }

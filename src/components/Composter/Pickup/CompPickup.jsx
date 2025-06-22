@@ -103,6 +103,8 @@ function CompPickup() {
         setFilteredSacks(applyFilterAndPagination(mySack, dateFrom, dateTo, currentPage));
     }, [mySack, currentPage, dateFrom, dateTo]);
 
+    console.log(filteredSacks,'Sack')
+
     return (
         <div className="flex-grow p-6 fade-in" style={{
             background: 'linear-gradient(to bottom right, #0A4724, #116937)', padding: 10

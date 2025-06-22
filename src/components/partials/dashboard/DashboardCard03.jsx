@@ -201,7 +201,7 @@ function DashboardCard03() {
         </div>
 
         <div className="flex items-start">
-          <div className="text-3xl font-bold text-gray-800 dark:text-gray-100 mr-2">
+          <div className="text-2xl font-bold text-gray-800 dark:text-gray-100 mr-2" style={{ marginBottom: 8 }}>
             {loading ? "Loading..." : `${totalKilos} Kilos`}
           </div>
         </div>

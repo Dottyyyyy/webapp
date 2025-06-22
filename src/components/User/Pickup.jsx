@@ -203,7 +203,7 @@ const Pickup = () => {
                                     className="w-24 h-24 rounded-lg mx-auto mb-2 object-cover"
                                 />
                                 <div className="text-sm">
-                                    <i className="mdi mdi-sack"></i> {item.sacks.length}
+                                    <i className="mdi mdi-sack"></i> {item.sacks.filter(s => s.status !== "cancelled").length}
                                 </div>
                                 <div className="text-yellow-400 font-semibold text-sm mt-1">Status: {item.status}</div>
                                 {item.status !== "completed" && (

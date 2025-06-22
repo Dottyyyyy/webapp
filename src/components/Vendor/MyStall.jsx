@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { getUser } from '../../utils/helpers';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import '../../index.css';
 import CreateSack from './CreateSack';
 
@@ -13,6 +15,12 @@ const MyStall = () => {
     const [fromDate, setFromDate] = useState("");
     const [toDate, setToDate] = useState("");
     const [showModal, setShowModal] = useState(false);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [sackToDelete, setSackToDelete] = useState(null);
+
+    const [showReviewModal, setShowReviewModal] = useState(false);
+    const [currentReviewPage, setCurrentReviewPage] = useState(1);
+    const reviewsPerPage = 4;
     const user = getUser();
 
     const fetchStore = async () => {
@@ -61,10 +69,34 @@ const MyStall = () => {
         return isStatusMatch && isWithinDateRange;
     });
 
+    const handleDeleteClick = (sack) => {
+        setSackToDelete(sack);
+        setShowDeleteConfirm(true);
+    };
+
+    const confirmDeleteSack = async () => {
+        try {
+            await axios.delete(`${import.meta.env.VITE_API}/sack/delete-sack/${sackToDelete._id}`);
+            toast.success("Sack succesfully Deleted.");
+            fetchStoreSacks();
+        } catch (error) {
+            console.error("Error deleting sack:", error);
+        } finally {
+            setShowDeleteConfirm(false);
+            setSackToDelete(null);
+        }
+    };
+
+    const totalReviews = stall?.review?.length || 0;
+    const totalPages = Math.ceil(totalReviews / reviewsPerPage);
+    const startIndex = (currentReviewPage - 1) * reviewsPerPage;
+    const paginatedReviews = stall?.review?.slice(startIndex, startIndex + reviewsPerPage) || [];
+
     return (
         <div className="min-h-screen bg-gray-100 p-6 fade-in" style={{
             background: 'linear-gradient(to bottom right, #0A4724, #116937)',
         }}>
+            <ToastContainer />
             {/* Stall Info */}
             {stall ? (
                 <div className="rounded-lg shadow-md overflow-hidden mb-8 flex flex-row justify-center p-5 ml-70">
@@ -86,6 +118,12 @@ const MyStall = () => {
                                 <span className="text-sm text-gray-300">
                                     ({stall.rating?.length || 0} ratings)
                                 </span>
+                                <button
+                                    onClick={() => setShowReviewModal(true)}
+                                    className="ml-10 text-sm underline text-white hover:text-gray-200"
+                                >
+                                    See Reviews ({stall.review?.length || 0})
+                                </button>
                             </div>
                             <span className={`absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-medium ${stall.status === 'Open'
                                 ? 'bg-green-100 text-green-700'
@@ -181,6 +219,14 @@ const MyStall = () => {
                                 <span className={`inline-block mt-3 px-3 py-1 rounded-full text-xs font-medium ${statusColor}`}>
                                     {sack.status}
                                 </span>
+                                {(status === 'posted' || status === 'spoiled') && (
+                                    <button
+                                        onClick={() => handleDeleteClick(sack)}
+                                        className="ml-32 text-white text-sm bg-red-600 hover:bg-red-700 px-3 py-1 rounded"
+                                    >
+                                        🗑️ Delete
+                                    </button>
+                                )}
                             </div>
                         );
                     })}
@@ -189,6 +235,98 @@ const MyStall = () => {
                 <p className="text-white mt-4">No sacks found for current filters.</p>
             )}
             {showModal && <CreateSack onClose={() => setShowModal(false)} />}
+            {showReviewModal && (
+                <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center z-50" >
+                    <div className="w-full max-w-md rounded-lg shadow-lg p-6 relative" style={{
+                        background: 'linear-gradient(to bottom right,rgb(5, 107, 49),rgb(35, 241, 124))',
+                    }} >
+                        <button
+                            onClick={() => {
+                                setShowReviewModal(false);
+                                setCurrentReviewPage(1);
+                            }}
+                            className="absolute top-2 right-2 text-gray-600 hover:text-black"
+                        >
+                            ✕
+                        </button>
+                        <h2 className="text-xl font-semibold mb-4">Stall Reviews</h2>
+
+                        {paginatedReviews?.length > 0 ? (
+                            <div className="space-y-3 max-h-96 overflow-y-auto">
+                                {paginatedReviews.map((rev) => (
+                                    <div key={rev._id} className="p-3 border rounded-md shadow-sm bg-white">
+                                        <p className="text-sm text-gray-800">{rev.text}</p>
+                                        <p className="text-xs text-gray-500 mt-1">
+                                            {new Date(rev.date).toLocaleDateString('en-US', {
+                                                year: 'numeric',
+                                                month: 'long',
+                                                day: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit',
+                                            })}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-gray-600">No reviews available.</p>
+                        )}
+                        {totalPages > 1 && (
+                            <div className="flex justify-between items-center mt-4">
+                                <button
+                                    onClick={() => setCurrentReviewPage((prev) => Math.max(prev - 1, 1))}
+                                    disabled={currentReviewPage === 1}
+                                    className="px-3 py-1 rounded bg-gray-200 text-gray-700 disabled:opacity-50"
+                                >
+                                    Previous
+                                </button>
+                                <span className="text-sm text-gray-600">
+                                    Page {currentReviewPage} of {totalPages}
+                                </span>
+                                <button
+                                    onClick={() => setCurrentReviewPage((prev) => Math.min(prev + 1, totalPages))}
+                                    disabled={currentReviewPage === totalPages}
+                                    className="px-3 py-1 rounded bg-gray-200 text-gray-700 disabled:opacity-50"
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+            {showDeleteConfirm && (
+                <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="rounded-lg shadow-lg p-6 w-full max-w-sm" style={{
+                        background: 'linear-gradient(to bottom right,rgb(14, 114, 58),rgb(47, 189, 109))',
+                    }}>
+                        <h2 className="text-lg font-semibold text-white mb-4">
+                            Confirm Deletion
+                        </h2>
+                        <p className="text-sm text-white mb-6">
+                            Are you sure you want to delete this sack?
+                        </p>
+                        <div className="flex justify-end space-x-3">
+                            <button
+                                onClick={() => {
+                                    setShowDeleteConfirm(false);
+                                    setSackToDelete(null);
+                                }}
+                                className="px-4 py-2 bg-gray-300 text-white rounded hover:bg-gray-400"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={confirmDeleteSack}
+                                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                            >
+                                Yes, Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
         </div>
     );
 };

@@ -195,6 +195,16 @@ ${sidebarOpen ? "translate-x-0" : "lg:translate-x-0 -translate-x-200"}
                         <ul className="space-y-2">
                           <li>
                             <NavLink
+                              to="/admin/market"
+                              className="block px-4 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-green-100 hover:text-green-700"
+                            >
+                              {sidebarExpanded ? "Market" : "🚪"}
+                            </NavLink>
+                          </li>
+                        </ul>
+                        <ul className="space-y-2">
+                          <li>
+                            <NavLink
                               to="#"
                               onClick={handleLogout}
                               className="block px-4 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-green-100 hover:text-green-700"
