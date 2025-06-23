@@ -16,6 +16,7 @@ import axios from "axios";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import { useRef } from "react";
+import DashboardCard08 from "../partials/dashboard/DashboardCard08";
 
 function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -137,7 +138,7 @@ function Dashboard() {
               <StatCard title="Stalls" count={numStalls} icon="🏬" />
             </div>
 
-            <div ref={pdfRef} style={{marginBottom: 20}} className="bg-green-600">
+            <div ref={pdfRef} style={{ marginBottom: 20 }} className="bg-green-600">
               {/* Main Charts Section */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
                 <div className="lg:col-span-2 bg-white rounded-xl shadow-lg p-4">
@@ -175,6 +176,9 @@ function Dashboard() {
                 <div className="bg-white rounded-2xl p-6 shadow-md border border-gray-200">
                   <DashboardCard04 />
                 </div>
+              </div>
+              <div className="grid rounded-2x grid-cols-1 bg-white rounded-2xl p-6 shadow-md border border-gray-200">
+                <DashboardCard08 />
               </div>
             </div>
           </div>

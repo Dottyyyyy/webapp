@@ -32,7 +32,7 @@ function DashboardCard05() {
     } catch (error) {
       console.error("Error fetching stalls:", error);
     }
-  };
+  };  
 
   const fetchUserCounts = async () => {
     try {
