@@ -4,10 +4,10 @@ import '../../../index.css'
 import axios from "axios";
 import Sidebar from "../../partials/Sidebar";
 import Header from "../../partials/Header";
-import DashboardCard02 from "../../partials/MarketDashboard/DashboardCard02";
-import DashboardCard03 from "../../partials/MarketDashboard/DashboardCard03";
-import DashboardCard04 from "../../partials/MarketDashboard/DashboardCard04";
-import DashboardCard12 from "../../partials/MarketDashboard/DashboardCard12";
+// import DashboardCard02 from "../../partials/MarketDashboard/DashboardCard02";
+// import DashboardCard03 from "../../partials/MarketDashboard/DashboardCard03";
+// import DashboardCard04 from "../../partials/MarketDashboard/DashboardCard04";
+// import DashboardCard12 from "../../partials/MarketDashboard/DashboardCard12";
 import MarketDashboardCard01 from "../../partials/MarketDashboard/DashboardCard01";
 import DashboardCard01 from "../../partials/dashboard/DashboardCard01";
 import DashboardCard14 from "../../partials/MarketDashboard/DashboardCard04";
