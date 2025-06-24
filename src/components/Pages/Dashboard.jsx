@@ -133,9 +133,9 @@ function Dashboard() {
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
               <a href="/admin/farmers"><StatCard title="Farmer" count={roleCounts.farmer} icon="🌾" /></a>
               <a href="/admin/composters"><StatCard title="Composter" count={roleCounts.composter} icon="♻️" /></a>
-              <StatCard title="Sack Collected" count={sacks.length} icon="🗑️" />
               <a href="/admin/vendors"><StatCard title="Vendors" count={roleCounts.vendor} icon="🧺" /></a>
-              <StatCard title="Stalls" count={numStalls} icon="🏬" />
+              <a href="/admin/view/stalls"><StatCard title="Stalls" count={numStalls} icon="🏬" /></a>
+              <StatCard title="Sack Collected" count={sacks.length} icon="🗑️" />
             </div>
 
             <div ref={pdfRef} style={{ marginBottom: 20 }} className="bg-green-600">

@@ -32,7 +32,7 @@ function DashboardCard05() {
     } catch (error) {
       console.error("Error fetching stalls:", error);
     }
-  };  
+  };
 
   const fetchUserCounts = async () => {
     try {
@@ -105,10 +105,27 @@ function DashboardCard05() {
       console.error("Error fetching predicted waste data:", error);
     }
   };
-  // console.log(optimalSchedule);
+  console.log(predictedWaste);
 
   useEffect(() => {
-    if (predictedWaste.length > 0 && predictedWasteChartRef.current) {
+    // ✅ Group predicted waste by date (sum total per day)
+    const groupedPredictedWaste = {};
+    predictedWaste.forEach(item => {
+      if (!groupedPredictedWaste[item.date]) {
+        groupedPredictedWaste[item.date] = 0;
+      }
+      groupedPredictedWaste[item.date] += item.predicted_kilos;
+    });
+
+    // ✅ Extract labels and data points
+    const dateLabels = Object.keys(groupedPredictedWaste).map(date =>
+      new Date(date).toLocaleDateString("en-US", { month: "short", day: "numeric" })
+    );
+
+    const predictedDataPoints = Object.values(groupedPredictedWaste);
+
+    // ✅ Render Predicted Waste Chart
+    if (predictedDataPoints.length > 0 && predictedWasteChartRef.current) {
       if (predictedWasteChartInstance.current) {
         predictedWasteChartInstance.current.destroy();
       }
@@ -116,11 +133,11 @@ function DashboardCard05() {
       predictedWasteChartInstance.current = new Chart(predictedWasteChartRef.current, {
         type: "line",
         data: {
-          labels: predictedWaste.map((_, index) => index),
+          labels: dateLabels,
           datasets: [
             {
-              label: "Predicted Waste for each Stall (kg)",
-              data: predictedWaste.map((item) => item.predicted_kilos),
+              label: "Predicted Waste (kg)",
+              data: predictedDataPoints,
               borderColor: "rgba(75,192,192,1)",
               fill: false,
             },
@@ -132,6 +149,7 @@ function DashboardCard05() {
             x: {
               title: {
                 display: true,
+                text: "Date"
               }
             },
             y: {
@@ -145,13 +163,10 @@ function DashboardCard05() {
             tooltip: {
               callbacks: {
                 title: function (context) {
-                  const index = context[0].dataIndex;
-                  return `Date: ${wasteGeneration[index].ds}`;
+                  return `Date: ${context[0].label}`;
                 },
                 label: function (context) {
-                  const index = context.dataIndex;
-                  const yhat = wasteGeneration[index].yhat.toFixed(2);
-                  return `Predicted: ${yhat} Kg`;
+                  return `Predicted: ${context.raw.toFixed(2)} Kg`;
                 },
               },
             },
@@ -160,6 +175,7 @@ function DashboardCard05() {
       });
     }
 
+    // ✅ Render Waste Generation Chart
     if (wasteGeneration.length > 0 && wasteGenerationChartRef.current) {
       if (wasteGenerationChartInstance.current) {
         wasteGenerationChartInstance.current.destroy();
@@ -168,12 +184,14 @@ function DashboardCard05() {
       wasteGenerationChartInstance.current = new Chart(wasteGenerationChartRef.current, {
         type: "line",
         data: {
-          labels: wasteGeneration.map((_, index) => index), // use index for visual clarity
+          labels: wasteGeneration.map(item =>
+            new Date(item.ds).toLocaleDateString("en-US", { month: "short", day: "numeric" })
+          ),
           datasets: [
             {
-              label: 'Prediction',
+              label: "Prediction",
               data: wasteGeneration.map(d => d.yhat),
-              borderColor: 'green',
+              borderColor: "green",
               fill: false,
             },
           ],
@@ -183,11 +201,15 @@ function DashboardCard05() {
           scales: {
             x: {
               ticks: {
-                display: false, // 👈 hide the dates
+                display: true,
               },
               grid: {
-                display: false, // optional: hide x-axis grid lines
+                display: false,
               },
+              title: {
+                display: true,
+                text: "Date"
+              }
             },
             y: {
               beginAtZero: true,
@@ -203,7 +225,6 @@ function DashboardCard05() {
         }
       });
     }
-
   }, [predictedWaste, wasteGeneration, optimalSchedule]);
 
   const fetchReviewRating = async () => {
