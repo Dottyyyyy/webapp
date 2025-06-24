@@ -8,7 +8,7 @@ import DashboardCard04 from "../partials/dashboard/DashboardCard04";
 import DashboardCard05 from "../partials/dashboard/DashboardCard05";
 import DashboardCard12 from "../partials/dashboard/DashboardCard12";
 import DashboardCard06 from "../partials/dashboard/DashboardCard06";
-import DashboardCard14 from "../partials/MarketDashboard/DashboardCard04";
+import DashboardCard14 from "../partials/marketdashboard/DashboardCard14";
 import DashboardCard15 from "../partials/MarketDashboard/DashboardCard05";
 import Footer from "../Navigation/Footer";
 import '../../index.css';
