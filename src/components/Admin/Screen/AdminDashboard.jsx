@@ -8,7 +8,7 @@ import Header from "../../partials/Header";
 // import DashboardCard03 from "../../partials/MarketDashboard/DashboardCard03";
 // import DashboardCard04 from "../../partials/MarketDashboard/DashboardCard04";
 // import DashboardCard12 from "../../partials/MarketDashboard/DashboardCard12";
-import MarketDashboardCard01 from "../../partials/MarketDashboard/DashboardCard01";
+import MarketDashboardCard01 from "../../partials/marketdashboard/MarketDashboardCard01";
 import DashboardCard01 from "../../partials/dashboard/DashboardCard01";
 import DashboardCard14 from "../../partials/marketdashboard/DashboardCard14";
 import DashboardCard15 from "../../partials/marketdashboard/DashboardCard15";
