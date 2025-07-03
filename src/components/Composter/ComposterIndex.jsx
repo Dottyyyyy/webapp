@@ -1,17 +1,18 @@
 import axios from 'axios';
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
 import { getUser } from '../../utils/helpers';
-import Footer from '../Navigation/Footer';
 import Chart from "chart.js/auto";
 
 function ComposterIndex() {
   const user = getUser();
-  const userId = user._id
+  const userId = user._id;
+  const [todaysCollected, setTodaysCollected] = useState(0);
   const [wasteCollected, setWasteCollected] = useState(0);
   const [monthlyWasteCollected, setMonthlyWasteCollected] = useState(0);
   const [activePickupRequest, setActivePickupRequest] = useState(0);
   const [notifications, setNotifications] = useState([]);
   const [chartData, setChartData] = useState({ labels: [], values: [] });
+  const [chartFilter, setChartFilter] = useState('daily');
   const [topVendors, setTopVendors] = useState([]);
   const [vendorCount, setVendorCount] = useState(0);
   const [overallAverageRating, setOverallAverageRating] = useState(0);
@@ -64,77 +65,139 @@ function ComposterIndex() {
 
       let total = 0;
       let thisMonthTotal = 0;
+      let todayTotal = 0;
 
       const now = new Date();
       const currentMonth = now.getMonth();
       const currentYear = now.getFullYear();
+      const today = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate()
+      ).toLocaleDateString('en-CA');
 
       completedPickups.forEach(pickup => {
         const kilo = parseFloat(pickup.totalKilo || 0);
+        const pickupDate = new Date(pickup.pickupTimestamp);
+        const pickupDateStr = new Date(
+          pickupDate.getFullYear(),
+          pickupDate.getMonth(),
+          pickupDate.getDate()
+        ).toLocaleDateString('en-CA');
+
         total += kilo;
 
-        const pickupDate = new Date(pickup.pickupTimestamp);
         if (
-          pickupDate.getFullYear() === currentYear &&
-          pickupDate.getMonth() === currentMonth
+          pickupDate.getFullYear() === now.getFullYear() &&
+          pickupDate.getMonth() === now.getMonth()
         ) {
           thisMonthTotal += kilo;
         }
-      });
 
-      const monthlyData = {};
-
-      completedPickups.forEach(pickup => {
-        const kilo = parseFloat(pickup.totalKilo || 0);
-        const pickupDate = new Date(pickup.pickupTimestamp);
-
-        const monthKey = pickupDate.toLocaleString('default', {
-          month: 'short',
-          year: 'numeric'
-        });
-
-        if (!monthlyData[monthKey]) {
-          monthlyData[monthKey] = 0;
+        if (pickupDateStr === today) {
+          todayTotal += kilo;
         }
-        monthlyData[monthKey] += kilo;
-      });
-
-      const sortedMonths = Object.keys(monthlyData).sort((a, b) => {
-        return new Date(a) - new Date(b);
-      });
-
-      setChartData({
-        labels: sortedMonths,
-        values: sortedMonths.map(month => monthlyData[month]),
       });
 
       setWasteCollected(total);
       setMonthlyWasteCollected(thisMonthTotal);
-      setActivePickupRequest(requestedPickups.length)
+      setTodaysCollected(todayTotal);
+      setActivePickupRequest(requestedPickups.length);
+
+      // Prepare chart data based on the filter selection
+      if (chartFilter === 'daily') {
+        setChartData(prepareDailyChartData(pickups));
+      } else if (chartFilter === 'monthly') {
+        setChartData(prepareMonthlyChartData(pickups));
+      }
     } catch (error) {
       console.error('Error getting Pickups:', error.message);
     }
   };
 
+  // Function to prepare daily chart data
+  const prepareDailyChartData = (pickups) => {
+    const dailyData = {};
+
+    pickups.forEach((pickup) => {
+      const pickupDate = new Date(pickup.pickupTimestamp);
+      const formattedDate = pickupDate.toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+      });
+
+      if (!dailyData[formattedDate]) {
+        dailyData[formattedDate] = 0;
+      }
+
+      dailyData[formattedDate] += parseFloat(pickup.totalKilo || 0);
+    });
+
+    // Sort the dates in reverse chronological order (most recent last)
+    const sortedLabels = Object.keys(dailyData).sort((a, b) => {
+      const dateA = new Date(a);
+      const dateB = new Date(b);
+      return dateA - dateB; // Sort in ascending order (oldest first)
+    });
+
+    // Sort the values to match the sorted labels
+    const sortedValues = sortedLabels.map(label => dailyData[label]);
+
+    return {
+      labels: sortedLabels,
+      values: sortedValues,
+    };
+  };
+
+  // Function to prepare monthly chart data
+  const prepareMonthlyChartData = (pickups) => {
+    const monthlyData = {};
+
+    pickups.forEach((pickup) => {
+      const pickupMonth = new Date(pickup.pickupTimestamp).toLocaleDateString('en-CA', { month: 'short', year: 'numeric' });
+      if (!monthlyData[pickupMonth]) {
+        monthlyData[pickupMonth] = 0;
+      }
+      monthlyData[pickupMonth] += parseFloat(pickup.totalKilo || 0);
+    });
+
+    // Sort the months in reverse chronological order (most recent last)
+    const sortedLabels = Object.keys(monthlyData).sort((a, b) => {
+      const dateA = new Date(a);
+      const dateB = new Date(b);
+      return dateA - dateB; // Sort in ascending order (oldest first)
+    });
+
+    // Sort the values to match the sorted months
+    const sortedValues = sortedLabels.map(label => monthlyData[label]);
+
+    return {
+      labels: sortedLabels,
+      values: sortedValues,
+    };
+  };
 
   const fetchNotifications = async () => {
     try {
       const { data } = await axios.get(`${import.meta.env.VITE_API}/notifications/get-notif`);
       const spoiledNotifications = data.notifications.filter(notification => notification.type === 'spoiled');
-      console.log(spoiledNotifications);
       setNotifications(spoiledNotifications);
     } catch (error) {
       console.error("Error fetching notifications:", error);
     }
   };
 
-
   useEffect(() => {
     fetchPickupSacks();
     fetchNotifications();
-  }, [userId]);
+    const interval = setInterval(() => {
+      fetchPickupSacks();
+      fetchNotifications();
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [userId, chartFilter]);
 
-
+  // Initialize chart after chart data is updated
   useEffect(() => {
     if (!chartData.labels.length) return;
 
@@ -178,7 +241,7 @@ function ComposterIndex() {
           x: {
             title: {
               display: true,
-              text: 'Month'
+              text: chartFilter === 'daily' ? 'Day' : 'Month'
             }
           }
         }
@@ -188,7 +251,6 @@ function ComposterIndex() {
 
   return (
     <>
-      {/* Hero Section */}
       <section
         id="home"
         className="px-6"
@@ -197,7 +259,6 @@ function ComposterIndex() {
         }}
       >
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12">
-          {/* Left Side */}
           <div className="flex-1">
             <h1 className="text-3xl font-bold text-gray-900 mb-2 text-white">
               Welcome, {user.name}
@@ -238,7 +299,6 @@ function ComposterIndex() {
             </div>
           </div>
 
-          {/* Right Side - Image */}
           <div className="flex-1">
             <div className="w-full h-full rounded-xl overflow-hidden border border-green-300 shadow-lg">
               <img
@@ -253,20 +313,36 @@ function ComposterIndex() {
 
       <div className="min-h-screen bg-[#E9FFF3]">
         <main className="p-6 max-w-7xl mx-auto">
+          <div className="flex justify-center gap-4 mb-8">
+            <button
+              onClick={() => setChartFilter('daily')}
+              className={`px-6 py-2 rounded-full ${chartFilter === 'daily' ? 'bg-green-600 text-white' : 'bg-gray-300 text-gray-800'}`}
+            >
+              Daily Graph
+            </button>
+            <button
+              onClick={() => setChartFilter('monthly')}
+              className={`px-6 py-2 rounded-full ${chartFilter === 'monthly' ? 'bg-green-600 text-white' : 'bg-gray-300 text-gray-800'}`}
+            >
+              Monthly Graph
+            </button>
+          </div>
           <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 mt-8">
             <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
               <h2 className="text-xl font-bold text-gray-800 mb-4" style={{ marginLeft: 225 }}>
-                Collected Waste
+                Collected Waste Graph 📊
               </h2>
-              <h2 className="text-xl font-bold text-gray-800 mb-4" style={{ marginRight: 150 }}>
+              <h2 className="text-xl font-bold text-gray-800 mb-4" style={{ marginRight: 60 }}>
                 {user.name}'s Statistics 📶
               </h2>
             </div>
-            <div className="relative h-[300px] w-full" style={{ display: 'flex', flexDirection: 'row', justifyContent:'space-between' }}>
+            <div className="relative h-[375px] w-full" style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
               {chartData.labels.length > 0 ? (
-                <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 mt-8">
-                  <h2 className="text-xl font-semibold text-gray-800 mb-4">Collected Waste Per Month</h2>
-                  <div className="relative h-[300px] w-full">
+                <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 mt-8 mb-10">
+                  <h2 className="text-xl font-semibold text-gray-800 mb-4">
+                    {chartFilter === 'daily' ? 'Daily' : 'Monthly'} Collected Waste
+                  </h2>
+                  <div className="relative h-[225px] w-175">
                     <canvas id="wasteChart"></canvas>
                   </div>
                 </div>
@@ -275,24 +351,28 @@ function ComposterIndex() {
                   No collection data available yet.
                 </div>
               )}
-              {/* Stats Grid */}
               <div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 ml-10">
-                  <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 h-40">
+                  <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 h-30">
                     <h3 className="text-sm text-gray-500 font-medium">Total Collected</h3>
-                    <p className="text-3xl font-bold text-green-600 mt-2">{wasteCollected} kg</p>
+                    <p className="text-2xl font-bold text-green-600 mt-2">{wasteCollected}kg</p>
                   </div>
-                  <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 h-40">
+                  <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 h-30">
                     <h3 className="text-sm text-gray-500 font-medium">Monthly Average</h3>
-                    <p className="text-3xl font-bold text-green-600 mt-2">{monthlyWasteCollected} kg</p>
+                    <p className="text-2xl font-bold text-green-600 mt-2">{monthlyWasteCollected}kg</p>
                   </div>
-                  <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 h-40">
-                    <h3 className="text-sm text-gray-500 font-medium">Active Requests</h3>
-                    <p className="text-3xl font-bold text-green-600 mt-2">{activePickupRequest}</p>
+                  <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 h-30">
+                    <h3 className="text-sm text-gray-500 font-medium">Today's Collected</h3>
+                    <p className="text-2xl font-bold text-green-600 mt-2">{todaysCollected}kg</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 ml-10">
+                  <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 h-25 w-98 mt-5" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                    <h3 className="text-sm text-gray-500 font-medium">Active Requests: </h3>
+                    <p className="text-2xl font-bold text-green-600 ml-2">{activePickupRequest}</p>
                   </div>
                 </div>
                 <div className="flex justify-center ml-15">
-                  {/* Quick Actions */}
                   <div className="mb-10">
                     <br />
                     <div className="flex flex-col sm:flex-row gap-4">
@@ -315,37 +395,32 @@ function ComposterIndex() {
             </div>
           </div>
         </main>
-        <div
-          style={{
-            background: 'linear-gradient(to bottom right, #0A4724, #116937)', padding: 50,
-          }}
-        >
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-white">Recent Available Sacks</h2>
-            <a href="/composter/market" className="text-sm text-white hover:underline">
-              View All
-            </a>
-          </div>
-          <div className="grid gap-4">
-            {notifications.filter((notif) => !notif.isRead).length > 0 ? (
-              notifications
-                .filter((notif) => !notif.isRead)
-                .slice(0, 5)
-                .map((notif, i) => (
-                  <div
-                    key={notif._id || i}
-                    className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded"
-                  >
-                    <p className="text-sm font-medium">{notif.message}</p>
-                  </div>
-                ))
-            ) : (
-              <h1 className="text-gray-500">No New Waste Sacks</h1>
-            )}
-          </div>
+      </div>
+
+      <div style={{ background: 'linear-gradient(to bottom right, #0A4724, #116937)', padding: 50 }}>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold text-white">Recent Available Sacks</h2>
+          <a href="/composter/market" className="text-sm text-white hover:underline">
+            View All
+          </a>
+        </div>
+        <div className="grid gap-4">
+          {notifications.filter((notif) => !notif.isRead).length > 0 ? (
+            notifications
+              .filter((notif) => !notif.isRead)
+              .slice(0, 5)
+              .map((notif, i) => (
+                <div key={notif._id || i} className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded">
+                  <p className="text-sm font-medium">{notif.message}</p>
+                </div>
+              ))
+          ) : (
+            <h1 className="text-gray-500">No New Waste Sacks</h1>
+          )}
         </div>
       </div>
     </>
-  )
+  );
 }
-export default ComposterIndex
+
+export default ComposterIndex;

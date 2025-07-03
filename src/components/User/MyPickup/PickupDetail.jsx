@@ -186,21 +186,31 @@ const PickupDetails = () => {
 
     return (
         <>
-            <div className="p-6 min-h-screen text-gray-800" style={{
-                background: 'linear-gradient(to bottom right, #0A4724, #116937)',
-            }}>
+            <div
+                className="p-6 min-h-screen text-gray-800"
+                style={{
+                    background: "linear-gradient(to bottom right, #0A4724, #116937)",
+                }}
+            >
                 <ToastContainer />
-                <div className="flex justify-between items-center mb-6">
-                    <div>
+                {/* Main Section */}
+                <div className="flex flex-col md:flex-row justify-between items-start mb-6 gap-6">
+                    <div className="flex-1">
                         <h1 className="text-3xl font-bold text-white">Pick up Detail</h1>
-                        <p className="text-sm text-gray-600" style={{ color: 'rgb(85, 212, 140)' }}>Pickup #: <span className="font-semibold">{pickup._id}</span></p>
+                        <p className="text-sm text-gray-600" style={{ color: "rgb(85, 212, 140)" }}>
+                            Pickup #: <span className="font-semibold">{pickup._id}</span>
+                        </p>
                         {pickupStatus === "completed" && (
-                            <p className="text-sm" style={{ color: 'rgb(85, 212, 140)' }}>Picked Up Complete Date: 📅
-                                {new Date(new Date(pickup.pickedUpDate).getTime() - 24 * 60 * 60 * 1000).toLocaleDateString("en-US", {
-                                    year: "numeric",
-                                    month: "long",
-                                    day: "numeric",
-                                })}{" "}
+                            <p className="text-sm" style={{ color: "rgb(85, 212, 140)" }}>
+                                Picked Up Complete Date: 📅
+                                {new Date(new Date(pickup.pickedUpDate).getTime() - 24 * 60 * 60 * 1000).toLocaleDateString(
+                                    "en-US",
+                                    {
+                                        year: "numeric",
+                                        month: "long",
+                                        day: "numeric",
+                                    }
+                                )}{" "}
                                 {new Date(pickup.pickedUpDate).toLocaleTimeString("en-US", {
                                     timeZone: "UTC",
                                     hour: "2-digit",
@@ -211,26 +221,24 @@ const PickupDetails = () => {
                         )}
                     </div>
 
-                    <div className="flex items-center gap-4">
-                        {(pickup.status === 'pending' || pickup.status === 'pickup') && (
+                    <div className="flex flex-wrap gap-4 items-center justify-between md:justify-start">
+                        {(pickup.status === "pending" || pickup.status === "pickup") && (
                             <button
                                 onClick={() => setShowMapModal(true)}
                                 className="bg-blue-400 text-white rounded hover:bg-blue-600"
                                 style={{ borderRadius: 20, padding: 4, width: 100 }}
                             >
-                                <strong style={{ fontSize: 12, }}>
-                                    View Map
-                                </strong>
+                                <strong style={{ fontSize: 12 }}>View Map</strong>
                             </button>
                         )}
                         <span
                             className={`text-white px-3 py-1 rounded-full text-sm font-medium ${pickup.status === "pending"
-                                ? "bg-blue-400"
-                                : pickup.status === "pickup"
-                                    ? "bg-yellow-500"
-                                    : pickup.status === "completed"
-                                        ? "bg-green-500"
-                                        : "bg-gray-400"
+                                    ? "bg-blue-400"
+                                    : pickup.status === "pickup"
+                                        ? "bg-yellow-500"
+                                        : pickup.status === "completed"
+                                            ? "bg-green-500"
+                                            : "bg-gray-400"
                                 }`}
                         >
                             {pickup.status === "pending"
@@ -241,15 +249,17 @@ const PickupDetails = () => {
                                         ? "Complete"
                                         : pickup.status}
                         </span>
+
                         <div className="bg-white p-3 rounded-lg shadow text-center">
                             <p className="text-sm">Total Weight</p>
                             <p className="font-bold text-lg">{pickup.totalKilo} kg</p>
                         </div>
                         <div className="bg-white p-3 rounded-lg shadow text-center">
                             <p className="text-sm">Pending Items</p>
-                            <p className="font-bold text-lg">{pickup.sacks.filter(s => s.status !== "cancelled").length}</p>
+                            <p className="font-bold text-lg">{pickup.sacks.filter((s) => s.status !== "cancelled").length}</p>
                         </div>
-                        {pickup.status === 'pending' && (
+
+                        {pickup.status === "pending" && (
                             <button
                                 className="bg-green-500 hover:bg-green-600 text-white px-5 py-2 rounded-lg shadow"
                                 onClick={handlePickupStatus}
@@ -257,7 +267,7 @@ const PickupDetails = () => {
                                 Start Pickup
                             </button>
                         )}
-                        {pickup.status === 'pickup' && (
+                        {pickup.status === "pickup" && (
                             <button
                                 className="bg-green-500 hover:bg-green-600 text-white px-5 py-2 rounded-lg shadow"
                                 onClick={handleCompletePickUpStatus}
@@ -269,10 +279,10 @@ const PickupDetails = () => {
                 </div>
 
                 {/* Pickup Info Section */}
-                {pickup?.sacks?.filter(item => item.status !== 'cancelled').map((item) => (
-                    <div key={item._id} className="bg-[#E9FFF3] rounded-xl p-6 mb-6 flex gap-6 shadow">
+                {pickup?.sacks?.filter((item) => item.status !== "cancelled").map((item) => (
+                    <div key={item._id} className="bg-[#E9FFF3] rounded-xl p-6 mb-6 flex flex-col md:flex-row gap-6 shadow">
                         {/* Left Column: Image + Stall Info */}
-                        <div className="w-1/3">
+                        <div className="w-full md:w-1/3">
                             <img
                                 src={sellers[item.seller]?.stall?.stallImage?.url || "https://via.placeholder.com/800x400"}
                                 alt="Stall"
@@ -283,12 +293,16 @@ const PickupDetails = () => {
                                 <p className="text-sm mt-1">Stall #: {newPickup?.reviewed}</p>
                                 <p className="text-sm mt-1">Stall #: {item.stallNumber}</p>
                                 <p className="text-sm">{sellers[item.seller]?.stall?.stallAddress || "Taytay Rizal New Market"}</p>
-                                <p className="text-sm">📅
-                                    {new Date(new Date(pickup.pickupTimestamp).getTime() - 24 * 60 * 60 * 1000).toLocaleDateString("en-US", {
-                                        year: "numeric",
-                                        month: "long",
-                                        day: "numeric",
-                                    })}{" "}
+                                <p className="text-sm">
+                                    📅
+                                    {new Date(new Date(pickup.pickupTimestamp).getTime() - 24 * 60 * 60 * 1000).toLocaleDateString(
+                                        "en-US",
+                                        {
+                                            year: "numeric",
+                                            month: "long",
+                                            day: "numeric",
+                                        }
+                                    )}{" "}
                                     {new Date(pickup.pickupTimestamp).toLocaleTimeString("en-US", {
                                         timeZone: "UTC",
                                         hour: "2-digit",
@@ -300,7 +314,7 @@ const PickupDetails = () => {
                         </div>
 
                         {/* Right Column: Items */}
-                        <div className="w-2/3">
+                        <div className="w-full md:w-2/3">
                             <h3 className="text-lg font-semibold mb-4">Items to Pick Up</h3>
                             <div className="space-y-4">
                                 <div className="flex items-start bg-gray-100 p-4 rounded-lg shadow">
@@ -314,8 +328,9 @@ const PickupDetails = () => {
                                             <h4 className="font-semibold">Item #{item.index || 1}</h4>
                                             <p className="font-bold">{item.kilo} kg</p>
                                         </div>
-                                        <p className="text-sm">Description: {item.description || 'Mixed Vegetables'}</p>
-                                        <p className="text-sm">Spoilage Date:{" "}
+                                        <p className="text-sm">Description: {item.description || "Mixed Vegetables"}</p>
+                                        <p className="text-sm">
+                                            Spoilage Date:{" "}
                                             {new Date(new Date(item.dbSpoil).getTime() - 24 * 60 * 60 * 1000).toLocaleDateString("en-US", {
                                                 year: "numeric",
                                                 month: "long",
@@ -325,6 +340,7 @@ const PickupDetails = () => {
                                     </div>
                                 </div>
                             </div>
+
                             {pickupStatus === "completed" && !item?.reviewed && (
                                 <form onSubmit={(e) => handleFormSubmit(e, item.sackId)} className="p-6 bg-white rounded-lg shadow-lg mt-6">
                                     <h3 className="text-xl font-semibold mb-4">Write a Review</h3>
@@ -344,7 +360,7 @@ const PickupDetails = () => {
                                                 key={star}
                                                 onClick={() => handleRatingClick(star)}
                                                 type="button"
-                                                className={`text-xl ${rating >= star ? 'text-yellow-500' : 'text-gray-400'}`}
+                                                className={`text-xl ${rating >= star ? "text-yellow-500" : "text-gray-400"}`}
                                             >
                                                 ★
                                             </button>
@@ -359,11 +375,16 @@ const PickupDetails = () => {
                         </div>
                     </div>
                 ))}
+
+                {/* Map Modal */}
                 {showMapModal && (
                     <div className="fixed inset-0 bg-opacity-50 flex justify-center items-center z-50">
-                        <div className="rounded-lg p-6 w-full max-w-4xl shadow-lg relative" style={{
-                            background: 'linear-gradient(to bottom right,rgb(15, 90, 47),rgb(33, 181, 97))',
-                        }}>
+                        <div
+                            className="rounded-lg p-6 w-full max-w-4xl shadow-lg relative"
+                            style={{
+                                background: "linear-gradient(to bottom right,rgb(15, 90, 47),rgb(33, 181, 97))",
+                            }}
+                        >
                             <button
                                 onClick={() => setShowMapModal(false)}
                                 className="absolute top-2 right-2 text-white hover:text-white text-2xl"
@@ -377,11 +398,16 @@ const PickupDetails = () => {
                         </div>
                     </div>
                 )}
+
+                {/* Complete Pickup Modal */}
                 {showCompleteModal && (
                     <div className="fixed inset-0 z-50 bg-opacity-50 flex items-center justify-center">
-                        <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full text-center" style={{
-                            background: 'linear-gradient(to bottom right,rgb(15, 90, 47),rgb(33, 181, 97))',
-                        }}>
+                        <div
+                            className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full text-center"
+                            style={{
+                                background: "linear-gradient(to bottom right,rgb(15, 90, 47),rgb(33, 181, 97))",
+                            }}
+                        >
                             <h2 className="text-xl font-semibold mb-3 text-white">Complete Pickup Confirmation</h2>
                             <p className="text-white mb-6">
                                 Are you sure all sacks were handed over?
@@ -407,7 +433,6 @@ const PickupDetails = () => {
                         </div>
                     </div>
                 )}
-
             </div>
         </>
     );

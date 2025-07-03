@@ -102,12 +102,24 @@ const Pickup = () => {
     }, [mySack, currentPage, dateFrom, dateTo]);
 
     return (
-        <div className="flex-grow p-6 fade-in" style={{
-            background: 'linear-gradient(to bottom right, #0A4724, #116937)', padding: 10
-        }}>
-            <div style={{ display: 'flex', flexDirection: 'row' }} >
-                <div className="flex items-center justify-center">
-                    <h1 className="text-3xl font-bold text-black text-center p-4 rounded-xl inline-block" style={{ background: 'linear-gradient(to bottom right,rgb(21, 132, 69),rgb(37, 212, 113))', padding: 10, marginRight: 40 }}>
+        <div
+            className="flex-grow p-6 fade-in"
+            style={{
+                background: "linear-gradient(to bottom right, #0A4724, #116937)",
+                padding: 10,
+            }}
+        >
+            <div className="flex flex-col lg:flex-row gap-6">
+                {/* Left Section: Pickup Waste Header + Date Inputs */}
+                <div className="flex-1">
+                    <h1
+                        className="text-3xl font-bold text-black text-center p-4 rounded-xl inline-block"
+                        style={{
+                            background: "linear-gradient(to bottom right,rgb(21, 132, 69),rgb(37, 212, 113))",
+                            padding: 10,
+                            marginRight: 40,
+                        }}
+                    >
                         <div className="flex-1">
                             <div className="w-full h-full rounded-xl overflow-hidden border border-green-300 shadow-lg">
                                 <img
@@ -118,7 +130,7 @@ const Pickup = () => {
                             </div>
                         </div>
                         Pickup Waste
-                        <div className="flex items-center gap-4 mb-4">
+                        <div className="flex items-center gap-4 mb-4 mt-4">
                             <div>
                                 <label className="block font-semibold text-sm text-gray-700">From:</label>
                                 <input
@@ -141,40 +153,48 @@ const Pickup = () => {
                         {(dateFrom || dateTo) && (
                             <button
                                 className="text-sm text-red-200 underline"
-                                onClick={() => { setDateFrom(""); setDateTo(""); }}
+                                onClick={() => {
+                                    setDateFrom("");
+                                    setDateTo("");
+                                }}
                             >
                                 Clear
                             </button>
                         )}
                     </h1>
                 </div>
-                <div className="bg-[#E9FFF3] rounded-lg p-4">
+
+                {/* Right Section: Pagination and Sack Items */}
+                <div className="bg-[#E9FFF3] rounded-lg p-4 flex-1 mr-40">
                     <div className="flex justify-between mt-4 mb-5">
                         <button
                             disabled={currentPage === 1}
-                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                            className={`px-4 py-2 rounded ${currentPage === 1 ? 'bg-gray-300' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                            className={`px-4 py-2 rounded ${currentPage === 1 ? "bg-gray-300" : "bg-blue-600 text-white hover:bg-blue-700"}`}
                         >
                             Previous
                         </button>
                         <button
                             disabled={currentPage * itemsPerPage >= mySack.length}
-                            onClick={() => setCurrentPage(prev => prev + 1)}
-                            className={`px-4 py-2 rounded ${currentPage * itemsPerPage >= mySack.length ? 'bg-gray-300' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                            onClick={() => setCurrentPage((prev) => prev + 1)}
+                            className={`px-4 py-2 rounded ${currentPage * itemsPerPage >= mySack.length ? "bg-gray-300" : "bg-blue-600 text-white hover:bg-blue-700"}`}
                         >
                             Next
                         </button>
                     </div>
+
+                    {/* Sack Items */}
                     {filteredSacks.map((item, index) => (
                         <div
                             key={item._id}
                             onClick={() => navigate(`/pickup/see/${item._id}`, { state: { pickupData: item } })}
-                            className="cursor-pointer text-white rounded-xl shadow-md p-4 mb-4 flex items-center justify-between transition-transform hover:scale-[1.01] w-250"
+                            className="cursor-pointer text-white rounded-xl shadow-md p-4 mb-4 flex items-center justify-between transition-transform hover:scale-[1.01] w-full sm:w-[250px] mx-auto"
                             style={{
-                                background: 'linear-gradient(to bottom right, #0A4724, #116937)', padding: 10
+                                background: "linear-gradient(to bottom right, #0A4724, #116937)",
+                                padding: 10,
                             }}
                         >
-                            {/* Left section */}
+                            {/* Left Section: Pickup Info */}
                             <div className="flex-1 text-center">
                                 {item.status !== "completed" && (
                                     <div className="bg-green-500 px-3 py-1 rounded-full font-semibold text-sm mb-2 inline-block">
@@ -187,7 +207,7 @@ const Pickup = () => {
                                 <div className="text-md font-medium">Total Kilo: {item.totalKilo}</div>
                             </div>
 
-                            {/* Middle section */}
+                            {/* Middle Section: Location Info */}
                             <div className="flex-1 text-center">
                                 <div className="text-4xl mb-2">
                                     <i className="fas fa-route"></i>
@@ -195,15 +215,15 @@ const Pickup = () => {
                                 <div className="text-sm">Taytay Rizal,<br />New Market</div>
                             </div>
 
-                            {/* Right section */}
+                            {/* Right Section: Image and Status */}
                             <div className="flex-1 text-center">
                                 <img
-                                    src='/src/images/newtaytay.jpg'
+                                    src="/src/images/newtaytay.jpg"
                                     alt="Taytay"
                                     className="w-24 h-24 rounded-lg mx-auto mb-2 object-cover"
                                 />
                                 <div className="text-sm">
-                                    <i className="mdi mdi-sack"></i> {item.sacks.filter(s => s.status !== "cancelled").length}
+                                    <i className="mdi mdi-sack"></i> {item.sacks.filter((s) => s.status !== "cancelled").length}
                                 </div>
                                 <div className="text-yellow-400 font-semibold text-sm mt-1">Status: {item.status}</div>
                                 {item.status !== "completed" && (
@@ -211,7 +231,8 @@ const Pickup = () => {
                                         <i className="mdi mdi-clock-remove"></i> {
                                             new Date(new Date(item.pickupTimestamp).getTime())
                                                 .toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
-                                        }<br />
+                                        }
+                                        <br />
                                         {
                                             new Date(item.pickupTimestamp).toLocaleTimeString("en-US", {
                                                 timeZone: "UTC", hour: "2-digit", minute: "2-digit", hour12: true
