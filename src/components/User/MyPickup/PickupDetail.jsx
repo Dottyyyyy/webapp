@@ -12,7 +12,7 @@ const PickupDetails = () => {
     const location = useLocation();
     const { pickupData } = location.state || {};
     const [newPickup, setNewPickup] = useState({});
-    const pickup = pickupData || newPickup;
+    const pickup = Object.keys(newPickup).length > 0 ? newPickup : pickupData;
     const [pickupStatus, setPickupStatus] = useState(pickup?.status || newPickup?.status);
     const [sackStatuses, setSackStatuses] = useState({});
     const [review, setReview] = useState('');
@@ -23,14 +23,14 @@ const PickupDetails = () => {
     const navigate = useNavigate();
     const user = getUser();
     const userId = user._id;
-    // console.log(pickup)
+    console.log(newPickup, 'new')
     const [showMapModal, setShowMapModal] = useState(false);
 
 
     useEffect(() => {
         const fetchSackSellers = async () => {
             try {
-                if (!pickup?.sacks || !Array.isArray(pickup.sacks)) return; // ⛔ Prevent running if sacks not loaded
+                if (!pickup?.sacks || !Array.isArray(pickup.sacks)) return;
 
                 const sellerData = {};
                 await Promise.all(
@@ -64,22 +64,40 @@ const PickupDetails = () => {
 
     const fetchAllSackStatuses = async () => {
         try {
-            if (!pickup?.sacks || !Array.isArray(pickup.sacks)) return; // ⛔ Prevent running if sacks not loaded
+            if (!pickup?.sacks || !Array.isArray(pickup.sacks)) return;
 
             const statuses = {};
+            const reviewedFlags = {};
+
             await Promise.all(
-                pickup?.sacks?.map(async (item) => {
+                pickup.sacks.map(async (item) => {
                     const response = await axios.get(`${import.meta.env.VITE_API}/sack/see-sacks`, {
                         params: { sackIds: item.sackId }
                     });
-                    if (response.data.sacks.length > 0) {
-                        statuses[item.sackId] = response.data.sacks[0].status;
+
+                    const sack = response.data.sacks[0];
+                    if (sack) {
+                        statuses[item.sackId] = sack.status;
+                        reviewedFlags[item.sackId] = sack.reviewed;
                     } else {
                         statuses[item.sackId] = "Not Found";
+                        reviewedFlags[item.sackId] = false;
                     }
                 })
             );
+
             setSackStatuses(statuses);
+
+            const updatedSacks = pickup.sacks.map((item) => ({
+                ...item,
+                reviewed: reviewedFlags[item.sackId] ?? false,
+            }));
+
+            setNewPickup({
+                ...pickup,
+                sacks: updatedSacks,
+            });
+
         } catch (error) {
             console.error("Error fetching sack statuses:", error);
         }
@@ -104,18 +122,42 @@ const PickupDetails = () => {
 
             toast.success(
                 <div>
-                    <p>Thankyou for your review.</p>
-                    <p>We wil make our market better.</p>
+                    <p>Thank you for your review.</p>
+                    <p>We will make our market better.</p>
                 </div>
             );
+
+            // ✅ Mark this sack as reviewed in the local state
+            const updatedSacks = pickup.sacks.map((sack) =>
+                sack.sackId === sackId ? { ...sack, reviewed: true } : sack
+            );
+
+            setNewPickup({
+                ...pickup,
+                sacks: updatedSacks,
+            });
 
             setTimeout(() => {
                 navigate(-1);
             }, 1500);
         } catch (error) {
-            console.log('Error in completing pickup status', error.message)
+            console.log('Error in completing pickup status', error.message);
+
+            // ✅ Optionally hide the form if backend says it's already reviewed
+            if (error.response?.data?.message === "Sack has already been reviewed.") {
+                const updatedSacks = pickup.sacks.map((sack) =>
+                    sack.sackId === sackId ? { ...sack, reviewed: true } : sack
+                );
+                setNewPickup({
+                    ...pickup,
+                    sacks: updatedSacks,
+                });
+            }
+
+            toast.error(error.response?.data?.message || "Something went wrong.");
         }
     };
+
 
     const handleCompletePickUpStatus = () => {
         setShowCompleteModal(true);
@@ -238,6 +280,7 @@ const PickupDetails = () => {
                             />
                             <div className="bg-gray-100 p-4 rounded-xl">
                                 <h3 className="font-bold">Taytay Rizal Market</h3>
+                                <p className="text-sm mt-1">Stall #: {newPickup?.reviewed}</p>
                                 <p className="text-sm mt-1">Stall #: {item.stallNumber}</p>
                                 <p className="text-sm">{sellers[item.seller]?.stall?.stallAddress || "Taytay Rizal New Market"}</p>
                                 <p className="text-sm">📅
@@ -282,7 +325,7 @@ const PickupDetails = () => {
                                     </div>
                                 </div>
                             </div>
-                            {pickupStatus === "completed" && (
+                            {pickupStatus === "completed" && !item?.reviewed && (
                                 <form onSubmit={(e) => handleFormSubmit(e, item.sackId)} className="p-6 bg-white rounded-lg shadow-lg mt-6">
                                     <h3 className="text-xl font-semibold mb-4">Write a Review</h3>
 
