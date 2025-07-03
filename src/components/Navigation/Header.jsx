@@ -1,17 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-
 // Utils
 import { getUser, logout } from "../../utils/helpers";
-
 // Components
-import Sidebar from "./Sidebar";
 import SearchModal from "../Extras/ModalSearch";
-import Notifications from "../Extras/DropdownNotifications";
-import Help from "../Extras/DropdownHelp";
-import UserMenu from "../Extras/DropdownProfile";
-import ThemeToggle from "../Extras/ThemeToggle";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -55,7 +48,8 @@ const Header = () => {
 
   return (
     <>
-      <header className="bg-[#EBFFF3] p-6 shadow-lg">
+      {/* Sticky Header */}
+      <header className="bg-[#EBFFF3] p-6 shadow-lg sticky top-0 z-50">
         <div className="container mx-auto flex justify-between items-center">
           {/* Logo and App Title */}
           <Link to="/">

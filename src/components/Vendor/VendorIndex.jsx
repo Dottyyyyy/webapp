@@ -200,17 +200,14 @@ function VendorIndex() {
                 </div>
                 <div className="bg-white shadow rounded-xl p-6 text-center">
                     <h3 className="text-sm text-gray-500 mb-1">Monthly Waste</h3>
-                    <p className="text-3xl font-bold text-gray-800"> {monthlyAverage} <span className="text-lg font-medium"> kg</span></p>
+                    <p className="text-3xl font-bold text-gray-800"> {monthlyAverage}<span className="text-lg font-medium">kg</span></p>
                 </div>
                 <div className="bg-white shadow rounded-xl p-6 text-center">
                     <h3 className="text-sm text-gray-500 mb-1">Posted Sacks</h3>
                     <p className="text-3xl font-bold text-gray-800">{postedCounts}</p>
                 </div>
                 <div className="bg-white shadow rounded-xl p-6 text-center">
-                    <h3 className="text-sm text-gray-500 mb-1">Active Pickup <span>
-                        Requests
-                    </span>
-                    </h3>
+                    <h3 className="text-sm text-gray-500 mb-1">Active Requests</h3>
                     <p className="text-3xl font-bold text-gray-800"> {pickupCount} </p>
                 </div>
                 <div className="bg-white shadow rounded-xl p-6 text-center">

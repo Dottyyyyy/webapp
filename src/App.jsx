@@ -41,6 +41,7 @@ import Footer from "./components/Navigation/Footer";
 import MarketList from "./components/Vendor/MarketList";
 import ProtectedRoute from "./utils/ProtectedRoutes";
 import AdminViewStalls from "./components/Admin/AdminViewStalls";
+import StallIndex from "./components/Admin/Stall/StallIndex";
 
 const App = () => {
   const [mySacks, setMySacks] = useState([]); // Lifted state for sacks
@@ -99,6 +100,7 @@ const App = () => {
               <Route path="/admin/vendors" element={<Vendors />} />
               <Route path="/admin/create/vendor" element={<CreateVendor />} />
               <Route path="/admin/view/stalls" element={<AdminViewStalls />} />
+              <Route path="/admin/stall-index/:id" element={<StallIndex />} />
             </Route>
           </Routes>
         </div>
