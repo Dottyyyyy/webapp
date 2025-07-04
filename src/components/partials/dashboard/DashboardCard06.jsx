@@ -4,7 +4,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Chart from "chart.js/auto";
 
-function DashboardCard06() {
+function DashboardCard06({ onExportData }) {
   const [pickupData, setPickupData] = useState([]);
   const chartRef = useRef(null);
   const chartInstance = useRef(null);
@@ -63,6 +63,21 @@ function DashboardCard06() {
     const claimedData = allKeys.map((key) => claimed[key] || 0);
     const cancelledData = allKeys.map((key) => cancelled[key] || 0);
 
+    // 💾 Pass structured data to parent via onExportData
+    if (onExportData) {
+      const exportTable = allKeys.map((key) => ({
+        week: new Date(key).toLocaleDateString("en-US", {
+          month: "long",
+          day: "numeric",
+          year: "numeric",
+        }),
+        claimed: claimed[key] || 0,
+        cancelled: cancelled[key] || 0,
+      }));
+      onExportData(exportTable);
+    }
+
+    // 🎨 Render Chart
     if (chartInstance.current) {
       chartInstance.current.destroy();
     }
@@ -100,7 +115,7 @@ function DashboardCard06() {
               autoSkip: false,
               maxRotation: 45,
               minRotation: 30,
-              callback: function (value, index, ticks) {
+              callback: function (value) {
                 return this.getLabelForValue(value);
               },
             },

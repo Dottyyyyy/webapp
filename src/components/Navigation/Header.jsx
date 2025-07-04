@@ -10,7 +10,9 @@ const Header = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [mySack, setMySacks] = useState([]);
+  const [notifications, setNotifications] = useState([]);
   const [searchModalOpen, setSearchModalOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);  // State for dropdown visibility
 
   const userData = getUser();
   const userId = userData?._id;
@@ -46,6 +48,85 @@ const Header = () => {
     });
   };
 
+  const fetchNotifications = async () => {
+    try {
+      const { data } = await axios.get(`${import.meta.env.VITE_API}/notifications/users-get-notif/${userId}`);
+
+      let filteredNotifications = [];
+
+      if (user?.role === "farmer") {
+        filteredNotifications = data.notifications.filter(notification => notification.type === 'new_sack');
+      } else if (user?.role === "composter") {
+        filteredNotifications = data.notifications.filter(notification => notification.type === 'spoiled');
+      } else if (user?.role === "vendor") {
+        filteredNotifications = data.notifications.filter(notification =>
+          ['trashed', 'spoiled', 'claimed', 'pickup_completed'].includes(notification.type)
+        );
+      }
+
+      setNotifications(filteredNotifications);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+    const interval = setInterval(() => {
+      fetchNotifications();
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [userId, user?.role]);
+
+  const handleNotificationClick = (stallId) => {
+    if (user.role === 'farmer') {
+      setDropdownOpen(false)
+      navigate(`/stalls/${stallId}`);
+      window.location.reload()
+    } else {
+      setDropdownOpen(false)
+      navigate(`/composter/market/detail/${stallId}`);
+      window.location.reload()
+    }
+  };
+
+  const toggleDropdown = () => {
+    setDropdownOpen(!dropdownOpen);
+  };
+
+  const timeAgo = (dateStr) => {
+    const seconds = Math.floor((new Date() - new Date(dateStr)) / 1000);
+    const intervals = [
+      { label: 'year', seconds: 31536000 },
+      { label: 'month', seconds: 2592000 },
+      { label: 'day', seconds: 86400 },
+      { label: 'hour', seconds: 3600 },
+      { label: 'minute', seconds: 60 },
+      { label: 'second', seconds: 1 },
+    ];
+
+    for (const i of intervals) {
+      const count = Math.floor(seconds / i.seconds);
+      if (count > 0) return `${count} ${i.label}${count !== 1 ? 's' : ''} ago`;
+    }
+    return 'just now';
+  };
+
+  // Check if a notification is today
+  const isNotificationToday = (notificationDate) => {
+    const notificationTime = new Date(notificationDate);
+    const today = new Date();
+    return (
+      notificationTime.getDate() === today.getDate() &&
+      notificationTime.getMonth() === today.getMonth() &&
+      notificationTime.getFullYear() === today.getFullYear()
+    );
+  };
+
+  // Filter today's notifications
+  const todaysNotifications = notifications.filter((notif) => isNotificationToday(notif.createdAt));
+
+
   return (
     <>
       {/* Sticky Header */}
@@ -79,7 +160,7 @@ const Header = () => {
             {user?.role === "vendor" && (
               <>
                 <div className="flex items-center space-x-8 text-green-900 font-medium">
-                  <a href='/' className="hover:underline">Home</a>
+                  <a href="/" className="hover:underline">Home</a>
                   <button onClick={() => navigate(`/vendor/myStall/${user._id}`)} className="hover:underline underline-offset-4 decoration-green-600">My stall</button>
                   <a href="/about" className="hover:underline">About</a>
                   <a href="/messenger" className="hover:underline">Chats</a>
@@ -111,10 +192,42 @@ const Header = () => {
               <>
                 <div className="flex items-center space-x-8 text-green-900 font-medium">
                   <a href="/" className="hover:underline underline-offset-4 decoration-green-600">Home</a>
+                  <a href={user.role === "farmer" ? "/viewposts" : "/composter/viewposts"} className="hover:underline">Post</a>
                   <a href={user.role === "farmer" ? "/viewStalls" : "/composter/market"} className="hover:underline">Stalls</a>
                   <a href="/about" className="hover:underline">About</a>
-                  <a href="/messenger" className="hover:underline">Chats</a>
                   <a href={user.role === "farmer" ? "/pickup" : "/composter/pickup"} className="hover:underline font-semibold">Pick up</a>
+                  <div className="relative">
+                    <button className="text-xl hover:text-green-600" onClick={toggleDropdown}>
+                      🔔 {todaysNotifications.length > 0 && (
+                        <span className="absolute top-0 right-0 bg-red-600 text-white text-xs px-1 rounded-full">{todaysNotifications.length}</span>
+                      )}
+                    </button>
+
+                    {/* Notification Dropdown */}
+                    {dropdownOpen && (
+                      <div className="absolute right-0 mt-2 w-72 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-50">
+                        <div className="grid gap-4">
+                          {notifications.filter((notif) => !notif.isRead).length > 0 ? (
+                            notifications
+                              .filter((notif) => !notif.isRead)
+                              .slice(0, 5)
+                              .map((notif, i) => (
+                                <div
+                                  key={notif._id || i}
+                                  className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded cursor-pointer"
+                                  onClick={() => handleNotificationClick(notif.stall.user)}
+                                >
+                                  <p className="text-sm font-medium">{notif.message}</p>
+                                  <p className="text-sm font-medium">{timeAgo(notif.createdAt)}</p>
+                                </div>
+                              ))
+                          ) : (
+                            <h1 className="text-gray-500">No New Waste Sacks</h1>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="flex items-center space-x-4 ml-6">
@@ -123,13 +236,14 @@ const Header = () => {
                       <span className="text-xl">👤</span> {user?.name || "Farmer"} ▼
                     </button>
                     <div className="absolute right-0 w-40 bg-white border border-gray-200 rounded shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all duration-200 z-50" style={{ borderBottomLeftRadius: 10, borderBottomRightRadius: 10 }}>
-                      <a href="/mySack" className="block px-4 py-2 hover:bg-gray-100">My Sack</a>
-                      <a href="/profile" className="block px-4 py-2 hover:bg-gray-100">Profile</a>
+                      <a href="/mySack" className="block px-4 py-2 hover:bg-gray-100">🛒My Sack </a>
+                      <a href="/profile" className="block px-4 py-2 hover:bg-gray-100">👤 Profile</a>
+                      <a href="/messenger" className="block px-4 py-2 hover:bg-gray-100">💬 Chats</a>
                       <button
                         onClick={handleLogout}
                         className="w-full text-left px-4 py-2 hover:bg-gray-100"
                       >
-                        Log out
+                       ტ Log out
                       </button>
                     </div>
                   </div>

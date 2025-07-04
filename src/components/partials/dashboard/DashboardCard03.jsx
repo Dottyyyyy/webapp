@@ -4,21 +4,13 @@ import EditMenu from "../../Extras/DropdownEditMenu";
 import Chart from "chart.js/auto";
 import { adjustColorOpacity, getCssVariable } from "../../../utils/Utils";
 
-function DashboardCard03() {
+function DashboardCard03({ onExportData }) {
   const canvasRef = useRef(null);
   const chartInstanceRef = useRef(null);
 
   const [chartData, setChartData] = useState(null);
   const [totalKilos, setTotalKilos] = useState(0);
   const [loading, setLoading] = useState(true);
-
-  // Utility to create gradient for chart background fill
-  const chartAreaGradient = (ctx, chartArea, stops) => {
-    if (!chartArea) return null;
-    const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
-    stops.forEach(({ stop, color }) => gradient.addColorStop(stop, color));
-    return gradient;
-  };
 
   // Fetch the composter pickup data
   const fetchComposterPickup = async () => {
@@ -29,15 +21,11 @@ function DashboardCard03() {
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-      // Filter last 7 days
       const filteredData = rawData.filter(item => {
         const itemDate = new Date(item._id.date);
         return itemDate >= sevenDaysAgo;
       });
 
-      // console.log("Filtered Data:", filteredData);
-
-      // If no data, fallback to rawData or empty arrays
       const dataToUse = filteredData.length > 0 ? filteredData : rawData;
 
       const labels = dataToUse.map(item =>
@@ -49,12 +37,19 @@ function DashboardCard03() {
 
       const dataPoints = dataToUse.map(item => item.totalKilo);
 
-      // console.log("Labels:", labels);
-      // console.log("Data Points:", dataPoints);
-
       const total = dataPoints.reduce((sum, val) => sum + val, 0);
       setTotalKilos(total);
-
+      if (onExportData) {
+        const exportRows = dataToUse.map(item => ({
+          date: new Date(item._id.date).toLocaleDateString("en-PH", {
+            month: "long",
+            day: "2-digit",
+            year: "numeric"
+          }),
+          totalKilo: item.totalKilo
+        }));
+        onExportData(exportRows);
+      }
       setChartData({
         labels,
         datasets: [

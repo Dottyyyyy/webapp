@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import Chart from "chart.js/auto";
 
-function DashboardCard08() {
+function DashboardCard08({ onExportData }) {
   const [predictedWaste, setPredictedWaste] = useState([]);
   const [actualWaste, setActualWaste] = useState([]);
   const [viewMode, setViewMode] = useState('actual'); // State to toggle between actual/predicted
@@ -140,6 +140,24 @@ function DashboardCard08() {
             },
           },
         });
+      }
+
+      if (onExportData) {
+        const exportTable = [];
+
+        allDates.forEach((date, idx) => {
+          const row = { date };
+          stallNumbers.forEach((stall) => {
+            const actual = groupedActualData[date]?.[stall] || 0;
+            const predicted = groupedPredictedData[date]?.[stall] || 0;
+
+            row[`Stall ${stall} (Actual)`] = actual;
+            row[`Stall ${stall} (Predicted)`] = predicted;
+          });
+          exportTable.push(row);
+        });
+
+        onExportData(exportTable);
       }
     }
   }, [predictedWaste, actualWaste, viewMode]); // Re-run when data or viewMode changes

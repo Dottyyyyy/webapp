@@ -15,6 +15,7 @@ import '../../index.css';
 import axios from "axios";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import autoTable from 'jspdf-autotable';
 import { useRef } from "react";
 import DashboardCard08 from "../partials/dashboard/DashboardCard08";
 
@@ -24,43 +25,15 @@ function Dashboard() {
   const [numStalls, setStalls] = useState(0);
   const [sacks, setSacks] = useState([]);
   const pdfRef = useRef();
+  const [dashboardCard06ExportData, setDashboardCard06ExportData] = useState([]);
+  const [dashboardCard14ExportData, setDashboardCard14ExportData] = useState([]);
+  const [dashboardCard02ExportData, setDashboardCard02ExportData] = useState([]);
+  const [dashboardCard03ExportData, setDashboardCard03ExportData] = useState([]);
+  const [dashboardCard05ExportData, setDashboardCard05ExportData] = useState([]);
+  const [dashboardCard04ExportData, setDashboardCard04ExportData] = useState([]);
+  const [dashboardCard08ExportData, setDashboardCard08ExportData] = useState([]);
 
-  const handleDownloadPDF = async () => {
-    const element = pdfRef.current;
-    if (!element) return;
-
-    // Inject fallback styles
-    const style = document.createElement("style");
-    style.innerHTML = `
-    * {
-      color: #000 !important;
-      background-color: #fff !important;
-    }
-  `;
-    element.appendChild(style);
-
-    try {
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        scrollY: -window.scrollY,
-      });
-
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF({
-        orientation: "portrait",
-        unit: "px",
-        format: [canvas.width, canvas.height],
-      });
-
-      pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
-      pdf.save(`dashboard-${new Date().toISOString().slice(0, 10)}.pdf`);
-    } catch (err) {
-      console.error("Error generating PDF:", err);
-    } finally {
-      element.removeChild(style);
-    }
-  };
+  console.log(dashboardCard05ExportData, 'dashboardCard05ExportData')
 
   const fetchUserCounts = async () => {
     try {
@@ -110,6 +83,158 @@ function Dashboard() {
     return () => clearInterval(interval);
   }, []);
 
+  const handleDownloadPDF = () => {
+    const doc = new jsPDF();
+    doc.setFontSize(18);
+    doc.text("Dashboard Report", 14, 22);
+
+    if (dashboardCard06ExportData.length > 0) {
+      doc.setFontSize(14);
+      doc.text("Weekly Sack Report", 14, 35);
+
+      autoTable(doc, {
+        startY: 40,
+        head: [['Week', 'Claimed Sacks', 'Cancelled Sacks']],
+        body: dashboardCard06ExportData.map(row => [
+          row.week,
+          row.claimed,
+          row.cancelled,
+        ]),
+      });
+    }
+    if (dashboardCard14ExportData.length > 0) {
+      doc.addPage();
+      doc.setFontSize(16);
+      doc.text("Ratings Overview", 14, 22);
+
+      autoTable(doc, {
+        startY: 30,
+        head: [['Rating', 'Count']],
+        body: dashboardCard14ExportData.map(row => [row.rating, row.count]),
+        styles: {
+          fontSize: 12,
+          cellPadding: 4,
+        },
+        theme: 'striped'
+      });
+    }
+    if (dashboardCard02ExportData.length > 0) {
+      doc.addPage();
+      doc.setFontSize(16);
+      doc.text("Pig Farmers' Waste Pickup (Last 7 Days)", 14, 22);
+
+      autoTable(doc, {
+        startY: 30,
+        head: [['Date', 'Total Kilos']],
+        body: dashboardCard02ExportData.map(row => [
+          row.date,
+          row.totalKilo
+        ]),
+        styles: {
+          fontSize: 12,
+          cellPadding: 4,
+        },
+        theme: 'striped'
+      });
+    }
+    if (dashboardCard03ExportData.length > 0) {
+      doc.addPage();
+      doc.setFontSize(16);
+      doc.text("Composters' Waste Pickup (Last 7 Days)", 14, 22);
+
+      autoTable(doc, {
+        startY: 30,
+        head: [['Date', 'Total Kilos']],
+        body: dashboardCard03ExportData.map(row => [
+          row.date,
+          row.totalKilo
+        ]),
+        styles: {
+          fontSize: 12,
+          cellPadding: 4,
+        },
+        theme: 'striped'
+      });
+    }
+    if (dashboardCard05ExportData.length > 0) {
+      doc.addPage();
+      doc.setFontSize(16);
+      doc.text("Waste Generation Trend", 14, 22);
+
+      autoTable(doc, {
+        startY: 30,
+        head: [['Date', 'Waste Trend Amount (kg)']],
+        body: dashboardCard05ExportData.map(row => [
+          new Date(row.ds).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+          row.yhat.toFixed(2)
+        ]),
+        styles: {
+          fontSize: 12,
+          cellPadding: 4,
+        },
+        theme: 'striped'
+      });
+    }
+    if (dashboardCard04ExportData.length > 0) {
+      doc.addPage();
+      doc.setFontSize(16);
+      doc.text("Pig Farmers and Composters Monthly Waste Collection", 14, 22);
+
+      autoTable(doc, {
+        startY: 30,
+        head: [['Date', 'Pig Farmers (kg)', 'Composters (kg)']],
+        body: dashboardCard04ExportData.map(row => [
+          new Date(row.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+          row.farmers.toFixed(2),
+          row.composters.toFixed(2)
+        ]),
+        styles: {
+          fontSize: 12,
+          cellPadding: 4,
+        },
+        theme: 'striped'
+      });
+    }
+    if (dashboardCard08ExportData.length > 0) {
+      doc.addPage("landscape"); 
+      doc.setFontSize(16);
+      doc.text("Predictive & Actual Waste per Stall", 14, 22);
+
+      const allKeys = Object.keys(dashboardCard08ExportData[0]).filter(k => k !== 'date');
+      const stallBaseNames = Array.from(
+        new Set(
+          allKeys.map(k => k.replace(/\s+\(Actual\)|\s+\(Predicted\)/g, ''))
+        )
+      );
+
+      // Sub-headers (actual/predicted)
+      const headers = ['Date', ...stallBaseNames.flatMap(stall => [`${stall} (Actual)`, `${stall} (Predicted)`])];
+
+      // Body rows
+      const body = dashboardCard08ExportData.map(row =>
+        headers.map(col =>
+          col === 'Date'
+            ? new Date(row.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })
+            : (Number(row[col]) || 0).toFixed(2)
+        )
+      );
+
+      autoTable(doc, {
+        startY: 30,
+        head: [headers],
+        body,
+        styles: { fontSize: 8, cellPadding: 2 },
+        headStyles: {
+          fillColor: [41, 128, 185],
+          textColor: 255,
+          halign: 'center',
+        },
+        theme: 'striped',
+      });
+    }
+    doc.save(`New-Taytay-Market-Dashboard-Report-${new Date().toISOString().slice(0, 10)}.pdf`);
+  };
+
   return (
     <div className="flex h-screen overflow-hidden fade-in">
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
@@ -142,10 +267,10 @@ function Dashboard() {
               {/* Main Charts Section */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
                 <div className="lg:col-span-2 bg-white rounded-xl shadow-lg p-4">
-                  <DashboardCard06 />
+                  <DashboardCard06 onExportData={setDashboardCard06ExportData} />
                 </div>
                 <div className="bg-white rounded-xl shadow-lg p-4">
-                  <DashboardCard14 />
+                  <DashboardCard14 onExportData={setDashboardCard14ExportData} />
                 </div>
               </div>
 
@@ -157,9 +282,9 @@ function Dashboard() {
                 </div>
                 <div className="bg-white rounded-2xl p-6 shadow-md border border-gray-200">
                   <h2 className="font-semibold text-lg mb-2">Waste Collected Monthly</h2>
-                  <DashboardCard02 />
+                  <DashboardCard02 onExportData={setDashboardCard02ExportData} />
                   <div className="mt-4">
-                    <DashboardCard03 />
+                    <DashboardCard03 onExportData={setDashboardCard03ExportData} />
                   </div>
                 </div>
                 <div className="bg-white rounded-2xl p-6 shadow-md border border-gray-200">
@@ -171,14 +296,14 @@ function Dashboard() {
               {/* Bottom Charts Section */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
                 <div className="bg-white rounded-2xl p-6 shadow-md border border-gray-200">
-                  <DashboardCard05 />
+                  <DashboardCard05 onExportData={setDashboardCard05ExportData} />
                 </div>
                 <div className="bg-white rounded-2xl p-6 shadow-md border border-gray-200">
-                  <DashboardCard04 />
+                  <DashboardCard04 onExportData={setDashboardCard04ExportData} />
                 </div>
               </div>
               <div className="grid rounded-2x grid-cols-1 bg-white rounded-2xl p-6 shadow-md border border-gray-200">
-                <DashboardCard08 />
+                <DashboardCard08 onExportData={setDashboardCard08ExportData} />
               </div>
             </div>
           </div>

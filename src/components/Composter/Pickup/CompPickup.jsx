@@ -1,22 +1,23 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import '../../../index.css'
+import DataTable from 'react-data-table-component';
+import '../../../index.css';
 import { getUser } from "../../../utils/helpers";
 
-const CompPickuo = () => {
+const CompPickup = () => {
     const navigate = useNavigate();
     const user = getUser();
     const userId = user._id;
-    const [mySack, setMySacks] = useState([]);
-    const [sellers, setSellers] = useState({});
-    const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 4;
+
+    // State variables
+    const [mySack, setMySacks] = useState([]); // Keep the full list of sacks
+    const [statusFilter, setStatusFilter] = useState("all");
     const [filteredSacks, setFilteredSacks] = useState([]);
     const [dateFrom, setDateFrom] = useState("");
     const [dateTo, setDateTo] = useState("");
-    const [statusFilter, setStatusFilter] = useState("all");
 
+    // Fetch pickup sacks
     const fetchMySacks = async () => {
         try {
             const response = await axios.get(`${import.meta.env.VITE_API}/sack/get-pickup-sacks/${userId}`);
@@ -30,6 +31,7 @@ const CompPickuo = () => {
             const now = new Date();
             const nowUTC8 = new Date(now.getTime() + 8 * 60 * 60 * 1000);
 
+            // Clean up outdated pickup sacks
             for (const sack of pickUpSacks) {
                 const pickupTimestamp = new Date(sack.pickupTimestamp);
                 if (pickupTimestamp.getTime() <= nowUTC8.getTime() && sack.status !== "completed") {
@@ -41,48 +43,15 @@ const CompPickuo = () => {
                 }
             }
 
-            setMySacks(pickUpSacks);
-            setFilteredSacks(applyFilterAndPagination(pickUpSacks, dateFrom, dateTo, currentPage, statusFilter));
+            setMySacks(pickUpSacks); // Set all sacks before filtering
+            setFilteredSacks(applyFilterAndPagination(pickUpSacks, dateFrom, dateTo, statusFilter)); // Apply filter and pagination
         } catch (error) {
             console.error("Error fetching sacks:", error.response?.data || error.message);
         }
     };
 
-    const fetchSackSellers = async () => {
-        try {
-            const sellerIds = [...new Set(mySack.flatMap(item => item.sacks.map(sack => sack.seller)))];
-            const sellerData = {};
-            await Promise.all(
-                sellerIds.map(async (sellerId) => {
-                    if (!sellers[sellerId]) {
-                        const { data } = await axios.get(`${import.meta.env.VITE_API}/get-user/${sellerId}`);
-                        sellerData[sellerId] = data.user;
-                    }
-                })
-            );
-            setSellers((prevSellers) => ({ ...prevSellers, ...sellerData }));
-        } catch (error) {
-            console.error("Error fetching sellers:", error);
-        }
-    };
-
-    useEffect(() => {
-        if (userId) {
-            fetchMySacks();
-            const interval = setInterval(() => {
-                fetchMySacks();
-            }, 3000);
-            return () => clearInterval(interval);
-        }
-    }, []);
-
-    useEffect(() => {
-        if (mySack.length > 0) {
-            fetchSackSellers();
-        }
-    }, [mySack]);
-
-    const applyFilterAndPagination = (data, from, to, page, status) => {
+    // Apply filters
+    const applyFilterAndPagination = (data, from, to, status) => {
         let filtered = [...data];
 
         if (status && status !== "all") {
@@ -98,175 +67,102 @@ const CompPickuo = () => {
             });
         }
 
-        const startIndex = (page - 1) * itemsPerPage;
-        return filtered.slice(startIndex, startIndex + itemsPerPage);
+        return filtered;
     };
 
+    // Fetch sacks on mount
     useEffect(() => {
-        setFilteredSacks(applyFilterAndPagination(mySack, dateFrom, dateTo, currentPage, statusFilter));
-    }, [mySack, currentPage, dateFrom, dateTo, statusFilter]);
+        if (userId) {
+            fetchMySacks();
+            const interval = setInterval(() => {
+                fetchMySacks();
+            }, 3000); // Refresh every 3 seconds
+            return () => clearInterval(interval);
+        }
+    }, [userId]);
+
+    // Re-filter sacks whenever relevant state changes
+    useEffect(() => {
+        setFilteredSacks(applyFilterAndPagination(mySack, dateFrom, dateTo, statusFilter));
+    }, [mySack, statusFilter, dateFrom, dateTo]);
+
+    // Handle status change
+    const handleStatusChange = (status) => {
+        setStatusFilter(status.toLowerCase());
+    };
+
+    // Count the number of sacks per status
+    const countStatus = (status) => {
+        return mySack.filter(item => item.status.toLowerCase() === status.toLowerCase()).length;
+    };
+
+    // Columns configuration for the DataTable
+    const columns = [
+        {
+            name: 'Pickup No.',
+            selector: row => row._id.slice(-5).toUpperCase(), // Slice the last 5 characters
+            sortable: true,
+            style: {
+                fontWeight: 'bold'  // Make the text bold
+            }
+        },
+        {
+            name: 'Stall No.',
+            selector: row => row.sacks.map(sack => sack.stallNumber).join(", "),
+            sortable: true,
+        },
+        {
+            name: 'Weight',
+            selector: row => `${row.totalKilo} kg`,
+            sortable: true
+        },
+        {
+            name: 'Status',
+            selector: row => row.status,
+            sortable: true,
+            cell: row => <span className="capitalize">{row.status}</span>
+        }
+    ];
 
     return (
-        <div
-            className="flex-grow p-6 fade-in"
-            style={{
-                background: "linear-gradient(to bottom right, #0A4724, #116937)",
-                padding: 10,
-            }}
-        >
-            <div className="flex flex-col lg:flex-row gap-6">
-                {/* Left Section */}
-                <div className="w-full lg:w-[30%]">
-                    <div
-                        className="text-3xl font-bold text-black text-center p-4 rounded-xl"
-                        style={{
-                            background: "linear-gradient(to bottom right,rgb(21, 132, 69),rgb(37, 212, 113))",
-                            padding: 10,
-                            marginRight: 40,
-                        }}
-                    >
-                        <div className="w-full h-full rounded-xl overflow-hidden border border-green-300 shadow-lg mb-4">
-                            <img
-                                src="/images/newtaytay.jpg"
-                                alt="Food waste management"
-                                className="w-full h-full object-cover"
-                            />
-                        </div>
-                        <h1 className="mb-4">Pickup Waste</h1>
+        <div className="flex-grow p-6 fade-in" style={{ background: "linear-gradient(to bottom right, #0A4724, #116937)", padding: 10 }}>
+            <div className="flex justify-center items-center">
+                <div className="w-full lg:w-[90%] bg-[#355E3B] border-2 border-green-900 p-6 rounded-lg">
+                    {/* Filter Tabs */}
+                    <div className="flex justify-center gap-6 mb-6">
+                        {['Pending', 'Ongoing', 'Completed'].map((status) => {
+                            // Count statuses directly from the full list
+                            const statusCount = countStatus(status);
 
-                        {/* Filters */}
-                        <div className="flex items-center gap-4 mb-4 mt-4 flex-wrap">
-                            <div>
-                                <label className="block font-semibold text-sm text-gray-700">From:</label>
-                                <input
-                                    type="date"
-                                    className="border px-3 py-2 rounded"
-                                    value={dateFrom}
-                                    onChange={(e) => setDateFrom(e.target.value)}
-                                />
-                            </div>
-                            <div>
-                                <label className="block font-semibold text-sm text-gray-700">To:</label>
-                                <input
-                                    type="date"
-                                    className="border px-3 py-2 rounded"
-                                    value={dateTo}
-                                    onChange={(e) => setDateTo(e.target.value)}
-                                />
-                            </div>
-                            <div>
-                                <label className="block font-semibold text-sm text-gray-700">Status:</label>
-                                <select
-                                    className="border px-3 py-2 rounded"
-                                    value={statusFilter}
-                                    onChange={(e) => setStatusFilter(e.target.value)}
+                            return (
+                                <button
+                                    key={status}
+                                    onClick={() => handleStatusChange(status)}
+                                    className={`px-8 py-4 rounded-xl border-2 border-green-900 text-green-900 font-semibold ${statusFilter === status.toLowerCase() ? 'bg-green-100' : 'bg-white'}`}
                                 >
-                                    <option value="all">All</option>
-                                    <option value="pending">Pending</option>
-                                    <option value="pickup">Pickup</option>
-                                    <option value="completed">Completed</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        {(dateFrom || dateTo) && (
-                            <button
-                                className="text-sm text-red-200 underline"
-                                onClick={() => {
-                                    setDateFrom("");
-                                    setDateTo("");
-                                }}
-                            >
-                                Clear
-                            </button>
-                        )}
-                    </div>
-                </div>
-
-                {/* Right Section */}
-                <div className="w-full lg:w-[70%] bg-[#E9FFF3] rounded-lg p-4">
-                    <div className="flex justify-between mt-4 mb-5">
-                        <button
-                            disabled={currentPage === 1}
-                            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                            className={`px-4 py-2 rounded ${currentPage === 1 ? "bg-gray-300" : "bg-blue-600 text-white hover:bg-blue-700"}`}
-                        >
-                            Previous
-                        </button>
-                        <button
-                            disabled={currentPage * itemsPerPage >= mySack.length}
-                            onClick={() => setCurrentPage((prev) => prev + 1)}
-                            className={`px-4 py-2 rounded ${currentPage * itemsPerPage >= mySack.length ? "bg-gray-300" : "bg-blue-600 text-white hover:bg-blue-700"}`}
-                        >
-                            Next
-                        </button>
+                                    ({statusCount}) {/* Show the correct count */}
+                                    <h1 style={{ fontSize: 30}}>
+                                        {status}
+                                    </h1>
+                                </button>
+                            );
+                        })}
                     </div>
 
-                    {/* Pickup Items */}
-                    {filteredSacks.map((item, index) => (
-                        <div
-                            key={item._id}
-                            onClick={() => navigate(`/pickup/see/${item._id}`, { state: { pickupData: item } })}
-                            className="cursor-pointer text-white rounded-xl shadow-md p-4 mb-4 flex flex-col sm:flex-row items-center justify-between transition-transform hover:scale-[1.01] w-full"
-                            style={{
-                                background: "linear-gradient(to bottom right, #0A4724, #116937)",
-                                padding: 10,
-                            }}
-                        >
-                            {/* Left */}
-                            <div className="flex-1 text-center">
-                                {item.status !== "completed" && (
-                                    <div className="bg-green-500 px-3 py-1 rounded-full font-semibold text-sm mb-2 inline-block">
-                                        Pickup No: {index + 1}
-                                    </div>
-                                )}
-                                <div className="text-6xl mb-2">
-                                    <i className="fas fa-truck mr-2"></i>
-                                </div>
-                                <div className="text-md font-medium">Total Kilo: {item.totalKilo}</div>
-                            </div>
-
-                            {/* Middle */}
-                            <div className="flex-1 text-center">
-                                <div className="text-4xl mb-2">
-                                    <i className="fas fa-route"></i>
-                                </div>
-                                <div className="text-sm">Taytay Rizal,<br />New Market</div>
-                            </div>
-
-                            {/* Right */}
-                            <div className="flex-1 text-center">
-                                <img
-                                    src="/src/images/newtaytay.jpg"
-                                    alt="Taytay"
-                                    className="w-24 h-24 rounded-lg mx-auto mb-2 object-cover"
-                                />
-                                <div className="text-sm">
-                                    <i className="mdi mdi-sack"></i> {item.sacks.filter((s) => s.status !== "cancelled").length}
-                                </div>
-                                <div className="text-yellow-400 font-semibold text-sm mt-1">Status: {item.status}</div>
-                                {item.status !== "completed" && (
-                                    <div className="text-xs mt-1">
-                                        <i className="mdi mdi-clock-remove"></i> {
-                                            new Date(item.pickupTimestamp).toLocaleDateString("en-US", {
-                                                year: "numeric", month: "long", day: "numeric"
-                                            })
-                                        }
-                                        <br />
-                                        {
-                                            new Date(item.pickupTimestamp).toLocaleTimeString("en-US", {
-                                                timeZone: "UTC", hour: "2-digit", minute: "2-digit", hour12: true
-                                            })
-                                        }
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    ))}
+                    {/* DataTable */}
+                    <DataTable
+                        columns={columns}
+                        data={filteredSacks}
+                        pagination
+                        onRowClicked={(row) => navigate(`/pickup/see/${row._id}`, { state: { pickupData: row } })}
+                        highlightOnHover
+                        pointerOnHover
+                        noDataComponent="No records found"
+                    />
                 </div>
             </div>
         </div>
     );
 };
 
-export default CompPickuo;
+export default CompPickup;

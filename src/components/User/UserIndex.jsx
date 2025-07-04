@@ -425,37 +425,6 @@ function UserIndex() {
                         </div>
                     </div>
                 </main>
-                <div
-                    style={{
-                        background: 'linear-gradient(to bottom right, #0A4724, #116937)', padding: 50,
-                    }}
-                >
-                    <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-xl font-semibold text-white">Recent Available Sacks</h2>
-                        <a href="/viewstalls" className="text-sm text-white hover:underline">
-                            View All
-                        </a>
-                    </div>
-                    <div className="grid gap-4">
-                        {notifications.filter((notif) => !notif.isRead).length > 0 ? (
-                            notifications
-                                .filter((notif) => !notif.isRead)
-                                .slice(0, 5)
-                                .map((notif, i) => (
-                                    <div
-                                        key={notif._id || i}
-                                        className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded cursor-pointer"
-                                        onClick={() => handleNotificationClick(notif.stall.user)} // Redirect to stall
-                                    >
-                                        <p className="text-sm font-medium">{notif.message}</p>
-                                        <p className="text-sm font-medium">{timeAgo(notif.createdAt)}</p>
-                                    </div>
-                                ))
-                        ) : (
-                            <h1 className="text-gray-500">No New Waste Sacks</h1>
-                        )}
-                    </div>
-                </div>
             </div>
         </>
     );

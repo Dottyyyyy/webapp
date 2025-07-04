@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import Chart from "chart.js/auto";
 import axios from "axios";
 
-function DashboardCard04() {
+function DashboardCard04({ onExportData }) {
   const chartRef = useRef(null);
   const chartInstanceRef = useRef(null);
   const [chartData, setChartData] = useState(null);
@@ -45,6 +45,15 @@ function DashboardCard04() {
           farmers: allDates.map((date) => farmersMap.get(date) || 0),
           composters: allDates.map((date) => compostersMap.get(date) || 0),
         });
+        
+        if (onExportData) {
+          const exportData = allDates.map((date) => ({
+            date,
+            farmers: farmersMap.get(date) || 0,
+            composters: compostersMap.get(date) || 0,
+          }));
+          onExportData(exportData);
+        }
       } catch (error) {
         console.error("Error fetching data:", error);
       }

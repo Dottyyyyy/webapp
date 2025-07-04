@@ -3,7 +3,7 @@ import { getUser } from "../../../utils/helpers";
 import axios from "axios";
 import Chart from "chart.js/auto";
 
-function DashboardCard05() {
+function DashboardCard05({ onExportData }) {
   const user = getUser();
   const [roleCounts, setRoleCounts] = useState({ farmer: 0, composter: 0, vendor: 0 });
   const [numStalls, setStalls] = useState(0);
@@ -101,6 +101,9 @@ function DashboardCard05() {
       const wasteGeneration = await axios.get(`${import.meta.env.VITE_API}/ml/waste-generation-trend`);
       // console.log("Waste Generation Data:", wasteGeneration.data);
       setWasteGeneration(wasteGeneration.data);
+      if (onExportData) {
+        onExportData(wasteGeneration.data);
+      }
     } catch (error) {
       console.error("Error fetching predicted waste data:", error);
     }

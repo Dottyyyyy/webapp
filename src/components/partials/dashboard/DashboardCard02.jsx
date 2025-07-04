@@ -6,7 +6,7 @@ import { adjustColorOpacity, getCssVariable } from "../../../utils/Utils";
 import axios from "axios";
 import Chart from "chart.js/auto";
 
-function DashboardCard02() {
+function DashboardCard02({ onExportData }) {
   const canvasRef = useRef(null); // ✅ create ref
   const chartInstanceRef = useRef(null);
   const [chartData, setChartData] = useState({
@@ -80,6 +80,18 @@ function DashboardCard02() {
         ],
       });
 
+      if (onExportData) {
+        const exportRows = filteredData.map(item => ({
+          date: new Date(item._id.date).toLocaleDateString("en-PH", {
+            month: "long",
+            day: "2-digit",
+            year: "numeric"
+          }),
+          totalKilo: item.totalKilo
+        }));
+        onExportData(exportRows);
+      }
+
     } catch (error) {
       console.error("Error fetching pickup data:", error);
     }
@@ -148,7 +160,7 @@ function DashboardCard02() {
           Waste Taken (Last 7 Days)
         </div>
         <div className="flex items-start">
-          <div className="text-2xl font-bold text-gray-800 dark:text-gray-100 mr-2" style={{marginBottom: 8}}>
+          <div className="text-2xl font-bold text-gray-800 dark:text-gray-100 mr-2" style={{ marginBottom: 8 }}>
             {totalKilos} Kilos
           </div>
         </div>

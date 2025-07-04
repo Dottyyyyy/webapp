@@ -42,6 +42,8 @@ import MarketList from "./components/Vendor/MarketList";
 import ProtectedRoute from "./utils/ProtectedRoutes";
 import AdminViewStalls from "./components/Admin/AdminViewStalls";
 import StallIndex from "./components/Admin/Stall/StallIndex";
+import ViewPosts from "./components/User/Stall/ViewPosts";
+import ComposterViewPosts from "./components/Composter/Stall/ComposterViewPosts";
 
 const App = () => {
   const [mySacks, setMySacks] = useState([]); // Lifted state for sacks
@@ -67,6 +69,7 @@ const App = () => {
               <Route path="/addAddress" element={<AddAddress />} />
               <Route path="/addStall" element={<AddStall />} />
               <Route path="/viewstalls" element={<ViewStalls />} />
+              <Route path="/viewposts" element={<ViewPosts />} />
               <Route path="/chats" element={<Chats />} />
               <Route path="/chatroom/:userId/:receiverId" element={<ChatRoom />} />
               <Route path="/messenger" element={<MessengerLayout />} />
@@ -85,6 +88,7 @@ const App = () => {
               {/* Composter Routes */}
               <Route path="/composter/dashboard/" element={<ComposterIndex />} />
               <Route path="/composter/market/" element={<ComposterMarket />} />
+              <Route path="/composter/viewposts/" element={<ComposterViewPosts />} />
               <Route path="/composter/market/detail/:id" element={<ComposterViewStall />} />
               <Route path="/composter/pickup/" element={<CompPickup />} />
             </Route>
