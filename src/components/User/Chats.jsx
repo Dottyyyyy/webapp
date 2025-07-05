@@ -93,7 +93,9 @@ const Chats = ({ onSelectChat }) => {
                                     </div>
                                     <div style={styles.headerRow}>
                                         <span style={styles.role}>Role: {receiver?.role || 'Unknown'}</span>
-                                        <span style={styles.role}>Stall: {receiver?.stall?.stallNumber || 'Unknown'}</span>
+                                        {user.role !== 'vendor' && (
+                                            <span style={styles.role}>Stall: {receiver?.stall?.stallNumber || 'Unknown'}</span>
+                                        )}
                                     </div>
                                 </div>
                             </div>

@@ -1,35 +1,51 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 // Utils
 import { getUser, logout } from "../../utils/helpers";
 // Components
 import SearchModal from "../Extras/ModalSearch";
+import DashboardCard12 from "../partials/dashboard/DashboardCard12";
+import Profile from "../Pages/Profile";
 
 const Header = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [mySack, setMySacks] = useState([]);
   const [notifications, setNotifications] = useState([]);
+  const [stalls, setStalls] = useState([]);
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);  // State for dropdown visibility
-
   const userData = getUser();
   const userId = userData?._id;
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const storedSidebarExpanded = localStorage.getItem("sidebar-expanded");
+  const [sidebarExpanded, setSidebarExpanded] = useState(
+    storedSidebarExpanded === null ? false : storedSidebarExpanded === "true"
+  );
+
+  const dropdownRef = useRef(null);
+
+  const toggleDropdown = () => {
+    setDropdownOpen((prev) => !prev);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     if (userData) {
       setUser(userData);
     }
   }, []);
-
-  useEffect(() => {
-    if (userId) {
-      fetchMySacks();
-      const interval = setInterval(() => fetchMySacks(), 5000);
-      return () => clearInterval(interval);
-    }
-  }, [userId]);
 
   const fetchMySacks = async () => {
     try {
@@ -60,7 +76,11 @@ const Header = () => {
         filteredNotifications = data.notifications.filter(notification => notification.type === 'spoiled');
       } else if (user?.role === "vendor") {
         filteredNotifications = data.notifications.filter(notification =>
-          ['trashed', 'spoiled', 'claimed', 'pickup_completed'].includes(notification.type)
+          ['pickup', 'trashed', 'spoiled', 'claimed', 'pickup_completed'].includes(notification.type)
+        );
+      } else if (user?.role === "admin") {
+        filteredNotifications = data.notifications.filter(notification =>
+          ['new_sack', 'trashed', 'pickup_completed'].includes(notification.type)
         );
       }
 
@@ -69,6 +89,31 @@ const Header = () => {
       console.error("Error fetching notifications:", error);
     }
   };
+
+  const fetchStalls = async () => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_API}/get-all-stalls`
+      );
+      setStalls(response.data.stalls);
+    } catch (error) {
+      console.error("Error fetching stalls:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (userId) {
+      fetchMySacks();
+      fetchStalls();
+
+      const interval = setInterval(() => {
+        fetchMySacks();
+        fetchStalls();
+      }, 5000);
+
+      return () => clearInterval(interval);
+    }
+  }, [userId]);
 
   useEffect(() => {
     fetchNotifications();
@@ -83,15 +128,15 @@ const Header = () => {
       setDropdownOpen(false)
       navigate(`/stalls/${stallId}`);
       window.location.reload()
-    } else {
+    } else if (user.role === 'composter') {
       setDropdownOpen(false)
       navigate(`/composter/market/detail/${stallId}`);
       window.location.reload()
+    } else {
+      setDropdownOpen(false)
+      navigate(`/vendor/pickup`);
+      window.location.reload()
     }
-  };
-
-  const toggleDropdown = () => {
-    setDropdownOpen(!dropdownOpen);
   };
 
   const timeAgo = (dateStr) => {
@@ -125,6 +170,15 @@ const Header = () => {
 
   // Filter today's notifications
   const todaysNotifications = notifications.filter((notif) => isNotificationToday(notif.createdAt));
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (notifRef.current && !notifRef.current.contains(e.target)) {
+        setShowNotif(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
 
   return (
@@ -154,7 +208,24 @@ const Header = () => {
           {/* Navigation */}
           <nav className="flex items-center space-x-6">
             {/* Admin View */}
-            {user?.role === "admin"}
+            {user?.role === "admin" && (
+              <div ref={dropdownRef} className={`relative ${sidebarExpanded ? "block" : "hidden"}`}>
+                <span
+                  onClick={() => setDropdownOpen((prev) => !prev)}
+                  className="cursor-pointer transition-all duration-200"
+                >
+                  🔔
+                </span>
+
+                {dropdownOpen && (
+                  <div
+                    className="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-50"
+                  >
+                    <DashboardCard12 />
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Vendor View */}
             {user?.role === "vendor" && (
@@ -163,8 +234,38 @@ const Header = () => {
                   <a href="/" className="hover:underline">Home</a>
                   <button onClick={() => navigate(`/vendor/myStall/${user._id}`)} className="hover:underline underline-offset-4 decoration-green-600">My stall</button>
                   <a href="/about" className="hover:underline">About</a>
-                  <a href="/messenger" className="hover:underline">Chats</a>
                   <a href='/vendor/pickup' className="hover:underline font-semibold">Pick up</a>
+                  <div ref={dropdownRef} className="relative">
+                    <button className="text-xl hover:text-green-600" onClick={toggleDropdown}>
+                      🔔 {todaysNotifications.length > 0 && (
+                        <span className="absolute top-0 right-0 bg-red-600 text-white text-xs px-1 rounded-full">{todaysNotifications.length}</span>
+                      )}
+                    </button>
+                    {/* Notification Dropdown */}
+                    {dropdownOpen && (
+                      <div className="absolute right-0 mt-2 w-72 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-50">
+                        <div className="grid gap-4">
+                          {notifications.filter((notif) => !notif.isRead).length > 0 ? (
+                            notifications
+                              .filter((notif) => !notif.isRead)
+                              .slice(0, 5)
+                              .map((notif, i) => (
+                                <div
+                                  key={notif._id || i}
+                                  className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded cursor-pointer"
+                                  onClick={() => handleNotificationClick()}
+                                >
+                                  <p className="text-sm font-medium">{notif.message}</p>
+                                  <p className="text-sm font-medium">{timeAgo(notif.createdAt)}</p>
+                                </div>
+                              ))
+                          ) : (
+                            <h1 className="text-gray-500">No New Waste Sacks</h1>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="flex items-center space-x-4 ml-6">
@@ -173,14 +274,13 @@ const Header = () => {
                       <span className="text-xl">👤</span> {user?.name} ▼
                     </button>
                     <div className="absolute right-0 w-40 bg-white border border-gray-200 rounded shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all duration-200 z-50" style={{ borderBottomLeftRadius: 10, borderBottomRightRadius: 10 }}>
-                      <a href="/profile" className="block px-4 py-2 hover:bg-gray-100">Profile</a>
-                      <a href="/vendor/market-list" className="block px-4 py-2 hover:bg-gray-100">MarketList</a>
+                      <a href="/profile" className="block px-4 py-2 hover:bg-gray-100">👤 Profile</a>
+                      <a href="/messenger" className="block px-4 py-2 hover:bg-gray-100">💬 Chats</a>
+                      <a href="/vendor/market-list" className="block px-4 py-2 hover:bg-gray-100">📋 MarketList</a>
                       <button
                         onClick={handleLogout}
-                        className="w-full text-left px-4 py-2 hover:bg-gray-100"
-                      >
-                        Log out
-                      </button>
+                        className="w-[95%] text-left px-4 py-2 hover:bg-gray-100 ml-1" style={{ borderRadius: 10 }}
+                      > ტ Log out</button>
                     </div>
                   </div>
                 </div>
@@ -192,11 +292,11 @@ const Header = () => {
               <>
                 <div className="flex items-center space-x-8 text-green-900 font-medium">
                   <a href="/" className="hover:underline underline-offset-4 decoration-green-600">Home</a>
-                  <a href={user.role === "farmer" ? "/viewposts" : "/composter/viewposts"} className="hover:underline">Post</a>
+                  <a href={user.role === "farmer" ? "/viewposts" : "/composter/viewposts"} className="hover:underline">Posts</a>
                   <a href={user.role === "farmer" ? "/viewStalls" : "/composter/market"} className="hover:underline">Stalls</a>
                   <a href="/about" className="hover:underline">About</a>
                   <a href={user.role === "farmer" ? "/pickup" : "/composter/pickup"} className="hover:underline font-semibold">Pick up</a>
-                  <div className="relative">
+                  <div ref={dropdownRef} className="relative">
                     <button className="text-xl hover:text-green-600" onClick={toggleDropdown}>
                       🔔 {todaysNotifications.length > 0 && (
                         <span className="absolute top-0 right-0 bg-red-600 text-white text-xs px-1 rounded-full">{todaysNotifications.length}</span>
@@ -237,13 +337,18 @@ const Header = () => {
                     </button>
                     <div className="absolute right-0 w-40 bg-white border border-gray-200 rounded shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all duration-200 z-50" style={{ borderBottomLeftRadius: 10, borderBottomRightRadius: 10 }}>
                       <a href="/mySack" className="block px-4 py-2 hover:bg-gray-100">🛒My Sack </a>
-                      <a href="/profile" className="block px-4 py-2 hover:bg-gray-100">👤 Profile</a>
+                      <button
+                        onClick={() => setShowProfileModal(true)}
+                        className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                      >
+                        👤 Profile
+                      </button>
                       <a href="/messenger" className="block px-4 py-2 hover:bg-gray-100">💬 Chats</a>
                       <button
                         onClick={handleLogout}
-                        className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                        className="w-[95%] text-left px-4 py-2 hover:bg-gray-100 ml-1" style={{ borderRadius: 10 }}
                       >
-                       ტ Log out
+                        ტ Log out
                       </button>
                     </div>
                   </div>
@@ -270,6 +375,20 @@ const Header = () => {
 
       {/* Accent Divider */}
       <div className="bg-green-500 h-2 w-full"></div>
+      {showProfileModal && (
+        <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center z-50">
+          <div className="p-6 rounded-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-lg relative scrollbar-hide">
+            <button
+              onClick={() => setShowProfileModal(false)}
+              className="absolute top-3 right-3 text-gray-500 hover:text-red-600 font-bold text-xl"
+            >
+              &times;
+            </button>
+            <Profile />
+          </div>
+        </div>
+      )}
+
 
       {/* Optional: Search Modal */}
       {searchModalOpen && <SearchModal />}

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import Sidebar from '../../partials/Sidebar';
 import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
+import autoTable from 'jspdf-autotable';
 
 function Market() {
   const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
@@ -76,7 +76,7 @@ function Market() {
   const [newItem, setNewItem] = useState({ name: '', category: '', price: '' });
   const [fromDate, setFromDate] = useState('');
   const [isFiltering, setIsFiltering] = useState(false);
-
+  // console.log(items, 'items')
   const fetchItems = async () => {
     try {
       const res = await axios.get(`${import.meta.env.VITE_API}/item/get-items`);
@@ -213,6 +213,66 @@ function Market() {
     </>
   );
 
+  const handleExportAutoTablePDF = () => {
+    const doc = new jsPDF({ orientation: "landscape" });
+
+    const columns = [
+      { header: "Item", dataKey: "name" },
+      { header: "Category", dataKey: "category" },
+      ...days.map(day => ({
+        header: day.charAt(0).toUpperCase() + day.slice(1),
+        dataKey: day
+      }))
+    ];
+
+    const rows = items.map(item => {
+      const row = {
+        name: item.name,
+        category: item.category.charAt(0).toUpperCase() + item.category.slice(1),
+      };
+
+      days.forEach(day => {
+        const entries = item.day?.[day] ?? [];
+        row[day] = entries.length
+          ? entries
+            .map(entry =>
+              `(${new Date(entry.date).toLocaleDateString('en-US', {
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric'
+              })}) ${'\n'} ${entry.price} Pesos
+              ${'\n'} `
+            ).join('\n')
+          : '-';
+      });
+
+      return row;
+    });
+
+    autoTable(doc, {
+      head: [columns.map(col => col.header)],
+      body: rows.map(row => columns.map(col => row[col.dataKey])),
+      startY: 20,
+      styles: {
+        fontSize: 9,
+        cellPadding: 2,
+        overflow: 'linebreak',
+        valign: 'top'
+      },
+      headStyles: {
+        fillColor: [34, 197, 94],
+        textColor: 255,
+        halign: 'center'
+      },
+      bodyStyles: {
+        textColor: 20
+      },
+      theme: 'grid'
+    });
+
+    doc.save(`Market_Price_History_${new Date().toISOString().slice(0, 10)}.pdf`);
+  };
+
   return (
     <div className="flex min-h-screen bg-green-600">
       <Sidebar />
@@ -221,11 +281,17 @@ function Market() {
         <div>
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-3xl font-bold text-black">Market Dashboard</h1>
-            <button
+            {/* <button
               onClick={handleDownloadPDF}
               className="bg-white text-green-700 font-semibold px-4 py-2 rounded shadow hover:bg-green-100"
             >
               📄 Download PDF
+            </button> */}
+            <button
+              onClick={handleExportAutoTablePDF}
+              className="bg-white text-green-700 font-semibold px-4 py-2 rounded shadow hover:bg-green-100"
+            >
+              📄 Export Table as PDF
             </button>
           </div>
 
@@ -299,10 +365,10 @@ function Market() {
         {/* Modal */}
         {
           isModalOpen && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+            <div className="fixed inset-0 bg-opacity-50 flex justify-center items-center z-50">
               <form
                 onSubmit={handleFormSubmit}
-                className="bg-green-500 p-6 rounded-lg w-80 text-center text-black space-y-3"
+                className="bg-[#355E3B] p-6 rounded-lg w-80 text-center text-black space-y-3"
               >
                 <input
                   name="name"

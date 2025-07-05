@@ -1,265 +1,363 @@
-import React, { useEffect, useState, useRef } from 'react'
-import { getUser } from '../../utils/helpers'
+import React, { useEffect, useState, useRef } from 'react';
+import { getUser } from '../../utils/helpers';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import Chart from "chart.js/auto";
-
+import Chart from 'chart.js/auto';
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 function VendorIndex() {
     const user = getUser();
     const navigate = useNavigate();
-    // console.log(user._id)
-    const userId = user._id
+    const userId = user._id;
     const [postedCounts, setPostedCount] = useState(0);
     const [pickupCount, setPickupCount] = useState(0);
     const [claimedCount, setClaimedCount] = useState(0);
     const [totalKilo, setTotalKilo] = useState(0);
     const [monthlyAverage, setMonthlyAverage] = useState(0);
     const [notifications, setNotifications] = useState([]);
+    const [chartView, setChartView] = useState('daily');
+    const [chartData, setChartData] = useState([]);
+    const [chartLabels, setChartLabels] = useState([]);
+    const [dailyTotal, setDailyTotal] = useState(0);
+    const [chartDataForAll, setChartDataForAll] = useState([]);
+
     const chartRef = useRef(null);
     const chartInstanceRef = useRef(null);
 
     useEffect(() => {
-        const fetchSackCounts = async () => {
+        const fetchData = async () => {
             try {
-                const response = await axios.get(`${import.meta.env.VITE_API}/notifications/get-pickup-request/${user._id}`);
-                setPostedCount(response.data.postedSacksCount);
-                setPickupCount(response.data.pickupSacksCount);
-                setClaimedCount(response.data.claimedSacksCount);
-                // console.log(response)
+                const notifRes = await axios.get(`${import.meta.env.VITE_API}/notifications/get-pickup-request/${userId}`);
+                setPostedCount(notifRes.data.postedSacksCount);
+                setPickupCount(notifRes.data.pickupSacksCount);
+                setClaimedCount(notifRes.data.claimedSacksCount);
+
+                const sackRes = await axios.get(`${import.meta.env.VITE_API}/sack/get-store-sacks/${userId}`);
+                const allSacks = sackRes.data.sacks || [];
+                setChartDataForAll(allSacks); // ✅ Add this line
+
+                const total = allSacks.reduce((sum, sack) => sum + parseFloat(sack.kilo || 0), 0);
+                setTotalKilo(total);
+                const todayStr = new Date().toISOString().split('T')[0];
+                const todayTotal = allSacks
+                    .filter(s => new Date(s.createdAt).toISOString().split('T')[0] === todayStr)
+                    .reduce((sum, s) => sum + parseFloat(s.kilo || 0), 0);
+                setDailyTotal(todayTotal);
+
+                const now = new Date();
+                const currentMonth = now.getMonth();
+                const currentYear = now.getFullYear();
+
+                const monthlySacks = allSacks.filter(s => new Date(s.createdAt).getMonth() === currentMonth && new Date(s.createdAt).getFullYear() === currentYear);
+                const monthlySum = monthlySacks.reduce((sum, sack) => sum + parseFloat(sack.kilo || 0), 0);
+                setMonthlyAverage(monthlySum);
+
+                generateChartData(chartView, allSacks);
             } catch (error) {
-                console.error('Error fetching sack status:', error);
-            }
-        };
-        const fetchStoreSacks = async () => {
-            try {
-                const { data } = await axios.get(`${import.meta.env.VITE_API}/sack/get-store-sacks/${user._id}`);
-                console.log("Fetched sacks:", data.sacks);
-
-                const allSacks = data.sacks;
-
-                // Calculate total kilos
-                const totalKilo = allSacks.reduce((sum, sack) => {
-                    return sum + parseFloat(sack.kilo || 0);
-                }, 0);
-                setTotalKilo(totalKilo);
-
-                // Get current month and year
-                const currentMonth = new Date().getMonth();
-                const currentYear = new Date().getFullYear();
-
-                // Filter sacks for current month
-                const currentMonthSacks = allSacks.filter((sack) => {
-                    const sackDate = new Date(sack.createdAt);
-                    return sackDate.getMonth() === currentMonth && sackDate.getFullYear() === currentYear;
-                });
-
-                // Calculate monthly total
-                const monthlyTotal = currentMonthSacks.reduce((sum, sack) => {
-                    return sum + parseFloat(sack.kilo || 0);
-                }, 0);
-                setMonthlyAverage(monthlyTotal);
-
-            } catch (error) {
-                console.error("Error fetching:", error);
+                console.error('Error fetching data:', error);
             }
         };
 
-        const fetchNotifications = async () => {
-            try {
-                const { data } = await axios.get(`${import.meta.env.VITE_API}/notifications/users-get-notif/${userId}`);
+        fetchData();
+    }, [userId, chartView]);
 
-                const newSackNotifications = data.notifications.filter(notification => notification.type === 'pickup');
+    const generateChartData = (view, sacks) => {
+        const now = new Date();
+        let labels = [];
+        let data = [];
 
-                // console.log(newSackNotifications);
-                setNotifications(newSackNotifications);
-            } catch (error) {
-                console.error("Error fetching notifications:", error);
-            }
-        };
+        if (view === 'daily') {
+            const today = now.toISOString().split('T')[0];
+            const total = sacks
+                .filter(s => new Date(s.createdAt).toISOString().split('T')[0] === today)
+                .reduce((sum, s) => sum + parseFloat(s.kilo || 0), 0);
+            labels = ['Today'];
+            data = [total];
+        } else if (view === 'weekly') {
+            const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const weekStart = new Date(now);
+            weekStart.setDate(now.getDate() - now.getDay());
+            labels = weekdays;
+            data = weekdays.map((_, i) => {
+                const day = new Date(weekStart);
+                day.setDate(weekStart.getDate() + i);
+                const dayStr = day.toISOString().split('T')[0];
+                return sacks
+                    .filter(s => new Date(s.createdAt).toISOString().split('T')[0] === dayStr)
+                    .reduce((sum, s) => sum + parseFloat(s.kilo || 0), 0);
+            });
+        } else if (view === 'monthly') {
+            labels = Array.from({ length: 12 }, (_, i) => new Date(0, i).toLocaleString('default', { month: 'short' }));
+            data = new Array(12).fill(0);
+            sacks.forEach(s => {
+                const d = new Date(s.createdAt);
+                const month = d.getMonth();
+                data[month] += parseFloat(s.kilo || 0);
+            });
+        } else if (view === 'yearly') {
+            const yearMap = {};
+            sacks.forEach(s => {
+                const year = new Date(s.createdAt).getFullYear();
+                yearMap[year] = (yearMap[year] || 0) + parseFloat(s.kilo || 0);
+            });
+            labels = Object.keys(yearMap).sort();
+            data = labels.map(year => yearMap[year]);
+        }
 
-        fetchNotifications();
-        fetchSackCounts();
-        fetchStoreSacks();
-    }, [user._id]);
+        setChartLabels(labels);
+        setChartData(data);
+    };
 
     useEffect(() => {
         if (!chartRef.current) return;
 
-        if (chartInstanceRef.current) {
-            chartInstanceRef.current.destroy();
-        }
+        if (chartInstanceRef.current) chartInstanceRef.current.destroy();
 
         const ctx = chartRef.current.getContext('2d');
-
         chartInstanceRef.current = new Chart(ctx, {
-            type: 'line',
+            type: 'bar',
             data: {
-                labels: ['Total Waste', 'Monthly Waste'],
+                labels: chartLabels,
                 datasets: [
                     {
-                        label: 'Kilograms',
-                        data: [totalKilo, monthlyAverage],
-                        backgroundColor: ['#10B981', '#34D399'],
-                        borderRadius: 10,
+                        label: 'Kilos',
+                        data: chartData,
+                        backgroundColor: '#34D399',
                     },
                 ],
             },
             options: {
                 responsive: true,
-                plugins: {
-                    legend: {
-                        display: false,
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function (context) {
-                                return `${context.parsed.y} kg`;
-                            },
-                        },
-                    },
-                },
                 scales: {
                     y: {
                         beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Kilograms',
-                        },
-                    },
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Waste Type',
-                        },
                     },
                 },
             },
         });
 
-        return () => {
-            if (chartInstanceRef.current) {
-                chartInstanceRef.current.destroy();
-            }
-        };
-    }, [totalKilo, monthlyAverage]);
+        return () => chartInstanceRef.current?.destroy();
+    }, [chartLabels, chartData]);
 
+    const handleExportPDF = () => {
+        const doc = new jsPDF();
+        const currentDate = new Date().toLocaleString();
+        const userName = user?.name || "Vendor";
+
+        doc.setFontSize(18);
+        doc.text(`Waste Contribution Report`, 14, 20);
+
+        doc.setFontSize(11);
+        doc.setTextColor(100);
+        doc.text(`Vendor: ${userName}`, 14, 30);
+        doc.text(`Date Generated: ${currentDate}`, 14, 36);
+
+        const views = ['daily', 'weekly', 'monthly', 'yearly'];
+        let currentY = 46;
+
+        views.forEach(view => {
+            // Generate chart data for the given view
+            const now = new Date();
+            const labels = [];
+            const data = [];
+
+            if (view === 'daily') {
+                const today = now.toISOString().split('T')[0];
+                const total = chartDataForAll.filter(s => new Date(s.createdAt).toISOString().split('T')[0] === today)
+                    .reduce((sum, s) => sum + parseFloat(s.kilo || 0), 0);
+                labels.push('Today');
+                data.push(total);
+            } else if (view === 'weekly') {
+                const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                const weekStart = new Date(now);
+                weekStart.setDate(now.getDate() - now.getDay());
+                for (let i = 0; i < 7; i++) {
+                    const day = new Date(weekStart);
+                    day.setDate(weekStart.getDate() + i);
+                    const dayStr = day.toISOString().split('T')[0];
+                    const total = chartDataForAll.filter(s => new Date(s.createdAt).toISOString().split('T')[0] === dayStr)
+                        .reduce((sum, s) => sum + parseFloat(s.kilo || 0), 0);
+                    labels.push(weekdays[i]);
+                    data.push(total);
+                }
+            } else if (view === 'monthly') {
+                const months = Array.from({ length: 12 }, (_, i) =>
+                    new Date(0, i).toLocaleString('default', { month: 'short' })
+                );
+                const monthTotals = new Array(12).fill(0);
+                chartDataForAll.forEach(s => {
+                    const d = new Date(s.createdAt);
+                    const month = d.getMonth();
+                    monthTotals[month] += parseFloat(s.kilo || 0);
+                });
+                labels.push(...months);
+                data.push(...monthTotals);
+            } else if (view === 'yearly') {
+                const yearMap = {};
+                chartDataForAll.forEach(s => {
+                    const year = new Date(s.createdAt).getFullYear();
+                    yearMap[year] = (yearMap[year] || 0) + parseFloat(s.kilo || 0);
+                });
+                const years = Object.keys(yearMap).sort();
+                labels.push(...years);
+                data.push(...years.map(y => yearMap[y]));
+            }
+
+            // Add view header
+            doc.setFontSize(14);
+            doc.setTextColor(0, 102, 51);
+            doc.text(`${view.charAt(0).toUpperCase() + view.slice(1)} Contribution`, 14, currentY);
+            currentY += 6;
+
+            // Add chart data table
+            autoTable(doc, {
+                startY: currentY,
+                head: [['Period', 'Total Waste (kg)']],
+                body: labels.map((label, i) => [label, `${data[i]} kg`]),
+                theme: 'striped',
+                styles: { fontSize: 10 },
+            });
+
+            currentY = doc.lastAutoTable.finalY + 10;
+        });
+
+        // Add stat summary at the end
+        doc.setFontSize(14);
+        doc.setTextColor(0, 102, 51);
+        doc.text('Overall Summary', 14, currentY);
+
+        autoTable(doc, {
+            startY: currentY + 6,
+            head: [['Statistic', 'Value']],
+            body: [
+                ['Today’s Contribution', `${dailyTotal} kg`],
+                ['Monthly Waste', `${monthlyAverage} kg`],
+                ['Total Waste', `${totalKilo} kg`],
+                ['Posted Sacks', `${postedCounts}`],
+                ['Claimed Requests', `${claimedCount}`],
+                ['Active Requests', `${pickupCount}`],
+            ],
+            theme: 'grid',
+            headStyles: { fillColor: [34, 139, 34] },
+            styles: { fontSize: 10 },
+        });
+        currentY = doc.lastAutoTable.finalY + 10
+
+        doc.save(`Contribution_Report_${userName.replace(/\s/g, "_")}.pdf`);
+    };
 
     return (
-        <>
-
-            {/* Hero Section */}
+        <div style={{ background: 'linear-gradient(to bottom right, #0A4724, #116937)', padding: 10 }}>
             <section
-                id="home"
                 className="px-6"
-                style={{
-                    background: 'linear-gradient(to bottom right, #0A4724, #116937)', padding: 10
-                }}
             >
                 <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12">
-                    {/* Left Side */}
                     <div className="flex-1">
-                        <h1 className="text-3xl font-bold text-gray-900 mb-2 text-white">
-                            Welcome, {user.name}
-                        </h1>
+                        <h1 className="text-3xl font-bold text-white mb-2">Welcome, {user.name}</h1>
                         <div className="inline-block bg-green-900 px-4 py-2 rounded-full text-sm font-medium text-white mb-6 border border-green-300">
                             🌱 Connect with local partners and reduce waste
                         </div>
-                        <h2 className="text-4xl md:text-5xl font-bold leading-tight mb-4 text-white">
-                            Why reuse your <br /> vegetable waste?
-                        </h2>
+                        <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">Why reuse your <br /> vegetable waste?</h2>
                         <p className="text-lg text-white mb-6">
-                            Manage your waste sacks and requests efficiently
-                            and learn how your vegetable waste can bring new value!
+                            Manage your waste sacks and requests efficiently and learn how your vegetable waste can bring new value!
                         </p>
                     </div>
-
-                    {/* Right Side - Image */}
                     <div className="flex-1">
-                        <div className="w-full h-full rounded-xl overflow-hidden border border-green-300 shadow-lg">
-                            <img
-                                src="/images/taytay-market.jpg"
-                                alt="Food waste management"
-                                className="w-full h-full object-cover"
-                            />
-                        </div>
+                        <img src="/images/taytay-market.jpg" alt="Market" className="w-full h-full rounded-xl border shadow-lg" />
                     </div>
                 </div>
             </section>
 
-            {/* Header */}
-            <div className="bg-white shadow rounded-xl p-6 max-w-3xl mx-auto mt-10">
-                <h2 className="text-lg font-semibold text-gray-700 mb-4">Waste Summary (kg)</h2>
-                <canvas ref={chartRef} height="100"></canvas>
-            </div>
-
-            {/* Stats Section */}
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-6 max-w-5xl mx-auto mb-10">
-                <div className="bg-white shadow rounded-xl p-6 text-center">
-                    <h3 className="text-sm text-gray-500 mb-1">Total Waste</h3>
-                    <p className="text-3xl font-bold text-gray-800">{totalKilo}<span className="text-lg font-medium">kg</span></p>
-                </div>
-                <div className="bg-white shadow rounded-xl p-6 text-center">
-                    <h3 className="text-sm text-gray-500 mb-1">Monthly Waste</h3>
-                    <p className="text-3xl font-bold text-gray-800"> {monthlyAverage}<span className="text-lg font-medium">kg</span></p>
-                </div>
-                <div className="bg-white shadow rounded-xl p-6 text-center">
-                    <h3 className="text-sm text-gray-500 mb-1">Posted Sacks</h3>
-                    <p className="text-3xl font-bold text-gray-800">{postedCounts}</p>
-                </div>
-                <div className="bg-white shadow rounded-xl p-6 text-center">
-                    <h3 className="text-sm text-gray-500 mb-1">Active Requests</h3>
-                    <p className="text-3xl font-bold text-gray-800"> {pickupCount} </p>
-                </div>
-                <div className="bg-white shadow rounded-xl p-6 text-center">
-                    <h3 className="text-sm text-gray-500 mb-1">Claimed Requests</h3>
-                    <p className="text-3xl font-bold text-gray-800"> {claimedCount} </p>
-                </div>
-            </div>
-
-            {/* Quick Actions */}
-            <div className="flex justify-center gap-4">
-                <button
-                    onClick={() => navigate(`/vendor/pickup`)}
-                    className="border border-green-600 text-green-600 hover:bg-green-50 px-6 py-2 rounded-full font-medium transition">
-                    Pickup Requests
+            <div className="flex justify-center gap-4 mt-10" >
+                <button onClick={() => navigate(`/vendor/myStall/${userId}`)} className="border border-green-600 text-green-600 hover:bg-green-50 px-6 py-2 rounded-full font-medium transition">
+                    My Contribution
                 </button>
-                <button className="border border-green-600 text-green-600 hover:bg-green-50 px-6 py-2 rounded-full font-medium transition">
-                    Collection History
+                <button onClick={() => navigate(`/vendor/pickup`)} className="border border-green-600 text-green-600 hover:bg-green-50 px-6 py-2 rounded-full font-medium transition">
+                    Collection Request
                 </button>
             </div>
-            <br />
-            <br />
-            <div
-                style={{
-                    background: 'linear-gradient(to bottom right, #0A4724, #116937)', padding: 50,
-                }}
-            >
-                <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl font-semibold text-white">Recent Available Sacks</h2>
-                    <a href="/pickup" className="text-sm text-white hover:underline">
-                        View All
-                    </a>
+            <br /><br />
+
+            <div className="bg-white shadow rounded-xl p-6 max-w-6xl mx-auto">
+                {/* Header and Dropdown */}
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+                    <h2 className="text-xl font-semibold text-gray-700">Waste Summary</h2>
+
+                    <div className="flex items-center">
+                        <label htmlFor="chartView" className="text-sm font-medium text-gray-600 mr-2">
+                            View:
+                        </label>
+                        <select
+                            id="chartView"
+                            value={chartView}
+                            onChange={(e) => setChartView(e.target.value)}
+                            className="border border-gray-300 p-2 rounded-md text-sm w-40"
+                        >
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly">Monthly</option>
+                            <option value="yearly">Yearly</option>
+                        </select>
+                        <button
+                            onClick={handleExportPDF}
+                            className="ml-4 bg-green-700 hover:bg-green-800 text-white px-4 py-2 text-sm rounded-md shadow"
+                        >
+                            Export PDF
+                        </button>
+                    </div>
                 </div>
-                <div className="grid gap-4">
-                    {notifications.filter((notif) => !notif.isRead).length > 0 ? (
-                        notifications
-                            .filter((notif) => !notif.isRead)
-                            .slice(0, 5)
-                            .map((notif, i) => (
-                                <div
-                                    key={notif._id || i}
-                                    className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded"
-                                >
-                                    <p className="text-sm font-medium">{notif.message}</p>
-                                </div>
-                            ))
-                    ) : (
-                        <h1 className="text-gray-500">No New Waste Sacks</h1>
-                    )}
+
+                {/* Chart and Stats Grid */}
+                <div className="flex flex-col lg:flex-row gap-8">
+                    {/* Left: Chart */}
+                    <div className="flex-1">
+                        <canvas ref={chartRef} height="250"></canvas>
+                    </div>
+
+                    <div className="flex-1 space-y-6">
+                        {/* Grid: 2 Columns */}
+                        {/* Daily Stat */}
+                        <div className="bg-gray-50 shadow-sm rounded-lg p-5 text-center">
+                            <h3 className="text-sm text-gray-500 mb-1">Today's Contribution</h3>
+                            <p className="text-2xl font-bold text-gray-800">{dailyTotal}<span className="text-base">kg</span></p>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div className="bg-gray-50 shadow-sm rounded-lg p-5 text-center">
+                                <h3 className="text-sm text-gray-500 mb-1">Total Waste</h3>
+                                <p className="text-2xl font-bold text-gray-800">
+                                    {totalKilo}<span className="text-base">kg</span>
+                                </p>
+                            </div>
+
+                            <div className="bg-gray-50 shadow-sm rounded-lg p-5 text-center">
+                                <h3 className="text-sm text-gray-500 mb-1">Monthly Waste</h3>
+                                <p className="text-2xl font-bold text-gray-800">
+                                    {monthlyAverage}<span className="text-base">kg</span>
+                                </p>
+                            </div>
+
+                            <div className="bg-gray-50 shadow-sm rounded-lg p-5 text-center">
+                                <h3 className="text-sm text-gray-500 mb-1">Posted Sacks</h3>
+                                <p className="text-2xl font-bold text-gray-800">{postedCounts}</p>
+                            </div>
+
+                            <div className="bg-gray-50 shadow-sm rounded-lg p-5 text-center">
+                                <h3 className="text-sm text-gray-500 mb-1">Claimed Requests</h3>
+                                <p className="text-2xl font-bold text-gray-800">{claimedCount}</p>
+                            </div>
+                        </div>
+
+                        {/* Active Request Stat */}
+                        <div className="bg-gray-50 shadow-sm rounded-lg p-5 text-center">
+                            <h3 className="text-sm text-gray-500 mb-1">Active Requests</h3>
+                            <p className="text-2xl font-bold text-gray-800">{pickupCount}</p>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </>
+        </div>
     );
 }
 
-export default VendorIndex
+export default VendorIndex;

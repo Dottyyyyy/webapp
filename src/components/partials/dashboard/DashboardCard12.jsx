@@ -11,14 +11,16 @@ function DashboardCard12() {
       const { data } = await axios.get(
         `${import.meta.env.VITE_API}/notifications/get-notif`
       );
-      // Limit to 25 notifications max
-      const limited = data.notifications.slice(0, 25);
+      const filteredNotifications = data.notifications.filter(notification =>
+        ['new_sack', 'pickup_complete', 'trashed'].includes(notification.type)
+      );
+      const limited = filteredNotifications.slice(0, 25);
       setNotifications(limited);
     } catch (error) {
       console.error("Error fetching notifications:", error);
     }
   };
-
+  
   useEffect(() => {
     fetchAllNotifications();
   }, []);
@@ -64,11 +66,10 @@ function DashboardCard12() {
           {[...Array(totalPages)].map((_, index) => (
             <button
               key={index}
-              className={`px-3 py-1 rounded-full text-sm ${
-                currentPage === index + 1
-                  ? "bg-violet-500 text-white"
-                  : "bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-100"
-              }`}
+              className={`px-3 py-1 rounded-full text-sm ${currentPage === index + 1
+                ? "bg-violet-500 text-white"
+                : "bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-100"
+                }`}
               onClick={() => setCurrentPage(index + 1)}
             >
               {index + 1}

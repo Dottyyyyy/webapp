@@ -138,12 +138,6 @@ const Login = () => {
                   Remember me
                 </label>
               </div>
-              <Link
-                to="/forgotpassword"
-                className="text-green-600 hover:text-green-500"
-              >
-                Forgot Password?
-              </Link>
             </div>
             <button
               type="submit"

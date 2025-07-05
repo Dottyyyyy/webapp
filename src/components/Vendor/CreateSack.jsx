@@ -17,6 +17,7 @@ const CreateSack = ({ onClose }) => {
     const [error, setError] = useState('');
     const [status, setStatus] = useState('');
     const [preview, setPreview] = useState(null);
+    const [showNote, setShowNote] = useState(false);
 
     // console.log(user.stall.stallNumber, 'User')
 
@@ -97,8 +98,18 @@ const CreateSack = ({ onClose }) => {
             <div className="w-full max-w-md p-6 space-y-6 rounded-lg shadow-md relative" style={{
                 background: 'linear-gradient(to bottom right,rgb(5, 107, 49),rgb(35, 241, 124))',
             }}>
-                <button onClick={onClose} className="absolute top-2 right-2 text-gray-500 hover:text-black">✕</button>
-                <h2 className="text-2xl font-bold text-center text-gray-900">Create Sack</h2>
+                <button onClick={onClose} className="absolute top-2 right-2 text-white hover:text-black">✕</button>
+                <h2 className="text-2xl font-bold text-center text-gray-900">Distribute Your Sack</h2>
+
+                <div>
+                    <button
+                        type="button"
+                        onClick={() => setShowNote(!showNote)}
+                        className="text-white underline text-sm mb-2 hover:text-black transition"
+                    >
+                        📌 Note for Vendors
+                    </button>
+                </div>
                 <form className="space-y-6" onSubmit={handleSubmit}>
                     <div className="flex justify-center mb-6 relative">
                         <label htmlFor="avatar-upload" className="cursor-pointer group">
@@ -126,7 +137,7 @@ const CreateSack = ({ onClose }) => {
                     <div className="space-y-1">
                         <label
                             htmlFor="description"
-                            className="block text-sm font-medium text-gray-700"
+                            className="block text-sm font-medium text-black"
                         >
                             Description:
                         </label>
@@ -141,14 +152,14 @@ const CreateSack = ({ onClose }) => {
                         />
                     </div>
                     <div className="space-y-1">
-                        <label className="block text-sm font-medium text-gray-700">
+                        <label className="block text-sm font-medium text-black">
                             How many kilo/s do you have?
                         </label>
                         <div className="flex items-center space-x-2">
                             <button
                                 type="button"
                                 onClick={decrement}
-                                className="px-3 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                                className="px-3 py-2 bg-black rounded hover:bg-gray-300"
                             >
                                 -
                             </button>
@@ -158,12 +169,12 @@ const CreateSack = ({ onClose }) => {
                                 onChange={handleChangeText}
                                 min={5}
                                 max={99999}
-                                className="w-20 text-center px-2 py-2 border border-gray-300 rounded"
+                                className="w-20 text-center px-2 py-2 border border-gray-300 rounded text-black"
                             />
                             <button
                                 type="button"
                                 onClick={increment}
-                                className="px-3 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                                className="px-3 py-2 bg-black rounded hover:bg-gray-300"
                             >
                                 +
                             </button>
@@ -171,7 +182,7 @@ const CreateSack = ({ onClose }) => {
                     </div>
 
                     <div className="space-y-1">
-                        <label className="block text-sm font-medium text-gray-700">Status</label>
+                        <label className="block text-sm font-medium text-black">Status</label>
                         <select
                             value={status}
                             onChange={(e) => {
@@ -183,7 +194,7 @@ const CreateSack = ({ onClose }) => {
                                     setDbSpoil('');
                                 }
                             }}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none text-black"
                             required
                         >
                             <option value="" disabled>Select status</option>
@@ -223,6 +234,54 @@ const CreateSack = ({ onClose }) => {
                         Create Sack
                     </button>
                 </form>
+
+                {showNote && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-50">
+                        <div className="bg-white w-full max-w-lg p-6 rounded-lg shadow-lg relative">
+                            <button
+                                onClick={() => setShowNote(false)}
+                                className="absolute top-2 right-2 text-black hover:text-black"
+                            >
+                                ✕
+                            </button>
+                            <h3 className="font-bold text-green-700 mb-2 text-lg">🧪 Summary:</h3>
+                            <table className="w-full text-sm table-auto border border-gray-300">
+                                <thead>
+                                    <tr className="bg-green-100">
+                                        <th className="border px-2 py-1 text-left text-black">Material</th>
+                                        <th className="border px-2 py-1 text-center text-black">Safe for Pigs</th>
+                                        <th className="border px-2 py-1 text-center text-black">Safe for Composting</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td className="border px-2 py-1 text-black">Raw Vegetables</td>
+                                        <td className="border px-2 py-1 text-center">✅</td>
+                                        <td className="border px-2 py-1 text-center">✅</td>
+                                    </tr>
+                                    <tr>
+                                        <td className="border px-2 py-1 text-black">Fruit Scraps (no mold)</td>
+                                        <td className="border px-2 py-1 text-center">✅ (limit)</td>
+                                        <td className="border px-2 py-1 text-center">✅</td>
+                                    </tr>
+                                    <tr>
+                                        <td className="border px-2 py-1 text-black">Moldy Food</td>
+                                        <td className="border px-2 py-1 text-center">❌</td>
+                                        <td className="border px-2 py-1 text-center">❌</td>
+                                    </tr>
+                                    <tr>
+                                        <td className="border px-2 py-1 text-black">Citrus/Onions/Garlic</td>
+                                        <td className="border px-2 py-1 text-center">❌</td>
+                                        <td className="border px-2 py-1 text-center">⚠️ (in moderation)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <p className="mt-2 text-xs text-gray-600">
+                                Use this guide to ensure your waste is safe for pigs and/or helpful for composters.
+                            </p>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     )

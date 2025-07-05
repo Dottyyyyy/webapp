@@ -136,19 +136,19 @@ function ViewPosts() {
                             return (
                                 <div key={item._id} className="bg-white rounded-lg shadow-md p-4 mb-4 hover:shadow-lg transition">
                                     {/* Post Header */}
-                                    <div className="flex items-center space-x-4 mb-4">
-                                        <img
-                                            src={stallImage || 'default-profile.jpg'}
-                                            alt="Seller Profile"
-                                            className="w-9 h-9 rounded-full object-cover"
-                                        />
-                                        <div className="flex flex-col">
-                                            <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', gap: 30, alignItems: 'center' }}>
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="flex items-center space-x-4">
+                                            <img
+                                                src={stallImage || 'default-profile.jpg'}
+                                                alt="Seller Profile"
+                                                className="w-9 h-9 rounded-full object-cover"
+                                            />
+                                            <div className="flex flex-col">
                                                 <span className="text-lg font-medium">{sellerData?.name || 'Unknown Seller'}</span>
-                                                <span style={{ fontSize: 12, fontWeight: 'lighter', marginLeft: 10 }}>{stallData?.stallNumber || 'Unknown Seller'}</span>
+                                                <span className="text-sm text-gray-500">{timeAgo(item.createdAt)}</span>
                                             </div>
-                                            <span className="text-sm text-gray-500">{timeAgo(item.createdAt)}</span>
                                         </div>
+                                        <span className="text-xs text-gray-500">{stallData?.stallNumber || 'Unknown Stall'}</span>
                                     </div>
 
                                     {/* Post Content */}
@@ -186,7 +186,7 @@ function ViewPosts() {
 
                                     {/* Modal for Add to Sack (if needed) */}
                                     {showModal && (
-                                        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                                        <div className="fixed inset-0 flex items-center justify-center bg-opacity-50 z-50">
                                             <div className="bg-white p-6 rounded-lg">
                                                 <div className="flex justify-center items-center mb-4">
                                                     <span className="text-2xl text-green-500">✓</span>

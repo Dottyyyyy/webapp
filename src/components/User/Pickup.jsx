@@ -120,7 +120,34 @@ const Pickup = () => {
             name: 'Status',
             selector: row => row.status,
             sortable: true,
-            cell: row => <span className="capitalize">{row.status}</span>
+            cell: row => {
+                let statusColor = '';
+                let label = '';
+
+                switch (row.status) {
+                    case 'pending':
+                        statusColor = 'bg-yellow-100 text-yellow-800';
+                        label = 'Pending';
+                        break;
+                    case 'pickup':
+                        statusColor = 'bg-blue-100 text-blue-800';
+                        label = 'Ongoing Pickup';
+                        break;
+                    case 'completed':
+                        statusColor = 'bg-green-100 text-green-800';
+                        label = 'Completed';
+                        break;
+                    default:
+                        statusColor = 'bg-gray-100 text-gray-800';
+                        label = row.status;
+                }
+
+                return (
+                    <span className={`capitalize px-3 py-1 rounded-full text-xs font-semibold ${statusColor}`}>
+                        {label}
+                    </span>
+                );
+            }
         }
     ];
 
@@ -130,7 +157,7 @@ const Pickup = () => {
                 <div className="w-full lg:w-[90%] bg-[#355E3B] border-2 border-green-900 p-6 rounded-lg">
                     {/* Filter Tabs */}
                     <div className="flex justify-center gap-6 mb-6">
-                        {['Pending', 'Ongoing', 'Completed'].map((status) => {
+                        {['Pending', 'Pickup', 'Completed'].map((status) => {
                             // Count statuses directly from the full list
                             const statusCount = countStatus(status);
 
@@ -141,7 +168,7 @@ const Pickup = () => {
                                     className={`px-8 py-4 rounded-xl border-2 border-green-900 text-green-900 font-semibold ${statusFilter === status.toLowerCase() ? 'bg-green-100' : 'bg-white'}`}
                                 >
                                     ({statusCount}) {/* Show the correct count */}
-                                    <h1 style={{ fontSize: 30}}>
+                                    <h1 style={{ fontSize: 30 }}>
                                         {status}
                                     </h1>
                                 </button>

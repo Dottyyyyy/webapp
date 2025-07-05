@@ -3,6 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { getUser } from '../../utils/helpers';
 import Chart from "chart.js/auto";
 import { useNavigate } from 'react-router-dom';
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 function ComposterIndex() {
   const navigate = useNavigate();
@@ -251,28 +253,47 @@ function ComposterIndex() {
     });
   }, [chartData]);
 
-  const timeAgo = (dateStr) => {
-    const seconds = Math.floor((new Date() - new Date(dateStr)) / 1000);
-    const intervals = [
-      { label: 'year', seconds: 31536000 },
-      { label: 'month', seconds: 2592000 },
-      { label: 'day', seconds: 86400 },
-      { label: 'hour', seconds: 3600 },
-      { label: 'minute', seconds: 60 },
-      { label: 'second', seconds: 1 },
-    ];
+  //Print The Collected Waste Statistics
+  const handleExportToPDF = () => {
+    const doc = new jsPDF();
 
-    for (const i of intervals) {
-      const count = Math.floor(seconds / i.seconds);
-      if (count > 0) return `${count} ${i.label}${count !== 1 ? 's' : ''} ago`;
+    doc.setFontSize(18);
+    doc.text("Waste Collection Report", 14, 20);
+
+    doc.setFontSize(12);
+    doc.text(`User: ${user.name}`, 14, 30);
+    doc.text(`Date Generated: ${new Date().toLocaleDateString()}`, 14, 36);
+    doc.text(`Filter: ${chartFilter.toUpperCase()}`, 14, 42);
+
+    // Total stats table
+    autoTable(doc, {
+      startY: 50,
+      head: [['Total Collected (kg)', 'Monthly (kg)', 'Today (kg)', 'Active Requests']],
+      body: [[
+        wasteCollected,
+        monthlyWasteCollected,
+        todaysCollected,
+        activePickupRequest
+      ]]
+    });
+
+    // Daily/Monthly chart data table
+    if (chartData.labels.length > 0) {
+      const chartTableBody = chartData.labels.map((label, index) => [
+        label,
+        `${chartData.values[index]} kg`
+      ]);
+
+      autoTable(doc, {
+        startY: doc.lastAutoTable.finalY + 10,
+        head: [[chartFilter === 'daily' ? 'Day' : 'Month', 'Collected (kg)']],
+        body: chartTableBody,
+      });
+    } else {
+      doc.text("No chart data available.", 14, doc.lastAutoTable ? doc.lastAutoTable.finalY + 10 : 60);
     }
-    return 'just now';
-  };
 
-
-  const handleNotificationClick = (stallId) => {
-    // console.log(stallId,'stallId')
-    navigate(`/composter/market/detail/${stallId}`);
+    doc.save(`waste-report-${chartFilter}.pdf`);
   };
 
   return (
@@ -358,9 +379,20 @@ function ComposterIndex() {
               <h2 className="text-xl font-bold text-gray-800 mb-4" style={{ marginLeft: 225 }}>
                 Collected Waste Graph 📊
               </h2>
-              <h2 className="text-xl font-bold text-gray-800 mb-4" style={{ marginRight: 60 }}>
-                {user.name}'s Statistics 📶
-              </h2>
+              <div>
+                <h2 className="text-xl font-bold text-gray-800 mb-4" style={{ marginRight: 60 }}>
+                  {user.name}'s Statistics 📶
+                </h2>
+                <div className="flex justify-end mt-6">
+                  <button
+                    onClick={handleExportToPDF}
+                    className="ml-4 bg-green-700 hover:bg-green-800 text-white px-4 py-2 text-sm rounded-md shadow mb-5"
+                    style={{ display: 'flex', alignItems: 'flex-end' }}
+                  >
+                    Export 🗐 {chartFilter.charAt(0).toUpperCase() + chartFilter.slice(1)}
+                  </button>
+                </div>
+              </div>
             </div>
             <div className="relative h-[375px] w-full" style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
               {chartData.labels.length > 0 ? (
@@ -421,34 +453,6 @@ function ComposterIndex() {
             </div>
           </div>
         </main>
-      </div>
-
-      <div style={{ background: 'linear-gradient(to bottom right, #0A4724, #116937)', padding: 50 }}>
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-white">Recent Available Sacks</h2>
-          <a href="/composter/market" className="text-sm text-white hover:underline">
-            View All
-          </a>
-        </div>
-        <div className="grid gap-4">
-          {notifications.filter((notif) => !notif.isRead).length > 0 ? (
-            notifications
-              .filter((notif) => !notif.isRead)
-              .slice(0, 5)
-              .map((notif, i) => (
-                <div
-                  key={notif._id || i}
-                  className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded cursor-pointer"
-                  onClick={() => handleNotificationClick(notif.stall.user)} // Redirect to stall
-                >
-                  <p className="text-sm font-medium">{notif.message}</p>
-                  <p className="text-sm font-medium">{timeAgo(notif.createdAt)}</p>
-                </div>
-              ))
-          ) : (
-            <h1 className="text-gray-500">No New Waste Sacks</h1>
-          )}
-        </div>
       </div>
     </>
   );
