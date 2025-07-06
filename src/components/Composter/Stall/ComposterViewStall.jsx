@@ -49,14 +49,7 @@ function ComposterViewStall() {
                 `${import.meta.env.VITE_API}/sack/get-store-sacks/${id}`
             );
             // console.log(data,'hello')
-            const now = new Date();
-            const filteredSacks = data.sacks.filter(sack => {
-                const spoilageDate = new Date(sack.dbSpoil);
-                const daysPast = (now - spoilageDate) / (1000 * 60 * 60 * 24);
-
-                return sack.status === "spoiled" && daysPast < 3;
-            });
-
+            const filteredSacks = data.sacks.filter(sack => sack.status === "spoiled");
             setSacks(filteredSacks);
         } catch (error) {
             console.error("Error fetching sacks data:", error);
@@ -64,6 +57,21 @@ function ComposterViewStall() {
     };
 
     // console.log(mySacks, 'Mysacks')
+
+    useEffect(() => {
+        fetchStallData();
+        fetchUserData();
+        fetchStallWasteData();
+
+        const interval = setInterval(() => {
+            fetchStallData();
+            fetchUserData();
+            fetchStallWasteData();
+        }, 3000); // Refresh every 3 seconds
+        return () => clearInterval(interval);
+    }, []);
+
+    console.log(sacks,'sacks')
 
     const handleAddToSack = async (sack) => {
         try {
@@ -77,12 +85,6 @@ function ComposterViewStall() {
             toast.warning('Error in Adding to Cart');
         }
     };
-
-    useEffect(() => {
-        fetchStallData();
-        fetchUserData();
-        fetchStallWasteData();
-    }, []);
 
     if (loading) {
         return (
@@ -164,6 +166,10 @@ function ComposterViewStall() {
                                         <span className="font-semibold block">Location</span>
                                         {stall.stallAddress || "N/A"}
                                     </div>
+                                    <div>
+                                        <span className="font-semibold block">Store Type:</span>
+                                        {stall.storeType || "N/A"}
+                                    </div>
                                 </div>
                                 <div className="mt-4 flex items-center gap-2">
                                     <span className="text-yellow-500 text-xl">
@@ -178,7 +184,7 @@ function ComposterViewStall() {
 
 
                         {/* Available Sacks */}
-                        {!sacks.length === 0 ? (
+                        {sacks.length > 0 ? (
                             <div className="px-6 py-8">
                                 <h2 className="text-xl font-bold text-gray-800 mb-4">Available Sacks</h2>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">

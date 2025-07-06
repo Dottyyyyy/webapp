@@ -62,7 +62,7 @@ const SeePickUp = () => {
       console.error('Error updating sack status:', error);
     }
   };
-
+  console.log(pickup, 'pickup')
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#081c15] to-[#1b4332] text-white px-4 py-6 sm:px-8 md:px-12 lg:px-24 xl:px-40 font-sans">
       <ToastContainer />
@@ -90,20 +90,48 @@ const SeePickUp = () => {
             <p className="text-3xl font-bold text-green-900">{totalSellerKilo} kg</p>
           </div>
           <div className="bg-white shadow-inner rounded-xl p-4 hover:shadow-lg transition">
-            <p className="text-sm text-gray-500">Pickup Schedule</p>
-            <p className="text-lg font-medium text-gray-800">
-              {new Date(pickup.pickupTimestamp).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              })}{' '}
-              at{' '}
-              {new Date(pickup.pickupTimestamp).toLocaleTimeString('en-US', {
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: true
-              })}
-            </p>
+            {pickup.status !== "completed" && (
+              <div>
+                <p className="text-sm text-gray-500">Pickup Schedule</p>
+                <p className="text-lg font-medium text-gray-800">
+                  {new Date(pickup.pickupTimestamp).toLocaleDateString('en-US', {
+                    timeZone: 'UTC',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}{' '}
+                  at{' '}
+                  {new Date(pickup.pickupTimestamp).toLocaleTimeString('en-US', {
+                    timeZone: 'UTC',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                  })}
+                </p>
+              </div>
+            )}
+            {pickup.status === "completed" && (
+              <div>
+                <p className="text-sm text-gray-500">Pickup Completed On:</p>
+                <p className="text-lg font-medium text-gray-800">
+                  {new Date(pickup.pickedUpDate).toLocaleDateString('en-US', {
+                    timeZone: 'UTC',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}{' '}
+                  at{' '}
+                  {new Date(pickup.pickedUpDate).toLocaleTimeString('en-US', {
+                    timeZone: 'UTC',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: true
+                  })}
+                </p>
+
+              </div>
+            )}
           </div>
         </div>
 

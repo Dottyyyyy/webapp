@@ -79,6 +79,14 @@ function StallIndex() {
                 return true;
         }
     });
+    const totalKilo = filteredSacks.reduce((sum, sack) => {
+        const kilo = parseFloat(sack.kilo);
+        return sum + (isNaN(kilo) ? 0 : kilo);
+    }, 0);
+    const allKilo = sacks.reduce((sum, sack) => {
+        const kilo = parseFloat(sack.kilo);
+        return sum + (isNaN(kilo) ? 0 : kilo);
+    }, 0);
 
     const yearOptions = [];
     for (let y = 2020; y <= now.getFullYear() + 1; y++) yearOptions.push(y);
@@ -259,7 +267,6 @@ Store: ${stall.storeType || "N/A"}`
         });
     }
 
-
     if (loading)
         return (
             <div className="flex items-center justify-center h-screen">
@@ -371,6 +378,17 @@ Store: ${stall.storeType || "N/A"}`
                                 <option key={y} value={y}>{y}</option>
                             ))}
                         </select>
+                    </div>
+                )}
+
+                {viewFilter !== "all" && (
+                    <div className="mb-4 text-sm text-gray-600">
+                        Showing <span className="font-semibold">{filteredSacks.length}</span> of <span className="font-semibold">{sacks.length}</span> sacks · Total Kilo: <span className="font-semibold">{totalKilo.toFixed(2)}</span> kg
+                    </div>
+                )}
+                {viewFilter === "all" && (
+                    <div className="mb-4 text-sm text-gray-600">
+                        Total Sacks: <span className="font-semibold">{sacks.length}</span> · Total Kilo: <span className="font-semibold">{allKilo.toFixed(2)}</span> kg
                     </div>
                 )}
 

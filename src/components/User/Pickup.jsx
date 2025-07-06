@@ -100,10 +100,10 @@ const Pickup = () => {
     const columns = [
         {
             name: 'Pickup No.',
-            selector: row => row._id.slice(-5).toUpperCase(), // Slice the last 5 characters
+            selector: row => row._id.slice(-5).toUpperCase(),
             sortable: true,
             style: {
-                fontWeight: 'bold'  // Make the text bold
+                fontWeight: 'bold'
             }
         },
         {
@@ -115,6 +115,31 @@ const Pickup = () => {
             name: 'Weight',
             selector: row => `${row.totalKilo} kg`,
             sortable: true
+        },
+        {
+            name: 'To Pickup',
+            selector: row => row.sacks.length,
+            sortable: true,
+        },
+        {
+            name: "Pickup Date",
+            selector: row =>
+                new Date(row.status === 'completed' ? row.pickedUpDate : row.pickupTimestamp).toLocaleDateString("en-US", {
+                    timeZone: "UTC",
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                }),
+        },
+        {
+            name: "Pickup Time",
+            selector: row =>
+                new Date(row.status === 'completed' ? row.pickedUpDate : row.pickupTimestamp).toLocaleTimeString("en-US", {
+                    timeZone: "UTC",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: true,
+                }),
         },
         {
             name: 'Status',

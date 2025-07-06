@@ -116,16 +116,23 @@ const VendorPickup = () => {
         },
         {
             name: "Pickup Date",
-            selector: row => new Date(row.pickupTimestamp).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }),
+            selector: row =>
+                new Date(row.status === 'completed' ? row.pickedUpDate : row.pickupTimestamp).toLocaleDateString("en-US", {
+                    timeZone: "UTC",
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                }),
         },
         {
             name: "Pickup Time",
-            selector: row => new Date(row.pickupTimestamp).toLocaleTimeString("en-US", {
-                timeZone: "UTC",
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: true,
-            }),
+            selector: row =>
+                new Date(row.status === 'completed' ? row.pickedUpDate : row.pickupTimestamp).toLocaleTimeString("en-US", {
+                    timeZone: "UTC",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: true,
+                }),
         },
     ];
 

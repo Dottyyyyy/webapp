@@ -108,7 +108,6 @@ function DashboardCard05({ onExportData }) {
       console.error("Error fetching predicted waste data:", error);
     }
   };
-  console.log(predictedWaste);
 
   useEffect(() => {
     // ✅ Group predicted waste by date (sum total per day)

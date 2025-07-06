@@ -33,8 +33,6 @@ function Dashboard() {
   const [dashboardCard04ExportData, setDashboardCard04ExportData] = useState([]);
   const [dashboardCard08ExportData, setDashboardCard08ExportData] = useState([]);
 
-  console.log(dashboardCard05ExportData, 'dashboardCard05ExportData')
-
   const fetchUserCounts = async () => {
     try {
       const res = await axios.get(`${import.meta.env.VITE_API}/get-all-users`);

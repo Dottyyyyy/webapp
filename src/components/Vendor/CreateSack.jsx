@@ -64,6 +64,7 @@ const CreateSack = ({ onClose }) => {
             setTimeout(() => {
                 if (response.data.success) {
                     onClose();
+                    window.location.reload();
                 } else {
                     toast.error(response.data.message || "Failed to create sack.");
                 }
@@ -146,7 +147,7 @@ const CreateSack = ({ onClose }) => {
                             id="description"
                             name="description"
                             required
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-black"
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                         />
@@ -226,6 +227,7 @@ const CreateSack = ({ onClose }) => {
                                 marginBottom: '8px',
                                 backgroundColor: '#fff',
                                 width: '80%',
+                                color:'black',
                             }}
                         />
                     )}

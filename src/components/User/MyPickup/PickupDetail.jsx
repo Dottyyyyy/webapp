@@ -20,6 +20,9 @@ const PickupDetails = () => {
     const [sellers, setSellers] = useState({});
     const [showCompleteModal, setShowCompleteModal] = useState(false);
     const [isCompleting, setIsCompleting] = useState(false);
+    const [showConfirm, setShowConfirm] = useState(false);
+    const [selectedSackId, setSelectedSackId] = useState(null);
+    const [claimSuccess, setClaimSuccess] = useState(false);
     const navigate = useNavigate();
     const user = getUser();
     const userId = user._id;
@@ -158,7 +161,6 @@ const PickupDetails = () => {
         }
     };
 
-
     const handleCompletePickUpStatus = () => {
         setShowCompleteModal(true);
     };
@@ -166,7 +168,7 @@ const PickupDetails = () => {
     const confirmCompletePickup = async () => {
         try {
             setIsCompleting(true);
-            await axios.put(`${import.meta.env.VITE_API}/sack/complete-pickup/${pickup._id}`);
+            await axios.put(`${import.meta.env.VITE_API}/sack/complete-pickup/${pickup._id}`, { role: user.role });
             toast.success(
                 <div>
                     <p>All sacks have been claimed. Thank you for your service!</p>
@@ -181,6 +183,27 @@ const PickupDetails = () => {
             toast.error("Something went wrong.");
         } finally {
             setIsCompleting(false);
+        }
+    };
+
+    const handleClaimSack = (sackId) => {
+        setSelectedSackId(sackId);
+        setShowConfirm(true);
+    };
+
+    const confirmClaim = async () => {
+        try {
+            await axios.put(`${import.meta.env.VITE_API}/sack/claim-sack/${selectedSackId}`);
+            setShowConfirm(false);
+            setClaimSuccess(true);
+
+            setTimeout(() => {
+                setClaimSuccess(false)
+                navigate(-1);
+            }, 1500);
+        } catch (error) {
+            console.error("Error claim sack:", error.message);
+            alert("Failed to claim the sack.");
         }
     };
 
@@ -267,98 +290,111 @@ const PickupDetails = () => {
             </div>
 
             {/* Sack Details */}
-            {pickup?.sacks?.filter(s => s.status !== "cancelled").map((item, idx) => (
-                <div key={item._id} className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8 flex flex-col md:flex-row">
+            {pickup?.sacks?.filter(s => s.status !== "cancelled").map((item, idx) => {
+                const sackStatus = sackStatuses[item.sackId.toString()] || "Loading...";
+                const backgroundColor = sackStatus === "claimed" ? "#009E60" : "white";
 
-                    {/* Left: Stall Info */}
-                    <div className="md:w-1/3 bg-[#F3FAF7] p-5 flex flex-col border-r">
-                        <img
-                            src={sellers[item.seller]?.stall?.stallImage?.url || "https://via.placeholder.com/800x400"}
-                            alt="Stall"
-                            className="w-full h-48 object-cover rounded-xl mb-4"
-                        />
-                        <div className="space-y-1 text-sm text-gray-800">
-                            <h3 className="text-green-700 font-bold text-base">🏪 Taytay Rizal Market</h3>
-                            <p>📌 Stall #: <span className="font-semibold">{item.stallNumber}</span></p>
-                            <p>📍 {sellers[item.seller]?.stall?.stallAddress || "Market Address Unavailable"}</p>
-                            <p>🗓️ Pickup Date:{" "}
-                                {new Date(pickup.pickupTimestamp).toLocaleDateString("en-US", {
-                                    year: "numeric", month: "short", day: "numeric"
-                                })}{" "}
-                                {new Date(pickup.pickupTimestamp).toLocaleTimeString("en-US", {
-                                    timeZone: "UTC", hour: "2-digit", minute: "2-digit", hour12: true
-                                })}
-                            </p>
-                        </div>
-                    </div>
-
-                    {/* Right: Sack Item + Review */}
-                    <div className="md:w-2/3 p-6">
-                        <h3 className="text-lg font-bold mb-4 text-gray-800">🧺 Item #{idx + 1}</h3>
-
-                        <div className="flex flex-col sm:flex-row gap-4 items-start mb-4">
+                return (
+                    <div key={item._id} className="rounded-2xl shadow-xl overflow-hidden mb-8 flex flex-col md:flex-row" style={{
+                        backgroundColor
+                    }}>
+                        {/* Left: Stall Info */}
+                        <div className="md:w-1/3 bg-[#F3FAF7] p-5 flex flex-col border-r">
                             <img
-                                src={item.images[0]?.url || "https://via.placeholder.com/400x300"}
-                                alt="Item"
-                                className="w-28 h-24 object-cover rounded-lg shadow"
+                                src={sellers[item.seller]?.stall?.stallImage?.url || "https://via.placeholder.com/800x400"}
+                                alt="Stall"
+                                className="w-full h-48 object-cover rounded-xl mb-4"
                             />
-                            <div className="flex-1 space-y-2 text-sm text-gray-700">
-                                <p>📝 <span className="font-medium">Description:</span> {item.description || "Mixed Vegetables"}</p>
-                                <p>⚖️ <span className="font-medium">Weight:</span> {item.kilo} kg</p>
-                                <p>📆 <span className="font-medium">Spoils on:</span>{" "}
-                                    {new Date(item.dbSpoil).toLocaleDateString("en-US", {
-                                        year: "numeric", month: "long", day: "numeric"
+                            <div className="space-y-1 text-sm text-gray-800">
+                                <h3 className="text-green-700 font-bold text-base">🏪 Taytay Rizal Market</h3>
+                                <p>📌 Stall #: <span className="font-semibold">{item.stallNumber}</span></p>
+                                <p>📍 {sellers[item.seller]?.stall?.stallAddress || "Market Address Unavailable"}</p>
+                                <p>🗓️ Pickup Date:{" "}
+                                    {new Date(pickup.pickupTimestamp).toLocaleDateString("en-US", {
+                                        year: "numeric", month: "short", day: "numeric"
+                                    })}{" "}
+                                    {new Date(pickup.pickupTimestamp).toLocaleTimeString("en-US", {
+                                        timeZone: "UTC", hour: "2-digit", minute: "2-digit", hour12: true
                                     })}
                                 </p>
                             </div>
                         </div>
 
-                        {/* Review Form */}
-                        {pickupStatus === "completed" && !item?.reviewed && (
-                            <form
-                                onSubmit={(e) => handleFormSubmit(e, item.sackId)}
-                                className="mt-6 bg-gray-50 p-5 rounded-xl shadow-inner"
-                            >
-                                <h4 className="text-md font-semibold text-gray-800 mb-2">⭐ Write a Review</h4>
+                        {/* Right: Sack Item + Review */}
+                        <div className="md:w-2/3 p-6">
+                            <h3 className="text-lg font-bold mb-4 text-gray-800">🧺 Item #{idx + 1}</h3>
 
-                                <textarea
-                                    value={review}
-                                    onChange={handleReviewChange}
-                                    placeholder="Write your review here..."
-                                    rows={4}
-                                    className="w-full border border-gray-300 rounded-md p-3 mb-4 text-sm"
+                            <div className="flex flex-col sm:flex-row gap-4 items-start mb-4">
+                                <img
+                                    src={item.images[0]?.url || "https://via.placeholder.com/400x300"}
+                                    alt="Item"
+                                    className="w-28 h-24 object-cover rounded-lg shadow"
                                 />
-
-                                <div className="flex items-center gap-2 mb-4">
-                                    <span className="text-sm text-gray-800">Rating:</span>
-                                    {[1, 2, 3, 4, 5].map((star) => (
-                                        <button
-                                            key={star}
-                                            type="button"
-                                            onClick={() => handleRatingClick(star)}
-                                            className={`text-xl ${rating >= star ? "text-yellow-500" : "text-gray-300"}`}
-                                        >
-                                            ★
-                                        </button>
-                                    ))}
+                                <div className="flex-1 space-y-2 text-sm text-gray-700">
+                                    <p className='text-black'>📝 <span className="font-medium text-black">Description:</span> {item.description || "Mixed Vegetables"}</p>
+                                    <p className='text-black'>⚖️ <span className="font-medium text-black">Weight:</span> {item.kilo} kg</p>
+                                    <p className='text-black'>📆 <span className="font-medium text-black">Spoils on:</span>{" "}
+                                        {new Date(item.dbSpoil).toLocaleDateString("en-US", {
+                                            year: "numeric", month: "long", day: "numeric"
+                                        })}
+                                    </p>
                                 </div>
+                                {pickup.status === "pickup" && sackStatus !== "claimed" && (
+                                    <button
+                                        onClick={() => handleClaimSack(item.sackId)}
+                                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-1 rounded-xl shadow transition"
+                                    >
+                                        ✔ Claim
+                                    </button>
+                                )}
+                            </div>
 
-                                <button
-                                    type="submit"
-                                    className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-md"
+                            {/* Review Form */}
+                            {pickupStatus === "completed" && !item?.reviewed && (
+                                <form
+                                    onSubmit={(e) => handleFormSubmit(e, item.sackId)}
+                                    className="mt-6 bg-gray-50 p-5 rounded-xl shadow-inner"
                                 >
-                                    Submit Review
-                                </button>
-                            </form>
-                        )}
-                    </div>
-                </div>
-            ))}
+                                    <h4 className="text-md font-semibold text-gray-800 mb-2">⭐ Write a Review</h4>
 
+                                    <textarea
+                                        value={review}
+                                        onChange={handleReviewChange}
+                                        placeholder="Write your review here..."
+                                        rows={4}
+                                        className="w-full border border-gray-300 rounded-md p-3 mb-4 text-sm text-black"
+                                    />
+
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <span className="text-sm text-gray-800">Rating:</span>
+                                        {[1, 2, 3, 4, 5].map((star) => (
+                                            <button
+                                                key={star}
+                                                type="button"
+                                                onClick={() => handleRatingClick(star)}
+                                                className={`text-xl ${rating >= star ? "text-yellow-500" : "text-gray-300"}`}
+                                            >
+                                                ★
+                                            </button>
+                                        ))}
+                                    </div>
+
+                                    <button
+                                        type="submit"
+                                        className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-md"
+                                    >
+                                        Submit Review
+                                    </button>
+                                </form>
+                            )}
+                        </div>
+                    </div>
+                );
+            })}
 
             {/* Map Modal */}
             {showMapModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center">
+                <div className="fixed inset-0 bg-opacity-60 z-50 flex items-center justify-center">
                     <div className="relative bg-gradient-to-br from-green-900 to-green-500 p-6 rounded-xl w-full max-w-4xl shadow-lg">
                         <button onClick={() => setShowMapModal(false)} className="absolute top-2 right-4 text-white text-2xl">&times;</button>
                         <h2 className="text-xl text-white font-bold mb-4">📍 Map View</h2>
@@ -366,6 +402,41 @@ const PickupDetails = () => {
                             <GoogleMapService pickup={pickup} />
                         </div>
                     </div>
+                </div>
+            )}
+
+            {/* Confirmation Modal */}
+            {showConfirm && (
+                <div className="fixed inset-0 bg-opacity-30 flex items-center justify-center z-50">
+                    <div className="bg-[#355E3B] p-6 rounded-xl shadow-lg max-w-sm w-full">
+                        <div style={{ display: 'flex', justifySelf: 'center' }}>
+                            <h2 className="font-bold mb-4" style={{ fontSize: 80, padding: 1, backgroundColor: 'white', borderRadius: 60 }}>❓</h2>
+                        </div>
+                        <p className="text-white mb-6">
+                            Are you sure you want to claim this item?
+                        </p>
+                        <div className="flex justify-end gap-3">
+                            <button
+                                onClick={() => setShowConfirm(false)}
+                                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 text-gray-800"
+                            >
+                                Dismiss
+                            </button>
+                            <button
+                                onClick={confirmClaim}
+                                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                            >
+                                Proceed
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Temporary success message */}
+            {claimSuccess && (
+                <div className="fixed top-5 right-5 bg-green-600 text-white px-4 py-2 rounded shadow">
+                    Sack successfully claimed!
                 </div>
             )}
 

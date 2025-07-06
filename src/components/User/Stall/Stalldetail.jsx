@@ -156,6 +156,10 @@ function StallDetails() {
                                         <span className="font-semibold block">Location</span>
                                         {stall.stallAddress || "N/A"}
                                     </div>
+                                    <div>
+                                        <span className="font-semibold block">Store Type:</span>
+                                        {stall.storeType || "N/A"}
+                                    </div>
                                 </div>
                                 <div className="mt-4 flex items-center gap-2">
                                     <span className="text-yellow-500 text-xl">
