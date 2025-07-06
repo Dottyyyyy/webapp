@@ -26,9 +26,8 @@ const PickupDetails = () => {
     const navigate = useNavigate();
     const user = getUser();
     const userId = user._id;
-    console.log(newPickup, 'new')
     const [showMapModal, setShowMapModal] = useState(false);
-
+    const [showBuildingMapModal, setshowBuildingMapModal] = useState(false);
 
     useEffect(() => {
         const fetchSackSellers = async () => {
@@ -108,7 +107,6 @@ const PickupDetails = () => {
     useEffect(() => {
         fetchAllSackStatuses();
     }, [userId]);
-
 
     const handleReviewChange = (e) => setReview(e.target.value);
 
@@ -206,7 +204,10 @@ const PickupDetails = () => {
             alert("Failed to claim the sack.");
         }
     };
-
+    const normalize = str => str?.replace(/[-\s]/g, '').toLowerCase();
+    const highlightedStalls = pickup?.sacks
+        ?.filter(s => s.status !== "cancelled")
+        .map(s => normalize(s.stallNumber));
     return (
         <div className="min-h-screen p-6 bg-gradient-to-br from-[#0A4724] to-[#116937] text-white">
             <ToastContainer />
@@ -237,12 +238,20 @@ const PickupDetails = () => {
                 <div className="flex flex-wrap items-center gap-4 justify-end">
                     {/* Map Button */}
                     {(pickup.status === "pending" || pickup.status === "pickup") && (
-                        <button
-                            onClick={() => setShowMapModal(true)}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 text-xs font-medium rounded-full shadow-md transition"
-                        >
-                            🗺️ View Map
-                        </button>
+                        <>
+                            <button
+                                onClick={() => setShowMapModal(true)}
+                                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 text-xs font-medium rounded-full shadow-md transition"
+                            >
+                                🗺️ View Map
+                            </button>
+                            <button
+                                onClick={() => setshowBuildingMapModal(true)}
+                                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 text-xs font-medium rounded-full shadow-md transition"
+                            >
+                                🗺️ Building Map
+                            </button>
+                        </>
                     )}
 
                     {/* Status Pill */}
@@ -319,6 +328,204 @@ const PickupDetails = () => {
                                 </p>
                             </div>
                         </div>
+
+                        {/* Building Map Modal */}
+                        {showBuildingMapModal && (
+                            <div className="fixed inset-0 bg-opacity-60 z-50 flex items-center justify-center">
+                                <div className="bg-white p-4 max-h-[90vh] max-w-[95vw] overflow-auto rounded shadow-lg">
+                                    <div className="text-center text-xl font-bold mb-4 text-black">Building C Layout</div>
+                                    <button
+                                        onClick={() => setshowBuildingMapModal(false)}
+                                        className="absolute top-50 right-40 font-bold text-lg text-white-800 bg-[red]"
+                                        style={{ padding: 4, borderRadius: 10, width: '4%' }}
+                                    >
+                                        Close
+                                    </button>
+
+                                    <div className="flex flex-col items-start justify-start mb-4">
+                                        <div className="mb-4 text-xs text-black">
+                                            <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-4 h-4 bg-green-400 rounded-sm border" /> <span>Stall/s To Pickup</span>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-4 h-4 bg-black rounded-sm border" /> <span>Regular Stall</span>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-4 h-4 bg-yellow-200 rounded-sm border" /> <span>Hallway</span>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-4 h-4 bg-red-500 rounded-sm border" /> <span>Entrance / Exit / Stairs</span>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-4 h-4 bg-gray-300 rounded-sm border" /> <span>BLDG C Office</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex flex-row gap-4 text-[10px] font-semibold">
+                                        {/* Left Vertical Stalls and Stairs */}
+                                        <div className="flex flex-col gap-[1px] mt-30">
+                                            {['B-01 S-45', 'B-01 S-44', 'B-01 S-43', 'B-01 S-42', 'B-01 S-41'].map((stall, idx) => (
+                                                <div key={idx} className={`border text-center p-1 ${highlightedStalls.includes(normalize(stall))
+                                                    ? 'bg-green-800 text-white font-bold' : 'bg-black text-white'
+                                                    }`}>
+                                                    {stall}
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        {/* Center Block (LEFT HALF) */}
+                                        <div className="flex flex-col gap-1">
+                                            {/* B04 */}
+                                            <div className="grid grid-cols-10 gap-[1px]">
+                                                {['B-04 S-01', 'B-04 S-02', 'B-04 S-03', 'B-04 S-04', 'B-04 S-05', 'B-04 S-06', 'B-04 S-07', 'B-04 S-08', 'B-04 S-09', 'B-04 S-10'].map((stall, i) => (
+                                                    <div key={i} className={`border text-center p-1 ${highlightedStalls.includes(normalize(stall))
+                                                        ? 'bg-green-800 text-white font-bold' : 'bg-black text-white'}`}>
+                                                        {stall}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <div className="bg-yellow-200 text-center py-1 font-bold text-black">HALLWAY</div>
+                                            {/* B03 */}
+                                            <div className="grid grid-cols-10 gap-[1px]">
+                                                {['B-03 S-09', 'B-03 S-10', 'B-03 S-11', 'B-03 S-12', 'B-03 S-13', 'B-03 S-14', 'B-03 S-15', 'B-03 S-16', 'B-03 S-17', 'B-03 S-18'].map((stall, i) => (
+                                                    <div key={i} className={`border text-center p-1 ${highlightedStalls.includes(normalize(stall))
+                                                        ? 'bg-green-800 text-white font-bold' : 'bg-black text-white'
+                                                        }`}>
+                                                        {stall}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <div className="bg-yellow-200 text-center py-1 font-bold text-black">HALLWAY</div>
+                                            {/* B02 (2 rows) */}
+                                            <div className="grid grid-cols-10 gap-[1px]">
+                                                {['', '', 'B-02 S-11', 'B-02 S-12', 'B-02 S-13', 'B-02 S-14', 'B-02 S-15', 'B-02 S-16', 'B-02 S-17', 'B-02 S-18'].map((stall, i) => (
+                                                    <div key={i} className={`border text-center p-1 ${highlightedStalls.includes(normalize(stall))
+                                                        ? 'bg-green-800 text-white font-bold' : 'bg-black text-white'
+                                                        }`}>
+                                                        {stall}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <div className="grid grid-cols-10 gap-[1px]">
+                                                {['B-02 S-01', 'B-02 S-02', 'B-02 S-03', 'B-02 S-04', 'B-02 S-05', 'B-02 S-06', 'B-02 S-07', 'B-02 S-08', 'B-02 S-09', 'B-02 S-10'].map((stall, i) => (
+                                                    <div key={i} className={`border text-center p-1 ${highlightedStalls.includes(normalize(stall))
+                                                        ? 'bg-green-800 text-white font-bold' : 'bg-black text-white'
+                                                        }`}>
+                                                        {stall}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <div className="bg-yellow-200 text-center py-1 font-bold text-black">HALLWAY</div>
+                                            <div className="grid grid-cols-10 gap-[1px]">
+                                                {['', 'B-01 S-03', '', 'B-01 S-05', '', '', '', '', '', ''].map((stall, i) => (
+                                                    <div key={i} className={`border text-center p-1 ${highlightedStalls.includes(normalize(stall))
+                                                        ? 'bg-green-800 text-white font-bold' : 'bg-black text-white'
+                                                        }`}>
+                                                        {stall}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            {/* B01 (2 rows with B-01-S-05 under B-01-S-04) */}
+                                            <div className="grid grid-cols-10 gap-[1px]">
+                                                {['B-01 S-01', 'B-01 S-02', 'B-01 S-04', 'B-01 S-06', 'B-01 S-07', 'B-01 S-08', 'B-01 S-09', 'B-01 S-10', 'B-01 S-11', 'B-01 S-12'].map((stall, i) => (
+                                                    <div key={i} className={`border text-center p-1 ${highlightedStalls.includes(normalize(stall))
+                                                        ? 'bg-green-800 text-white font-bold' : 'bg-black text-white'
+                                                        }`}>
+                                                        {stall}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <div className="border bg-yellow-200 text-center font-bold text-[12px] px-4 py-10 mt-2 text-black">HALLWAY</div>
+
+                                        {/* Center Block (RIGHT HALF) */}
+                                        <div className="flex flex-col gap-1 mt-7">
+                                            {/* B04 */}
+                                            <div className="grid grid-cols-10 gap-[1px]">
+                                                {['B-04 S-11', 'B-04 S-12', 'B-04 S-13', 'B-04 S-14', 'B-04 S-15', 'B-04 S-16', 'B-04 S-17', 'B-04 S-18', 'B-04 S-19', 'B-04 S-20'].map((stall, i) => (
+                                                    <div key={i} className={`border text-center p-1 ${highlightedStalls.includes(normalize(stall))
+                                                        ? 'bg-green-800 text-white font-bold' : 'bg-black text-white'
+                                                        }`}>
+                                                        {stall}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <div className="bg-yellow-200 text-center py-1 font-bold text-black">HALLWAY</div>
+                                            {/* B03 */}
+                                            <div className="grid grid-cols-10 gap-[1px]">
+                                                {['B-03 S-21', 'B-03 S-22', 'B-03 S-23', 'B-03 S-24', 'B-03 S-25', 'B-03 S-26', 'B-03 S-27', 'B-03 S-28', 'B-03 S-29', 'B-03 S-30'].map((stall, i) => (
+                                                    <div key={i} className={`border text-center p-1 ${highlightedStalls.includes(normalize(stall))
+                                                        ? 'bg-green-800 text-white font-bold' : 'bg-black text-white'
+                                                        }`}>
+                                                        {stall}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <div className="bg-yellow-200 text-center py-1 font-bold text-black">HALLWAY</div>
+                                            {/* B02 */}
+                                            <div className="grid grid-cols-10 gap-[1px]">
+                                                {['B-02 S-19', 'B-02 S-20', 'B-02 S-21', 'B-02 S-22', 'B-02 S-23', 'B-02 S-24', 'B-02 S-25', 'B-02 S-26', 'B-02 S-27', 'B-02 S-28'].map((stall, i) => (
+                                                    <div key={i} className={`border text-center p-1 ${highlightedStalls.includes(normalize(stall))
+                                                        ? 'bg-green-800 text-white font-bold' : 'bg-black text-white'
+                                                        }`}>
+                                                        {stall}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <div className="bg-yellow-200 text-center py-1 font-bold text-black">HALLWAY</div>
+                                            {/* B01 (2 rows) */}
+                                            <div className="grid grid-cols-10 gap-[1px]">
+                                                {['B-01 S-24', 'B-01 S-25', 'B-01 S-26', 'B-01 S-27', 'B-01 S-28', 'B-01 S-29', 'B-01 S-30', 'B-01 S-31', 'B-01 S-32', ''].map((stall, i) => (
+                                                    <div key={i} className={`border text-center p-1 ${highlightedStalls.includes(normalize(stall))
+                                                        ? 'bg-green-800 text-white font-bold' : 'bg-black text-white'
+                                                        }`}>
+                                                        {stall}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <div className="grid grid-cols-10 gap-[1px]">
+                                                {['B-01 S-14', 'B-01 S-15', 'B-01 S-16', 'B-01 S-17', 'B-01 S-18', 'B-01 S-19', 'B-01 S-20', 'B-01 S-21', 'B-01 S-22', 'B-01 S-23'].map((stall, i) => (
+                                                    <div key={i} className={`border text-center p-1 ${highlightedStalls.includes(normalize(stall))
+                                                        ? 'bg-green-800 text-white font-bold' : 'bg-black text-white'
+                                                        }`}>
+                                                        {stall}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <div className="border bg-yellow-200 text-center font-bold text-[12px] px-4 py-10 mt-2 text-black">HALLWAY</div>
+
+                                        {/* Side Column with Office and Final Stalls */}
+                                        <div className="flex flex-col justify-between gap-[1px] ml-2">
+                                            <div className="border bg-gray-300 text-center font-bold p-4">
+                                                <span style={{ color: 'black' }}>
+                                                    BLDG C OFFICE
+                                                </span>
+                                            </div>
+                                            {['B-03 S-31', 'B-03 S-32', 'B-02 S-83', 'B-02 S-84', 'B-01 S-33', 'B-01 S-34', 'B-01 S-35'].map((stall, i) => (
+                                                <div key={i} className={`border text-center p-1 ${highlightedStalls.includes(normalize(stall))
+                                                    ? 'bg-green-400 text-white font-bold' : 'bg-black text-white'
+                                                    }`}>
+                                                    {stall}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div className="border bg-yellow-200 text-center font-bold text-[12px] px-4 py-2 mt-2 text-black">HALLWAY</div>
+
+                                    {/* Footer: Entrance and Exit */}
+                                    <div className="flex flex-row justify-between mt-4">
+                                        <div className="border bg-red-500 text-center font-bold text-[12px] px-4 py-2">ENTRANCE</div>
+                                        <div className="border bg-red-500 text-center font-bold text-[12px] px-4 py-10 mt-2">STAIRS</div>
+
+                                        <div className="border bg-red-500 text-center font-bold text-[12px] px-4 py-2">EXIT</div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Right: Sack Item + Review */}
                         <div className="md:w-2/3 p-6">
