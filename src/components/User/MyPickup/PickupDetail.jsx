@@ -333,14 +333,16 @@ const PickupDetails = () => {
                         {showBuildingMapModal && (
                             <div className="fixed inset-0 bg-opacity-60 z-50 flex items-center justify-center">
                                 <div className="bg-white p-4 max-h-[90vh] max-w-[95vw] overflow-auto rounded shadow-lg">
-                                    <div className="text-center text-xl font-bold mb-4 text-black">Building C Layout</div>
-                                    <button
-                                        onClick={() => setshowBuildingMapModal(false)}
-                                        className="absolute top-50 right-40 font-bold text-lg text-white-800 bg-[red]"
-                                        style={{ padding: 4, borderRadius: 10, width: '4%' }}
-                                    >
-                                        Close
-                                    </button>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                        <div className="text-center text-xl font-bold mb-4 text-black">Building C Layout</div>
+                                        <button
+                                            onClick={() => setshowBuildingMapModal(false)}
+                                            className="font-bold text-lg text-white-800 bg-[red] "
+                                            style={{ padding: 4, borderRadius: 10, width: '5%' }}
+                                        >
+                                            Close
+                                        </button>
+                                    </div>
 
                                     <div className="flex flex-col items-start justify-start mb-4">
                                         <div className="mb-4 text-xs text-black">
