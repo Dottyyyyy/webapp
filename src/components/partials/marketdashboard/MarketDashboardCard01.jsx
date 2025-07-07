@@ -4,7 +4,7 @@ import EditMenu from "../../Extras/DropdownEditMenu";
 import Chart from "chart.js/auto";
 import axios from "axios";
 
-function MarketDashboardCard01() {
+function MarketDashboardCard01({ onExportData }) {
   const chartRef = useRef(null);
   const chartInstanceRef = useRef(null);
   const [stalls, setStalls] = useState([]);
@@ -28,6 +28,18 @@ function MarketDashboardCard01() {
       });
 
       setStalls(processed);
+
+      if (onExportData) {
+        // Send total average or whatever data needed
+        const totalAverageRating = processed.length > 0
+          ? (processed.reduce((sum, s) => sum + parseFloat(s.averageRating), 0) / processed.length).toFixed(2)
+          : 0;
+
+        onExportData({
+          totalAverageRating,
+          stallCount: processed.length,
+        });
+      }
     } catch (error) {
       console.error("Error fetching stalls:", error);
     }

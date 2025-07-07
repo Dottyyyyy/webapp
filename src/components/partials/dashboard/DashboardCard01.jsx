@@ -10,7 +10,7 @@ import { adjustColorOpacity, getCssVariable } from "../../../utils/Utils";
 import { getUser } from "../../../utils/helpers";
 import axios from "axios";
 
-function DashboardCard01() {
+function DashboardCard01({ onExportData }) {
   const [sacks, setSacks] = useState([]);
   const [pieData, setPieData] = useState([]);
   const [predictedWaste, setPredictedWaste] = useState([]);
@@ -37,12 +37,20 @@ function DashboardCard01() {
         label: new Date(item.date).getDate().toString(),
       }));
       setWasteData(wastePoints);
-      const co2Points = pastData.map((item, index) => ({
+      const co2Points = pastData.map((item) => ({
         value: item.total_kilo * 0.7,
         label: new Date(item.date).getDate().toString(),
       }));
       setCo2Data(co2Points);
 
+      // 🔥 send export data back to Dashboard
+      if (onExportData) {
+        const exportRows = co2Points.map((item, index) => ({
+          day: item.label,
+          co2Saved: `${item.value.toFixed(2)} kg`
+        }));
+        onExportData(exportRows);
+      }
       //waste-generation-trend-data
       const wasteGeneration = await axios.get(`${import.meta.env.VITE_API}/ml/waste-generation-trend`);
       // console.log("Waste Generation Data:", wasteGeneration.data);
@@ -138,7 +146,7 @@ function DashboardCard01() {
   };
 
   useEffect(() => {
-    fetchReviewRating(); 
+    fetchReviewRating();
     fetchPredictedWaste();
   }, []);
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
-const DashboardCard15 = () => {
+const DashboardCard15 = ({ onExportData }) => {
   const [reviews, setReviews] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const reviewsPerPage = 4;
@@ -20,7 +20,11 @@ const DashboardCard15 = () => {
               if (typeof review.text === "string" && review.text.trim() !== "") {
                 combinedReviews.push({
                   text: review.text,
-                  date: new Date(review.date),
+                  date: new Date(review.date).toLocaleDateString('en-PH', {
+                    month: 'short',
+                    day: '2-digit',
+                    year: 'numeric',
+                  }),
                   userName: user.name || "Unknown",
                   userEmail: user.email || "",
                 });
@@ -30,16 +34,17 @@ const DashboardCard15 = () => {
         });
 
         setReviews(combinedReviews);
+
+        // ⬇️ Pass to parent
+        if (onExportData) onExportData(combinedReviews);
+
       } catch (error) {
         console.error("Error fetching reviews:", error);
       }
     };
 
     fetchReviewRating();
-    const interval = setInterval(() => {
-      fetchReviewRating();
-    }, 2000);
-
+    const interval = setInterval(fetchReviewRating, 2000);
     return () => clearInterval(interval);
   }, []);
 
@@ -53,7 +58,7 @@ const DashboardCard15 = () => {
 
   return (
     <div className="flex flex-col col-span-full sm:col-span-6 bg-white dark:bg-gray-800 shadow-md rounded-2xl" style={{ backgroundColor: '#1D3B29' }}>
-      
+
 
       <div className="p-6 space-y-4 min-h-[250px]">
         {paginatedReviews.length === 0 ? (
@@ -66,7 +71,7 @@ const DashboardCard15 = () => {
             >
               <p>“{review.text}”</p>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-               To — {review.userName} {review.userEmail && `(${review.userEmail})`}
+                To — {review.userName} {review.userEmail && `(${review.userEmail})`}
               </p>
             </div>
           ))
