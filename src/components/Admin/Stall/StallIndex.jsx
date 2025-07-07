@@ -306,8 +306,12 @@ Store: ${stall.storeType || "N/A"}`
                                 {stall.stallNumber || "N/A"}
                             </div>
                             <div>
-                                <span className="font-semibold">Location</span><br />
+                                <span className="font-semibold">Location:</span><br />
                                 {stall.stallAddress || "N/A"}
+                            </div>
+                            <div>
+                                <span className="font-semibold">Store Type:</span><br />
+                                {stall.storeType || "N/A"}
                             </div>
                         </div>
                     </div>

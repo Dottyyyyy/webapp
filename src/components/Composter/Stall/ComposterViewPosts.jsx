@@ -108,9 +108,8 @@ function ComposterViewPosts() {
     };
 
     const handleStallClick = (stallId) => {
-        navigate(`/stalls/${stallId}`);
+        navigate(`/composter/market/detail/${stallId}`);
     };
-    console.log(stalls, 'stalls')
     return (
         <div className="flex w-full min-h-screen text-black">
             <div className="flex-grow p-8" style={{ background: 'linear-gradient(to bottom right, #0A4724, #116937)' }}>
@@ -136,19 +135,20 @@ function ComposterViewPosts() {
                             return (
                                 <div key={item._id} className="bg-white rounded-lg shadow-md p-4 mb-4 hover:shadow-lg transition">
                                     {/* Post Header */}
-                                    <div className="flex items-center space-x-4 mb-4">
-                                        <img
-                                            src={stallImage || 'default-profile.jpg'}
-                                            alt="Seller Profile"
-                                            className="w-9 h-9 rounded-full object-cover"
-                                        />
-                                        <div className="flex flex-col">
-                                            <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', gap: 30, alignItems: 'center' }}>
+                                    <div onClick={() => handleStallClick(item.seller)} className="flex items-center justify-between mb-4">
+                                        <div className="flex items-center space-x-4">
+                                            <img
+                                                src={stallImage || 'default-profile.jpg'}
+                                                alt="Seller Profile"
+                                                className="w-9 h-9 rounded-full object-cover"
+                                            />
+                                            <div className="flex flex-col">
                                                 <span className="text-lg font-medium">{sellerData?.name || 'Unknown Seller'}</span>
-                                                <span style={{ fontSize: 12, fontWeight: 'lighter', marginLeft: 10 }}>{stallData?.stallNumber || 'Unknown Seller'}</span>
+                                                <span className="text-sm text-gray-500">{stallData.storeType}</span>
+                                                <span className="text-xs text-gray-500">{timeAgo(item.createdAt)}</span>
                                             </div>
-                                            <span className="text-sm text-gray-500">{timeAgo(item.createdAt)}</span>
                                         </div>
+                                        <span className="text-xs text-gray-500">{stallData?.stallNumber || 'Unknown Stall'}</span>
                                     </div>
 
                                     {/* Post Content */}

@@ -394,6 +394,11 @@ function AdminViewStalls() {
                                 sortable: true,
                             },
                             {
+                                name: "Store Type:",
+                                selector: (row) => row.stall?.storeType,
+                                sortable: true,
+                            },
+                            {
                                 name: "Image",
                                 cell: (row) => (
                                     <img

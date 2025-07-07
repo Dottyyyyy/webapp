@@ -18,7 +18,7 @@ function StallDetails() {
     const navigate = useNavigate();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const user = getUser()
-    // console.log(stall)
+    console.log(sacks)
     const fetchStallData = async () => {
         try {
             const response = await axios.get(

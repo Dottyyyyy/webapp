@@ -136,7 +136,7 @@ function ViewPosts() {
                             return (
                                 <div key={item._id} className="bg-white rounded-lg shadow-md p-4 mb-4 hover:shadow-lg transition">
                                     {/* Post Header */}
-                                    <div className="flex items-center justify-between mb-4">
+                                    <div onClick={() => handleStallClick(item.seller)} className="flex items-center justify-between mb-4">
                                         <div className="flex items-center space-x-4">
                                             <img
                                                 src={stallImage || 'default-profile.jpg'}

@@ -18,7 +18,6 @@ function ComposterViewStall() {
     const navigate = useNavigate();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const user = getUser()
-
     const fetchStallData = async () => {
         try {
             const response = await axios.get(
@@ -71,7 +70,7 @@ function ComposterViewStall() {
         return () => clearInterval(interval);
     }, []);
 
-    console.log(sacks,'sacks')
+    console.log(sacks, 'sacks')
 
     const handleAddToSack = async (sack) => {
         try {
