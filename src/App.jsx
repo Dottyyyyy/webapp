@@ -44,6 +44,7 @@ import AdminViewStalls from "./components/Admin/AdminViewStalls";
 import StallIndex from "./components/Admin/Stall/StallIndex";
 import ViewPosts from "./components/User/Stall/ViewPosts";
 import ComposterViewPosts from "./components/Composter/Stall/ComposterViewPosts";
+import RecentPost from "./components/Vendor/RecentPost";
 
 const App = () => {
   const [mySacks, setMySacks] = useState([]); // Lifted state for sacks
@@ -80,6 +81,7 @@ const App = () => {
 
               {/* Vendor Routes */}
               <Route path="/vendor/myStall/:id" element={<MyStall />} />
+              <Route path="/vendor/post/:id" element={<RecentPost />} />
               <Route path="/vendor/create-sack" element={<CreateSack />} />
               <Route path="/vendor/pickup" element={<VendorPickup />} />
               <Route path="/vendor/pickup-detail/:id" element={<SeePickUp />} />

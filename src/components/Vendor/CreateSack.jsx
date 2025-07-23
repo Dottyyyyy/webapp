@@ -103,6 +103,7 @@ const CreateSack = ({ onClose }) => {
                 <h2 className="text-2xl font-bold text-center text-gray-900">Distribute Your Sack</h2>
 
                 <div>
+                    {/* <h2 className="text-white text-sm mb-2">E.g mixed vegetables.,carrot peels.cabbage peels, etc</h2> */}
                     <button
                         type="button"
                         onClick={() => setShowNote(!showNote)}
@@ -147,8 +148,9 @@ const CreateSack = ({ onClose }) => {
                             id="description"
                             name="description"
                             required
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-black"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-black italic text-xs"
                             value={description}
+                            placeholder="Ex: mixed vegetables.,carrot peels.cabbage peels, etc"
                             onChange={(e) => setDescription(e.target.value)}
                         />
                     </div>
@@ -227,7 +229,7 @@ const CreateSack = ({ onClose }) => {
                                 marginBottom: '8px',
                                 backgroundColor: '#fff',
                                 width: '80%',
-                                color:'black',
+                                color: 'black',
                             }}
                         />
                     )}

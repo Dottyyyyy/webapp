@@ -232,7 +232,8 @@ const Header = () => {
               <>
                 <div className="flex items-center space-x-8 text-green-900 font-medium">
                   <a href="/" className="hover:underline">Home</a>
-                  <button onClick={() => navigate(`/vendor/myStall/${user._id}`)} className="hover:underline underline-offset-4 decoration-green-600">My stall</button>
+                  <button onClick={() => navigate(`/vendor/post/${user._id}`)} className="hover:underline underline-offset-4 decoration-green-600 hover:underline">Post</button>
+                  <button onClick={() => navigate(`/vendor/myStall/${user._id}`)} className="hover:underline underline-offset-4 decoration-green-600 hover:underline">My stall</button>
                   <a href="/about" className="hover:underline">About</a>
                   <a href='/vendor/pickup' className="hover:underline font-semibold">Pick up</a>
                   <div ref={dropdownRef} className="relative">

@@ -135,9 +135,9 @@ const MyStall = () => {
                 const displayStatus = row.status === 'posted' ? 'Recently' : row.status.charAt(0).toUpperCase() + row.status.slice(1);
                 return (
                     <span className={`px-2 py-1 rounded text-xs font-semibold ${row.status === 'claimed' ? 'bg-green-100 text-green-700' :
-                            row.status === 'trashed' ? 'bg-red-100 text-red-700' :
-                                row.status === 'spoiled' ? 'bg-yellow-100 text-yellow-800' :
-                                    'bg-gray-200 text-gray-800'
+                        row.status === 'trashed' ? 'bg-red-100 text-red-700' :
+                            row.status === 'spoiled' ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-gray-200 text-gray-800'
                         }`}>
                         {displayStatus}
                     </span>
@@ -235,7 +235,7 @@ const MyStall = () => {
                     onClick={() => setShowModal(true)}
                     className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow"
                 >
-                    <FaPlus /> Distribute Sack
+                    <FaPlus /> Create New Post
                 </button>
             </div>
 
