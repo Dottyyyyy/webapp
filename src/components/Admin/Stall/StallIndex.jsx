@@ -113,11 +113,15 @@ function StallIndex() {
         {
             name: "Status",
             cell: r => (
-                <span className={`px-2 py-1 rounded text-xs font-bold ${r.status === "posted" ? "bg-green-200 text-green-800" :
-                    r.status === "claimed" ? "bg-blue-200 text-blue-800" :
-                        "bg-yellow-200 text-yellow-800"
-                    }`}>
-                    {r.status}
+                <span
+                    className={`px-2 py-1 rounded text-xs font-bold ${r.status === "posted"
+                        ? "bg-green-200 text-green-800"
+                        : r.status === "claimed"
+                            ? "bg-blue-200 text-blue-800"
+                            : "bg-yellow-200 text-yellow-800"
+                        }`}
+                >
+                    {r.status === "posted" ? "recent" : r.status}
                 </span>
             ),
             sortable: true,
@@ -267,6 +271,17 @@ Store: ${stall.storeType || "N/A"}`
         });
     }
 
+    const recentSummary = sacks.reduce(
+        (acc, sack) => {
+            if (sack.status === 'spoiled') acc.spoiled++;
+            else if (sack.status === 'trashed') acc.trashed++;
+            else if (sack.status === 'claimed') acc.claimed++;
+            else if (sack.status === 'posted') acc.posted++;
+            return acc;
+        },
+        { spoiled: 0, trashed: 0, claimed: 0, posted: 0 }
+    );
+
     if (loading)
         return (
             <div className="flex items-center justify-center h-screen">
@@ -315,6 +330,13 @@ Store: ${stall.storeType || "N/A"}`
                             </div>
                         </div>
                     </div>
+                </div>
+
+                <div className="text-sm text-gray-600 flex flex-row gap-6 mb-4">
+                    <p className="text-green-600"><strong>Recent:</strong> {recentSummary.posted}</p>
+                    <p className="text-red-600"><strong>Spoiled:</strong> {recentSummary.spoiled}</p>
+                    <p className="text-yellow-600"><strong>Trashed:</strong> {recentSummary.trashed}</p>
+                    <p className="text-blue-600"><strong>Claimed:</strong> {recentSummary.claimed}</p>
                 </div>
 
                 <div className="flex flex-wrap gap-3 mb-4">
