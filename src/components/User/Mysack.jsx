@@ -68,7 +68,7 @@ const Mysack = () => {
               onClick={handlePickUpSacks}
               className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-white shadow"
             >
-              {user.role === "farmer" ? "Demand Sacks" : "Demand Spoiled Sacks"}
+              {user.role === "farmer" ? "Pickup Sacks" : "Pickup Spoiled Sacks"}
             </button>
           )}
         </div>
