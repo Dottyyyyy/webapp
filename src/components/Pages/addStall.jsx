@@ -12,6 +12,7 @@ const AddStall = () => {
         stallDescription: '',
         stallAddress: '',
         stallNumber: '',
+        storeType: '',
         openHours: '',
         closeHours: '',
     });
@@ -39,6 +40,7 @@ const AddStall = () => {
         if (!formValues.stallDescription) errors.stallDescription = 'Description is required';
         if (!formValues.stallAddress) errors.stallAddress = 'Address is required';
         if (!formValues.stallNumber) errors.stallNumber = 'Stall number is required';
+        if (!formValues.storeType) errors.storeType = 'Store Type is required';
         if (!formValues.openHours) errors.openHours = 'Opening hours are required';
         if (!formValues.closeHours) errors.closeHours = 'Closing hours are required';
         setFormErrors(errors);
@@ -67,6 +69,7 @@ const AddStall = () => {
                 formData.append('stallDescription', updatedFormValues.stallDescription);
                 formData.append('stallAddress', updatedFormValues.stallAddress);
                 formData.append('stallNumber', updatedFormValues.stallNumber);
+                formData.append('storeType', updatedFormValues.storeType);
                 formData.append('openHours', formValues.openHours);
                 formData.append('closeHours', formValues.closeHours);
 
@@ -179,9 +182,10 @@ const AddStall = () => {
 
                         <div style={{ display: 'flex', flexDirection: 'row', gap: '20px', marginTop: 20 }}>
                             <label htmlFor="stallAddress">Stall Address</label>
-                            <label htmlFor="stallNumber" style={{ marginLeft: 120 }}>Stall Number</label>
+                            <label htmlFor="stallNumber" style={{ marginLeft: 100 }}>Stall Number</label>
+                            <label htmlFor="stallNumber" style={{ marginLeft: 100 }}>Stall Type</label>
                         </div>
-                        <div style={{ display: 'flex', flexDirection: 'row', gap: '20px' }}>
+                        <div style={{ display: 'flex', flexDirection: 'row', gap: '5px' }}>
                             <div className="form-group">
                                 <input
                                     type="text"
@@ -203,6 +207,17 @@ const AddStall = () => {
                                     placeholder="Stall Number"
                                 />
                                 {formErrors.stallNumber && <div className="error">{formErrors.stallNumber}</div>}
+                            </div>
+                            <div className="form-group">
+                                <input
+                                    type="text"
+                                    id="storeType"
+                                    name="storeType"
+                                    value={formValues.storeType}
+                                    onChange={handleInputChange}
+                                    placeholder="Store Type"
+                                />
+                                {formErrors.storeType && <div className="error">{formErrors.storeType}</div>}
                             </div>
                         </div>
 
