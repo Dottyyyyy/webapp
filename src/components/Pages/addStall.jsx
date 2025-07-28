@@ -181,9 +181,9 @@ const AddStall = () => {
                         </div>
 
                         <div style={{ display: 'flex', flexDirection: 'row', gap: '20px', marginTop: 20 }}>
-                            <label htmlFor="stallAddress">Stall Address</label>
-                            <label htmlFor="stallNumber" style={{ marginLeft: 100 }}>Stall Number</label>
-                            <label htmlFor="stallNumber" style={{ marginLeft: 100 }}>Stall Type</label>
+                            <label htmlFor="stallAddress">Stall Address:</label>
+                            <label htmlFor="stallNumber" style={{ marginLeft: 100 }}>Stall Number:</label>
+                            <label htmlFor="stallNumber" style={{ marginLeft: 100 }}>Store Type:</label>
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'row', gap: '5px' }}>
                             <div className="form-group">
